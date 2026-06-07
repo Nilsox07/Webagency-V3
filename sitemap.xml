@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://[DOMAIN]/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://[DOMAIN]/leistungen.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-webdesign.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-seo.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-lokales-seo.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-wartung.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-texte.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/leistung-logo.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/ablauf.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://[DOMAIN]/preise.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://[DOMAIN]/ratgeber.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://[DOMAIN]/briefing.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://[DOMAIN]/kontakt.html</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://[DOMAIN]/impressum.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://[DOMAIN]/datenschutz.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://[DOMAIN]/agb.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+</urlset>

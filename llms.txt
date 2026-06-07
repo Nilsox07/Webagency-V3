@@ -1,0 +1,29 @@
+# Sartu
+
+> Sartu ist eine Webdesign-Agentur aus Deutschland. Wir erstellen moderne, schnelle und suchmaschinenoptimierte Websites für Selbstständige, Handwerker sowie kleine und mittlere Unternehmen — kontaktlos, transparent und DSGVO-konform. Der Prozess läuft asynchron: Briefing per KI-Assistent (Lumi), Sofort-Vorschau, Festpreis-Buchung, Feedback per Klick und Go-live in 7 Tagen.
+
+## Leistungen
+
+- [Webdesign & Website-Erstellung](https://[DOMAIN]/leistung-webdesign.html): Moderne, responsive Websites ab 1.290 €, in 7 Tagen online. Vom Onepager bis zur 20-seitigen Firmenwebsite.
+- [Suchmaschinenoptimierung (SEO)](https://[DOMAIN]/leistung-seo.html): Keyword-Strategie, Onpage- und technisches SEO, Core Web Vitals, strukturierte Daten. Basis-SEO in jedem Paket, Onpage-SEO ab Pro.
+- [Lokales SEO & Google-Profil](https://[DOMAIN]/leistung-lokales-seo.html): Google-Unternehmensprofil, NAP-Konsistenz, lokale Keywords, Bewertungs-Monitoring. Inklusive ab Platin oder als Add-on ab 99 €/Monat.
+- [Wartung, Hosting & Betrieb](https://[DOMAIN]/leistung-wartung.html): Hosting in Deutschland, SSL, automatische Backups, Updates, Support. Ab 49 €/Monat bei Jahreszahlung.
+- [Texterstellung & Content](https://[DOMAIN]/leistung-texte.html): Verkaufsstarke, SEO-optimierte Website-Texte ab 120 € pro Seite, Komplettpaket (5 Seiten) für 490 €.
+- [Logo & Branding](https://[DOMAIN]/leistung-logo.html): Professionelles Logo und Erscheinungsbild. Wortmarke ab 390 €, Wort-Bild-Marke ab 690 €.
+
+## Preise
+
+- [Preise & Pakete](https://[DOMAIN]/preise.html): Festpreis-Pakete (Basis 1.290 €, Pro 2.990 €, Platin 5.990 €, Enterprise ab 9.990 €) und Wartungspakete (ab 49 €/Monat). Inklusive vollständiger Add-on-Liste.
+
+## Weitere Seiten
+
+- [Ablauf](https://[DOMAIN]/ablauf.html): In 7 Schritten zur fertigen Website — komplett asynchron, ohne Termine: Briefing, Sofort-Vorschau, Buchung, Umsetzung, Feedback, Korrektur, Go-live in 7 Tagen.
+- [Ratgeber](https://[DOMAIN]/ratgeber.html): 50 Fachbegriffe rund um Webdesign, SEO, Technik, Recht und Marketing verständlich erklärt, plus FAQ.
+- [Briefing mit Lumi](https://[DOMAIN]/briefing.html): Interaktives 2-Minuten-Briefing mit KI-Assistent und Sofort-Vorschau.
+- [Kontakt](https://[DOMAIN]/kontakt.html): Kostenlosen, unverbindlichen Website-Check anfordern.
+
+## Hinweise
+
+- Reine Onlineshops und komplexe E-Commerce-Systeme gehören bewusst nicht zum Angebot.
+- Es wird keine Rechtsberatung erbracht; Pflichttexte werden nur eingebunden.
+- Kontakt: hallo@sartu.de
