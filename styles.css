@@ -707,6 +707,16 @@ a { text-decoration: none; color: inherit; }
 }
 .page-toc a:hover { border-color: var(--green); color: var(--green); }
 
+/* Brotkrumen + Stand-Datum (Ratgeber-Artikel) */
+.crumb { font-size: 13px; color: var(--text-light-muted); margin-bottom: 14px; }
+.crumb a { color: var(--text-light); font-weight: 600; }
+.crumb a:hover { color: var(--green); }
+.article-stand {
+  font-size: 13px;
+  color: var(--text-light-muted);
+  margin: 18px 0 22px;
+}
+
 /* Generic pricing section */
 .pricing {
   padding: 84px 0 90px;
@@ -893,6 +903,16 @@ a { text-decoration: none; color: inherit; }
 .callout h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 4px; }
 .callout p { font-size: 14px; color: var(--text-muted); }
 .callout-guarantee { border-left-color: var(--green); background: linear-gradient(180deg, #ffffff, #fafdf0); }
+/* Klickbare Callout-Variante (Verweis-Box) */
+.callout-link { text-decoration: none; color: inherit; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; margin-top: 0; margin-bottom: 30px; }
+.callout-link:hover { transform: translateY(-2px); border-left-color: var(--green); box-shadow: 0 20px 40px -28px rgba(13, 19, 32, 0.4); }
+.callout-link h4 { color: var(--text-dark); }
+.callout-link p { color: var(--text-muted); }
+/* Dezenter Förder-Hinweis unter den Paketen (Preise-Seite) */
+.foerder-hint-section { background: var(--bg-light); padding: 0 0 80px; }
+.foerder-hint-section .callout { margin-top: 0; }
+.foerder-hint-section a { color: var(--green-strong); font-weight: 600; }
+.foerder-hint-section a:hover { text-decoration: underline; }
 
 /* ---------- Zahlung in Meilensteinen ---------- */
 .pay-grid {
