@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="briefing.css?v=1" />
   <link rel="canonical" href="https://[DOMAIN]/briefing.html" />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <meta property="og:type" content="website" />
@@ -72,9 +73,9 @@
     <section class="lumi-section">
       <div class="container">
         <div class="lumi-intro">
-          <p class="eyebrow eyebrow-green center">Briefing in 2 Minuten</p>
-          <h1>Sag Lumi, was du brauchst —<br /><span class="accent">der Rest passiert von selbst.</span></h1>
-          <p>Kein langes Formular, kein Termin. Lumi führt dich durch ein kurzes Gespräch und fragt gezielt nach. Am Ende bekommst du deine persönliche Design-Richtung.</p>
+          <p class="eyebrow eyebrow-green center">Briefing in ~2 Minuten</p>
+          <h1>Sag Lumi, was du brauchst —<br /><span class="accent">fast nur mit Klicken.</span></h1>
+          <p>Kein langes Formular, kein Termin, kein Tippzwang. Lumi führt dich Schritt für Schritt durch ein kurzes Briefing und empfiehlt dir am Ende das passende Paket.</p>
         </div>
 
         <div class="lumi-card">
@@ -84,19 +85,17 @@
               <strong>Lumi</strong>
               <span>Dein Sartu-Assistent</span>
             </div>
-            <div class="lumi-progress">
-              <span id="lumiProgressLabel">Schritt 1 von 7</span>
+            <div class="lumi-progress" id="lumiProgress" hidden>
+              <span id="lumiProgressLabel">Schritt 2 von 8</span>
               <div class="lumi-progress-bar"><div class="lumi-progress-fill" id="lumiProgressFill"></div></div>
             </div>
           </div>
 
-          <div class="lumi-chat" id="lumiChat" aria-live="polite"></div>
-
-          <div class="lumi-input-zone" id="lumiInput"></div>
+          <div class="lb-stage" id="lumiStage" aria-live="polite"></div>
         </div>
 
         <p class="lumi-disclaimer">
-          Interaktive Demo — Lumi läuft komplett in deinem Browser. Es werden keine Daten gespeichert oder gesendet.
+          Deine Angaben nutzt Sartu ausschließlich, um dir dein Briefing und ein passendes Angebot zu erstellen.
         </p>
       </div>
     </section>
@@ -125,6 +124,8 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="briefing.js"></script>
+  <script src="briefing-schema.js?v=1"></script>
+  <script src="onboarding-stage2.js?v=1"></script>
+  <script src="briefing.js?v=2"></script>
 </body>
 </html>

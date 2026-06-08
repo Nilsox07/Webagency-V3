@@ -1,397 +1,842 @@
 /* ============================================================
-   Lumi — adaptiver Briefing-Assistent (clientseitige Demo)
-   Kein Backend, kein LLM: simuliertes Slot-Filling-Gespräch
-   mit adaptivem Nachfragen, visueller Stilauswahl und
-   simulierter Sofort-Vorschau.
+   Sartu · Lumi — Geführter Klick-Flow (STUFE 1: Erst-Briefing)
+   ------------------------------------------------------------
+   Lumi ist KEIN frei chattender Bot, sondern ein geführtes Formular
+   im Chat-Look ("conversational form") mit fester Frageliste.
+
+   • Klick-Antworten gelten als eindeutig → KEIN LLM-Call, direkt weiter.
+   • Die KI fragt im ganzen Flow max. 1x nach: nur wenn das optionale
+     Freitextfeld bei Branche "Sonstiges" leer/unklar ist.
+   • Jede Frage hat eine "Überspringen / Weiß nicht"-Option.
+   • Genau EIN optionaler LLM-Call ganz am Ende (siehe requestBriefingFromLLM).
+   • Läuft komplett ohne LLM und ohne Backend (Demo-Fallback).
+
+   Stufe 2 (Detail-Onboarding nach Buchung) ist bewusst getrennt:
+   siehe onboarding-stage2.js
    ============================================================ */
 (function () {
-  const chat = document.getElementById('lumiChat');
-  const inputZone = document.getElementById('lumiInput');
-  const progressFill = document.getElementById('lumiProgressFill');
-  const progressLabel = document.getElementById('lumiProgressLabel');
-  if (!chat || !inputZone) return;
+  'use strict';
 
-  const TOTAL = 7;          // Anzahl Hauptfragen (für Fortschritt)
-  const answers = {};        // gesammelte Antworten
-  let answered = 0;          // beantwortete Hauptfragen
-  let queue = [];            // verbleibende Schritte
+  const SCHEMA = window.SARTU_BRIEFING_SCHEMA;
+  const stage = document.getElementById('lumiStage');
+  if (!SCHEMA || !stage) return;
 
-  /* ---------- Optionen ---------- */
-  const ZIEL_OPTS = [
-    { label: 'Mehr Anfragen gewinnen', value: 'anfragen' },
-    { label: 'Termine & Buchungen', value: 'termine' },
-    { label: 'Bekannter werden', value: 'image' },
-    { label: 'Produkte zeigen & verkaufen', value: 'shop' },
-  ];
+  const OPT = SCHEMA.options;
+  const PAKETE = SCHEMA.pakete;
+  const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const STIL_OPTS = [
-    { flavor: 'flv-clean',   title: 'Minimalistisch & Clean', sub: 'Viel Weißraum, klare Typo', value: 'clean' },
-    { flavor: 'flv-bold',    title: 'Bold & Farbig',          sub: 'Starke Farben, große Aussagen', value: 'bold' },
-    { flavor: 'flv-elegant', title: 'Elegant & Edel',         sub: 'Ruhig, hochwertig, premium', value: 'elegant' },
-  ];
-
-  const STIL_NOTES = {
-    clean:   'Klare Sache — minimalistisch mit viel Luft. Das wirkt modern und vertrauenswürdig.',
-    bold:    'Stark! Bold und farbig fällt sofort auf — perfekt, um aus der Masse zu stechen.',
-    elegant: 'Edel und ruhig — das strahlt Hochwertigkeit aus. Sehr gute Wahl.',
+  /* ============================================================
+     KONFIGURATION — später aktivieren (alles in [KLAMMERN] = Platzhalter)
+     ============================================================ */
+  const CONFIG = {
+    useLLM: false,                                  // → true setzen, um den EINEN LLM-Call am Ende zu aktivieren
+    llmEndpoint: '[LLM_BRIEFING_ENDPOINT]',         // serverless Function, die Claude mit Structured Output aufruft
+    formEndpoint: '[FORMSPREE_ODER_RESEND_ENDPOINT]',// E-Mail-Versand des Briefings
+    supabaseUrl: '[SUPABASE_URL]',
+    supabaseKey: '[SUPABASE_ANON_KEY]',
+    notifyEmail: '[SARTU-EMAIL]',
+    datenschutzUrl: 'datenschutz.html',
   };
+  const isPlaceholder = (v) => !v || /^\[.*\]$/.test(v);
 
-  const FARBE_OPTS = [
-    { dots: ['#aef000', '#0d1320', '#ffffff'], label: 'Frisch & Grün',     value: 'gruen' },
-    { dots: ['#1b3a8f', '#0b1426', '#ffffff'], label: 'Seriös & Blau',     value: 'blau' },
-    { dots: ['#b9824a', '#2e2419', '#f4ece0'], label: 'Warm & Erdig',      value: 'erdig' },
-    { dots: ['#0a0f1c', '#16243f', '#aef000'], label: 'Elegant & Dunkel',  value: 'dunkel' },
-    { dots: ['#ff5a8a', '#ffb020', '#5ad1ff'], label: 'Bunt & Verspielt',  value: 'bunt' },
-  ];
-
-  const UMFANG_OPTS = [
-    { label: 'Onepager', value: 'onepager' },
-    { label: 'Bis 8 Seiten', value: '8' },
-    { label: 'Bis 20 Seiten', value: '20' },
-    { label: 'Weiß ich noch nicht', value: 'unsure' },
-  ];
-
-  const PAKET = {
-    onepager: { name: 'Basis', preis: '1.290 €' },
-    '8':      { name: 'Pro', preis: '2.990 €' },
-    '20':     { name: 'Platin', preis: '5.990 €' },
-    unsure:   { name: 'Pro', preis: '2.990 €' },
+  /* ============================================================
+     ZUSTAND — alle Antworten an EINER Stelle. Bleiben bei Zurück-
+     Navigation und beim Korrigieren erhalten.
+     ============================================================ */
+  const A = {
+    branche: null, branche_sonstiges: '',
+    ziele: [], umfang: null, seiten: [],
+    features: [], stil: [], farbwelt: [], markenfarben_hex: '',
+    material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
+    zeitrahmen: null, paket_empfohlen: null, paket_gewaehlt: null,
+    kontakt: { name: '', email: '', telefon: '', dsgvo: false },
   };
+  const ui = { index: 0, askedClarification: false }; // harte Obergrenze: max. 1 Rückfrage
 
-  /* ---------- Gesprächsfluss ---------- */
-  function buildFlow() {
-    return [
-      {
-        type: 'text', key: 'branche',
-        bot: 'Hi, ich bin Lumi 👋 Ich helfe dir, dein Website-Projekt in 2 Minuten zu briefen. Lass uns starten: Was machst du, und für wen?',
-        placeholder: 'z. B. „Ich bin Malermeister und arbeite für Privatkunden…"',
-        adapt: function (val) {
-          if (val.trim().split(/\s+/).length < 4) {
-            return [{
-              type: 'text', key: 'branche_detail', counts: false,
-              bot: 'Klingt gut! Erzähl mir in einem Satz, was dich besonders macht — das hilft mir beim Stil.',
-              placeholder: 'z. B. „Wir sind die schnellsten in der Region…"',
-            }];
-          }
-          return null;
-        },
-      },
-      {
-        type: 'chips', key: 'ziel', options: ZIEL_OPTS,
-        bot: 'Verstanden! Was soll deine neue Website vor allem erreichen?',
-        adapt: function (val) {
-          if (val === 'shop') {
-            return [{
-              type: 'note',
-              bot: 'Kleiner Hinweis: Reine Onlineshops sind nicht mein Schwerpunkt — aber Produkte ansprechend zeigen und per Formular anfragen lassen, das geht hervorragend. Machen wir so!',
-            }];
-          }
-          return null;
-        },
-      },
-      {
-        type: 'styles', key: 'stil', options: STIL_OPTS,
-        bot: 'Jetzt wird’s visuell. Welche Design-Richtung spricht dich am meisten an?',
-        adapt: function (val) {
-          return [{ type: 'note', bot: STIL_NOTES[val] || 'Notiert!' }];
-        },
-      },
-      {
-        type: 'swatches', key: 'farbe', options: FARBE_OPTS,
-        bot: 'Und welche Farbwelt passt zu deiner Marke?',
-      },
-      {
-        type: 'text', key: 'website',
-        bot: 'Hast du schon eine Website oder eine Social-Media-Seite? Füg den Link ein — oder schreib einfach „keine".',
-        placeholder: 'z. B. www.meine-seite.de oder „keine"',
-        adapt: function (val) {
-          const domain = extractDomain(val);
-          if (domain) {
-            return [
-              { type: 'note', bot: 'Super, danke! Einen Moment, ich schau sie mir kurz an …' },
-              { type: 'note', longer: true,
-                bot: 'Ich habe ' + domain + ' analysiert: solide Basis, aber Struktur und Ladezeit haben Luft nach oben. Das nehme ich als Ausgangspunkt — so heben wir dich klar ab. 👍' },
-            ];
-          }
-          return [{ type: 'note', bot: 'Alles klar — dann starten wir mit einem frischen, leeren Blatt. Oft ist das sogar das Beste!' }];
-        },
-      },
-      {
-        type: 'chips', key: 'umfang', options: UMFANG_OPTS,
-        bot: 'Wie groß soll deine Website ungefähr werden?',
-      },
-      {
-        type: 'text', key: 'kontakt', counts: false,
-        bot: 'Fast geschafft! Wohin darf ich dir deine Design-Vorschau schicken? Schreib mir deinen Namen und deine E-Mail.',
-        placeholder: 'z. B. Max Mustermann, max@beispiel.de',
-        adapt: function (val) {
-          if (!/@/.test(val)) {
-            return [{
-              type: 'text', key: 'kontakt', counts: false,
-              bot: 'Fast! Ich brauche noch deine E-Mail, dann sind wir fertig. 📩',
-              placeholder: 'name@beispiel.de',
-            }];
-          }
-          return null;
-        },
-      },
-      { type: 'end' },
-    ];
+  /* ============================================================
+     KLEINE DOM-HELFER
+     ============================================================ */
+  function el(tag, cls, html) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  }
+  function clearStage() { stage.textContent = ''; }
+
+  // Lumi-Sprechblase mit Frage (h2 für Screenreader/Struktur)
+  function lumiSays(question, hint) {
+    const row = el('div', 'lb-say');
+    row.appendChild(el('span', 'lb-avatar', 'L'));
+    const bubble = el('div', 'lb-bubble');
+    const h = el('h2', 'lb-q');
+    h.setAttribute('tabindex', '-1');
+    h.textContent = question;
+    bubble.appendChild(h);
+    if (hint) bubble.appendChild(el('p', 'lb-hint', hint));
+    row.appendChild(bubble);
+    stage.appendChild(row);
+    return h; // zum Fokussieren
+  }
+  // kleinere Zwischen-/Folgefrage (kein eigener Schritt)
+  function subQuestion(text) {
+    const p = el('p', 'lb-subq', text);
+    stage.appendChild(p);
+    return p;
   }
 
-  /* ---------- Helpers ---------- */
-  function extractDomain(str) {
-    const s = (str || '').toLowerCase().trim();
-    if (/^(keine|nein|nope|hab(e)? keine|noch keine)/.test(s)) return null;
-    const m = s.match(/([a-z0-9-]+\.[a-z]{2,})(\/\S*)?/);
-    return m ? m[1] : null;
-  }
-
-  function firstName(str) {
-    const beforeMail = (str || '').split(/[,\n]/)[0].replace(/\S+@\S+/, '').trim();
-    const name = beforeMail || (str || '').trim();
-    return name.split(/\s+/)[0] || 'super';
-  }
-
-  function scrollDown() { chat.scrollTop = chat.scrollHeight; }
-
-  function addUser(text) {
-    const el = document.createElement('div');
-    el.className = 'lumi-msg user';
-    el.innerHTML = '<div class="bubble"></div>';
-    el.querySelector('.bubble').textContent = text;
-    chat.appendChild(el);
-    scrollDown();
-  }
-
-  function addBot(text, cb) {
-    // Tipp-Indikator
-    const typing = document.createElement('div');
-    typing.className = 'lumi-msg bot lumi-typing';
-    typing.innerHTML = '<span class="mini-avatar">L</span><div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
-    chat.appendChild(typing);
-    scrollDown();
-
-    const safe = text || '';
-    const delay = 550 + Math.min(safe.length * 16, 900);
-    setTimeout(function () {
-      typing.remove();
-      const el = document.createElement('div');
-      el.className = 'lumi-msg bot';
-      el.innerHTML = '<span class="mini-avatar">L</span><div class="bubble"></div>';
-      el.querySelector('.bubble').textContent = safe;
-      chat.appendChild(el);
-      scrollDown();
-      if (cb) cb();
-    }, delay);
-  }
-
-  function setProgress() {
-    const pct = Math.min(100, Math.round((answered / TOTAL) * 100));
-    progressFill.style.width = pct + '%';
-    if (answered >= TOTAL) {
-      progressLabel.textContent = 'Briefing fertig ✓';
-    } else {
-      progressLabel.textContent = 'Schritt ' + (answered + 1) + ' von ' + TOTAL;
+  // Aktions-Leiste: Zurück (links) · Überspringen + Weiter (rechts)
+  function actions(opts) {
+    opts = opts || {};
+    const row = el('div', 'lb-actions');
+    if (opts.onBack) {
+      const b = el('button', 'lb-back', '‹ Zurück');
+      b.type = 'button';
+      b.addEventListener('click', opts.onBack);
+      row.appendChild(b);
     }
-  }
-
-  function clearInput() { inputZone.innerHTML = ''; }
-
-  /* ---------- Engine ---------- */
-  function advance() {
-    if (!queue.length) return;
-    const step = queue.shift();
-    runStep(step);
-  }
-
-  function runStep(step) {
-    clearInput();
-    // Abschluss-Schritt hat keinen eigenen Bot-Text — direkt zur Zusammenfassung
-    if (step.type === 'end') { renderSummary(); return; }
-    const longer = step.longer;
-    const botText = typeof step.bot === 'function' ? step.bot(answers) : step.bot;
-    const render = function () {
-      if (step.type === 'note') { advance(); }
-      else { renderInput(step); }
-    };
-    if (longer) {
-      const typing = document.createElement('div');
-      typing.className = 'lumi-msg bot lumi-typing';
-      typing.innerHTML = '<span class="mini-avatar">L</span><div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
-      chat.appendChild(typing);
-      scrollDown();
-      setTimeout(function () {
-        typing.remove();
-        addBot(botText, render);
-      }, 1300);
-    } else {
-      addBot(botText, render);
+    const right = el('div', 'lb-actions-right');
+    if (opts.skip) {
+      const s = el('button', 'lb-skip', opts.skipLabel || 'Überspringen');
+      s.type = 'button';
+      s.addEventListener('click', opts.skip);
+      right.appendChild(s);
     }
-  }
-
-  function onAnswer(step, display, value) {
-    addUser(display);
-    answers[step.key] = value;
-    answers[step.key + '_label'] = display;
-    if (step.counts !== false) { answered++; setProgress(); }
-    clearInput();
-    if (step.adapt) {
-      const extra = step.adapt(value, answers);
-      if (extra && extra.length) queue = extra.concat(queue);
+    if (opts.onNext) {
+      const n = el('button', 'btn btn-primary lb-next');
+      n.type = 'button';
+      n.textContent = opts.nextLabel || 'Weiter';
+      n.addEventListener('click', opts.onNext);
+      right.appendChild(n);
     }
-    advance();
+    row.appendChild(right);
+    stage.appendChild(row);
+    return row;
   }
 
-  /* ---------- Input-Rendering ---------- */
-  function renderInput(step) {
-    if (step.type === 'text') return renderText(step);
-    if (step.type === 'chips') return renderChips(step);
-    if (step.type === 'styles') return renderStyles(step);
-    if (step.type === 'swatches') return renderSwatches(step);
-  }
-
-  function renderText(step) {
-    const form = document.createElement('form');
-    form.className = 'lumi-textform';
-    form.innerHTML =
-      '<input type="text" autocomplete="off" placeholder="' + (step.placeholder || 'Deine Antwort…') + '" />' +
-      '<button class="lumi-send" type="submit">Senden <span aria-hidden="true">→</span></button>';
-    const field = form.querySelector('input');
-    inputZone.appendChild(form);
-    field.focus();
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const v = field.value.trim();
-      if (!v) return;
-      onAnswer(step, v, v);
-    });
-  }
-
-  function renderChips(step) {
-    const wrap = document.createElement('div');
-    wrap.className = 'lumi-chips';
-    step.options.forEach(function (opt) {
-      const b = document.createElement('button');
-      b.className = 'lumi-chip';
+  /* ---- Multi-Select Chips (mit optionaler Exklusiv-Logik) ---- */
+  function buildChips(slot, options, conf) {
+    conf = conf || {};
+    const exclusive = conf.exclusive || [];
+    if (!Array.isArray(A[slot])) A[slot] = [];
+    const wrap = el('div', 'lb-chips');
+    const btns = {};
+    options.forEach((opt) => {
+      const b = el('button', 'lb-chip');
       b.type = 'button';
       b.textContent = opt.label;
-      b.addEventListener('click', function () { onAnswer(step, opt.label, opt.value); });
+      const on = A[slot].indexOf(opt.value) > -1;
+      if (on) b.classList.add('is-on');
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.addEventListener('click', () => {
+        let arr = A[slot].slice();
+        const has = arr.indexOf(opt.value) > -1;
+        if (has) {
+          arr = arr.filter((v) => v !== opt.value);
+        } else if (exclusive.indexOf(opt.value) > -1) {
+          arr = [opt.value];                                   // Exklusiv-Option leert den Rest
+        } else {
+          arr = arr.filter((v) => exclusive.indexOf(v) === -1); // normale Auswahl entfernt Exklusiv-Optionen
+          arr.push(opt.value);
+        }
+        A[slot] = arr;
+        options.forEach((o) => {
+          const bb = btns[o.value];
+          const sel = arr.indexOf(o.value) > -1;
+          bb.classList.toggle('is-on', sel);
+          bb.setAttribute('aria-pressed', sel ? 'true' : 'false');
+        });
+        if (conf.onChange) conf.onChange(arr);
+      });
+      btns[opt.value] = b;
       wrap.appendChild(b);
     });
-    inputZone.appendChild(wrap);
+    stage.appendChild(wrap);
+    return wrap;
   }
 
-  function renderStyles(step) {
-    const wrap = document.createElement('div');
-    wrap.className = 'lumi-styles';
-    step.options.forEach(function (opt) {
-      const b = document.createElement('button');
-      b.className = 'lumi-style';
+  /* ---- Single-Choice Karten ---- */
+  function buildCards(slot, options, conf) {
+    conf = conf || {};
+    const wrap = el('div', conf.cls || 'lb-cards');
+    const btns = {};
+    options.forEach((opt) => {
+      const b = el('button', 'lb-card');
       b.type = 'button';
-      b.innerHTML =
-        '<div class="lumi-style-preview ' + opt.flavor + '">' +
-          '<span class="bar a"></span><span class="bar b"></span><span class="bar c"></span>' +
-        '</div>' +
-        '<div class="lumi-style-meta"><strong></strong><span></span></div>';
-      b.querySelector('strong').textContent = opt.title;
-      b.querySelector('.lumi-style-meta span').textContent = opt.sub;
-      b.addEventListener('click', function () { onAnswer(step, opt.title, opt.value); });
+      let inner = '';
+      if (opt.icon) inner += '<span class="lb-card-icon" aria-hidden="true">' + opt.icon + '</span>';
+      inner += '<span class="lb-card-label">' + opt.label + '</span>';
+      if (opt.sub) inner += '<span class="lb-card-sub">' + opt.sub + '</span>';
+      b.innerHTML = inner;
+      if (A[slot] === opt.value) b.classList.add('is-on');
+      b.addEventListener('click', () => {
+        A[slot] = opt.value;
+        Object.keys(btns).forEach((k) => btns[k].classList.toggle('is-on', k === opt.value));
+        if (conf.onPick) conf.onPick(opt.value);
+      });
+      btns[opt.value] = b;
       wrap.appendChild(b);
     });
-    inputZone.appendChild(wrap);
+    stage.appendChild(wrap);
+    return wrap;
   }
 
-  function renderSwatches(step) {
-    const wrap = document.createElement('div');
-    wrap.className = 'lumi-swatches';
-    step.options.forEach(function (opt) {
-      const b = document.createElement('button');
-      b.className = 'lumi-swatch';
-      b.type = 'button';
-      const dots = opt.dots.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join('');
-      b.innerHTML = '<div class="lumi-swatch-dots">' + dots + '</div><small></small>';
-      b.querySelector('small').textContent = opt.label;
-      b.addEventListener('click', function () { onAnswer(step, opt.label, opt.value); });
-      wrap.appendChild(b);
-    });
-    inputZone.appendChild(wrap);
+  /* ============================================================
+     NAVIGATION / FORTSCHRITT
+     ============================================================ */
+  const progressWrap = document.getElementById('lumiProgress');
+  const progressLabel = document.getElementById('lumiProgressLabel');
+  const progressFill = document.getElementById('lumiProgressFill');
+
+  function updateProgress(step) {
+    // Fortschritt ERST AB SCHRITT 2 sichtbar (Schritt 1 & Intro/Abschluss: aus)
+    if (step && step >= 2) {
+      progressWrap.hidden = false;
+      progressLabel.textContent = 'Schritt ' + step + ' von ' + SCHEMA.totalSteps;
+      progressFill.style.width = Math.round((step / SCHEMA.totalSteps) * 100) + '%';
+    } else {
+      progressWrap.hidden = true;
+    }
   }
 
-  /* ---------- Abschluss / Zusammenfassung ---------- */
-  function renderSummary() {
-    answered = TOTAL;
-    setProgress();
-    const name = firstName(answers.kontakt || '');
-    const paket = PAKET[answers.umfang] || PAKET.unsure;
-    const stilOpt = STIL_OPTS.find(function (o) { return o.value === answers.stil; }) || STIL_OPTS[0];
+  function show(i) {
+    ui.index = Math.max(0, Math.min(screens.length - 1, i));
+    const sc = screens[ui.index];
+    updateProgress(sc.step);
+    clearStage();
+    const focusTarget = sc.render();
+    // Sanftes Heranscrollen + Fokus auf die Frage (außer Intro)
+    if (ui.index > 0) {
+      const card = document.querySelector('.lumi-card');
+      if (card) card.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
+    }
+    if (focusTarget && focusTarget.focus) {
+      try { focusTarget.focus({ preventScroll: true }); } catch (e) { focusTarget.focus(); }
+    }
+  }
+  const next = () => show(ui.index + 1);
+  const back = () => show(ui.index - 1);
+  function goToScreen(i) { show(i); }
 
-    addBot('Perfekt, ' + name + '! Ich stelle dir dein Briefing zusammen und erzeuge eine erste Vorschau …', function () {
-      const card = document.createElement('div');
-      card.className = 'lumi-summary-card';
+  /* ============================================================
+     SCREEN-DEFINITIONEN (Reihenfolge = Flow)
+     step: Nummer für die Fortschrittsanzeige (null = kein Schritt)
+     ============================================================ */
+  const screens = [
+    /* ---------- 0 · Willkommen (kein Fortschritt) ---------- */
+    { name: 'welcome', step: null, render: function () {
+      const h = lumiSays(
+        'Hi, ich bin Lumi 👋',
+        'In ~2 Minuten und nur mit Klicken erstelle ich dein Website-Briefing. Kein Tippzwang, jederzeit „Zurück“ möglich.'
+      );
+      const wrap = el('div', 'lb-welcome');
+      const btn = el('button', 'btn btn-primary btn-lg lb-start');
+      btn.type = 'button';
+      btn.innerHTML = 'Los geht’s <span class="arrow" aria-hidden="true">→</span>';
+      btn.addEventListener('click', next);
+      wrap.appendChild(btn);
+      stage.appendChild(wrap);
+      return h;
+    }},
 
-      const rows = [
-        ['Tätigkeit', answers.branche_label || '–'],
-        ['Ziel', answers.ziel_label || '–'],
-        ['Stil', answers.stil_label || '–'],
-        ['Farbwelt', answers.farbe_label || '–'],
-        ['Umfang', answers.umfang_label || '–'],
-        ['Empfohlenes Paket', paket.name + ' · ' + paket.preis],
-      ];
+    /* ---------- 1 · Branche (Single-Kacheln, KEIN Fortschrittsbalken) ---------- */
+    { name: 'branche', step: 1, render: function () {
+      const h = lumiSays('In welcher Branche bist du tätig?');
+      const sonst = el('div', 'lb-inline');
 
-      let html = '<h4>Dein Briefing</h4>';
-      rows.forEach(function (r) {
-        html += '<div class="lumi-summary-row"><span class="k">' + r[0] + '</span><span class="v"></span></div>';
+      function renderSonst() {
+        sonst.textContent = '';
+        if (A.branche === 'sonstiges') {
+          const lbl = el('label', 'lb-field');
+          lbl.innerHTML = '<span class="lb-field-label">Was bietest du an? <em>(optional)</em></span>';
+          const inp = el('input');
+          inp.type = 'text';
+          inp.placeholder = 'z. B. „mobiler Friseur für Senioren“';
+          inp.value = A.branche_sonstiges || '';
+          inp.addEventListener('input', (e) => { A.branche_sonstiges = e.target.value; });
+          lbl.appendChild(inp);
+          sonst.appendChild(lbl);
+        }
+      }
+
+      buildCards('branche', OPT.branche, { cls: 'lb-tiles', onPick: function (v) {
+        renderSonst();
+        if (v !== 'sonstiges') { next(); } // eindeutige Klick-Antwort → sofort weiter
+      }});
+      stage.appendChild(sonst);
+      renderSonst();
+
+      actions({
+        onBack: back,
+        onNext: function () { leaveBranche(); },
+        skip: function () { A.branche = A.branche || null; next(); },
+      });
+      return h;
+    }},
+
+    /* ---------- 2 · Website-Ziel (Multi-Chips) ---------- */
+    { name: 'ziele', step: 2, render: function () {
+      const h = lumiSays('Was soll deine Website vor allem erreichen?', 'Mehrfachauswahl möglich.');
+      buildChips('ziele', OPT.ziele);
+      actions({ onBack: back, onNext: next, skip: next });
+      return h;
+    }},
+
+    /* ---------- 3 · Umfang (Single-Karten) + bedingte Folgefrage „Seiten“ ---------- */
+    { name: 'umfang', step: 3, render: function () {
+      const h = lumiSays('Wie groß soll deine Website werden?');
+      const sub = el('div', 'lb-inline');
+
+      function renderSub() {
+        sub.textContent = '';
+        // Folgefrage nur, wenn NICHT One-Pager (und etwas gewählt wurde)
+        if (A.umfang && A.umfang !== 'onepager') {
+          const q = el('p', 'lb-subq', 'Welche Seiten brauchst du? <span class="lb-opt">(optional)</span>');
+          sub.appendChild(q);
+          const chips = buildChipsInto(sub, 'seiten', OPT.seiten, { exclusive: ['unsure'] });
+          void chips;
+        }
+      }
+
+      buildCards('umfang', OPT.umfang, { onPick: renderSub });
+      stage.appendChild(sub);
+      renderSub();
+      actions({ onBack: back, onNext: next, skip: next });
+      return h;
+    }},
+
+    /* ---------- 4 · Features / Funktionen (Multi-Chips) ---------- */
+    { name: 'features', step: 4, render: function () {
+      const h = lumiSays('Welche Funktionen brauchst du?', 'Mehrfachauswahl möglich.');
+      buildChips('features', OPT.features, { exclusive: ['beraten'] });
+      actions({ onBack: back, onNext: next, skip: next });
+      return h;
+    }},
+
+    /* ---------- 5 · Design: Stil + Farbwelt + optional HEX ---------- */
+    { name: 'design', step: 5, render: function () {
+      const h = lumiSays('Welcher Look gefällt dir?', 'Mehrfachauswahl möglich — Lumi nutzt das als Richtung.');
+      // Teil A — Stil-Moodboards (reine CSS-Grafik, lizenzfrei)
+      const moods = el('div', 'lb-moods');
+      const mbtns = {};
+      OPT.stil.forEach((opt) => {
+        const b = el('button', 'lb-mood');
+        b.type = 'button';
+        b.innerHTML =
+          '<span class="lb-mood-art ' + opt.flavor + '" aria-hidden="true">' +
+            '<span class="m1"></span><span class="m2"></span><span class="m3"></span>' +
+          '</span><span class="lb-mood-label">' + opt.label + '</span>';
+        if (A.stil.indexOf(opt.value) > -1) b.classList.add('is-on');
+        b.setAttribute('aria-pressed', A.stil.indexOf(opt.value) > -1 ? 'true' : 'false');
+        b.addEventListener('click', () => {
+          const i = A.stil.indexOf(opt.value);
+          if (i > -1) A.stil.splice(i, 1); else A.stil.push(opt.value);
+          const sel = A.stil.indexOf(opt.value) > -1;
+          b.classList.toggle('is-on', sel);
+          b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+        });
+        mbtns[opt.value] = b;
+        moods.appendChild(b);
+      });
+      stage.appendChild(moods);
+
+      // Teil B — Farbwelt (sichtbare Farbkacheln, KEIN HEX-Zwang)
+      subQuestion('Welche Farbstimmung passt zu dir?');
+      const sw = el('div', 'lb-swatches');
+      OPT.farbwelt.forEach((opt) => {
+        const b = el('button', 'lb-swatch');
+        b.type = 'button';
+        const dots = opt.dots.map((c) => '<span style="background:' + c + '"></span>').join('');
+        b.innerHTML = '<span class="lb-swatch-dots" aria-hidden="true">' + dots + '</span><small>' + opt.label + '</small>';
+        if (A.farbwelt.indexOf(opt.value) > -1) b.classList.add('is-on');
+        b.setAttribute('aria-pressed', A.farbwelt.indexOf(opt.value) > -1 ? 'true' : 'false');
+        b.addEventListener('click', () => {
+          const i = A.farbwelt.indexOf(opt.value);
+          if (i > -1) A.farbwelt.splice(i, 1); else A.farbwelt.push(opt.value);
+          const sel = A.farbwelt.indexOf(opt.value) > -1;
+          b.classList.toggle('is-on', sel);
+          b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+        });
+        sw.appendChild(b);
+      });
+      stage.appendChild(sw);
+
+      // Teil C — optionales HEX-Feld (kein Pflichtfeld, kein Color-Picker)
+      const lbl = el('label', 'lb-field lb-field-optional');
+      lbl.innerHTML = '<span class="lb-field-label">Feste Markenfarben? <em>(HEX-Code, falls bekannt — sonst überspringen)</em></span>';
+      const inp = el('input');
+      inp.type = 'text';
+      inp.placeholder = 'z. B. #1B3A8F';
+      inp.value = A.markenfarben_hex || '';
+      inp.addEventListener('input', (e) => { A.markenfarben_hex = e.target.value; });
+      lbl.appendChild(inp);
+      stage.appendChild(lbl);
+
+      actions({ onBack: back, onNext: next, skip: next });
+      return h;
+    }},
+
+    /* ---------- 6 · Vorhandenes Material (Multi-Chips + bedingte Uploads) ---------- */
+    { name: 'material', step: 6, render: function () {
+      const h = lumiSays('Was hast du schon?', 'Uploads sind optional — du kannst alles auch später nachreichen.');
+      const uploads = el('div', 'lb-inline');
+
+      function renderUploads() {
+        uploads.textContent = '';
+        const m = A.material;
+        if (m.indexOf('logo') > -1) uploads.appendChild(fileField('Logo hochladen', 'logo', { hint: 'Kann ich auch später nachreichen.' }));
+        if (m.indexOf('fotos') > -1) uploads.appendChild(fileField('Bilder hochladen', 'fotos', { multiple: true }));
+        if (m.indexOf('texte') > -1) {
+          uploads.appendChild(fileField('Texte hochladen', 'texte', {}));
+          const note = el('label', 'lb-field');
+          note.innerHTML = '<span class="lb-field-label">Notizen zu den Texten <em>(optional)</em></span>';
+          const ta = el('textarea');
+          ta.rows = 2;
+          ta.placeholder = 'z. B. „Texte sind grob, bitte überarbeiten“';
+          ta.value = A.uploads.texte_notiz || '';
+          ta.addEventListener('input', (e) => { A.uploads.texte_notiz = e.target.value; });
+          note.appendChild(ta);
+          uploads.appendChild(note);
+        }
+        if (m.indexOf('website') > -1) {
+          const wl = el('label', 'lb-field');
+          wl.innerHTML = '<span class="lb-field-label">Link zur aktuellen Website</span>';
+          const inp = el('input');
+          inp.type = 'url';
+          inp.placeholder = 'https://…';
+          inp.value = A.uploads.website_link || '';
+          inp.addEventListener('input', (e) => { A.uploads.website_link = e.target.value; });
+          wl.appendChild(inp);
+          uploads.appendChild(wl);
+        }
+      }
+
+      buildChips('material', OPT.material, { exclusive: ['nichts'], onChange: renderUploads });
+      stage.appendChild(uploads);
+      renderUploads();
+      actions({ onBack: back, onNext: next, skip: next });
+      return h;
+    }},
+
+    /* ---------- 7 · Zeitrahmen (Single-Buttons → sofort weiter) ---------- */
+    { name: 'zeitrahmen', step: 7, render: function () {
+      const h = lumiSays('Bis wann brauchst du die Website?');
+      buildCards('zeitrahmen', OPT.zeitrahmen, { cls: 'lb-cards lb-cards-wide', onPick: function () { next(); } });
+      actions({ onBack: back, skip: next });
+      return h;
+    }},
+
+    /* ---------- 8a · Paketempfehlung (Ergebnis-Screen) ---------- */
+    { name: 'paket', step: 8, render: function () {
+      const recId = recommend();
+      A.paket_empfohlen = recId;
+      if (!A.paket_gewaehlt) A.paket_gewaehlt = recId;
+
+      const h = lumiSays(
+        'Auf Basis deiner Angaben passt „' + PAKETE[recId].name + '“ am besten.',
+        'Unverbindliche Empfehlung — Festpreis, alle Preise netto.'
+      );
+
+      // Empfohlenes Paket + die zwei nächstliegenden anzeigen
+      const order = ['basis', 'pro', 'platin', 'enterprise'];
+      const idx = order.indexOf(recId);
+      const showIds = [recId];
+      [idx - 1, idx + 1, idx - 2, idx + 2].forEach((i) => {
+        if (i >= 0 && i < order.length && showIds.length < 3 && showIds.indexOf(order[i]) === -1) showIds.push(order[i]);
+      });
+      showIds.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+      const grid = el('div', 'lb-pakete');
+      const cards = {};
+      showIds.forEach((id) => {
+        const p = PAKETE[id];
+        const c = el('button', 'lb-paket');
+        c.type = 'button';
+        c.innerHTML =
+          (id === recId ? '<span class="lb-paket-badge">Empfohlen</span>' : '') +
+          '<span class="lb-paket-name">' + p.name + '</span>' +
+          '<span class="lb-paket-price">' + p.preis + '</span>' +
+          '<span class="lb-paket-note">' + p.note + '</span>';
+        if (A.paket_gewaehlt === id) c.classList.add('is-on');
+        c.addEventListener('click', () => {
+          A.paket_gewaehlt = id;
+          Object.keys(cards).forEach((k) => cards[k].classList.toggle('is-on', k === id));
+          unsureBtn.classList.remove('is-on');
+        });
+        cards[id] = c;
+        grid.appendChild(c);
+      });
+      stage.appendChild(grid);
+
+      // „Unsicher?“ — Entscheidung später mit Sartu
+      const unsureBtn = el('button', 'lb-unsure');
+      unsureBtn.type = 'button';
+      unsureBtn.textContent = 'Unsicher? Sartu entscheidet das später mit dir.';
+      if (A.paket_gewaehlt === 'unsicher') unsureBtn.classList.add('is-on');
+      unsureBtn.addEventListener('click', () => {
+        A.paket_gewaehlt = 'unsicher';
+        Object.keys(cards).forEach((k) => cards[k].classList.remove('is-on'));
+        unsureBtn.classList.add('is-on');
+      });
+      stage.appendChild(unsureBtn);
+
+      stage.appendChild(el('p', 'lb-paket-hint', SCHEMA.wartungHinweis + ' · Festpreis, unverbindlich.'));
+
+      actions({ onBack: back, onNext: next, nextLabel: 'Weiter zu den Kontaktdaten' });
+      return h;
+    }},
+
+    /* ---------- 8b · Kontaktdaten (Abschluss-Eingabe) ---------- */
+    { name: 'kontakt', step: 8, render: function () {
+      const h = lumiSays('Wohin darf Sartu dein fertiges Briefing + Angebot schicken?');
+      const form = el('form', 'lb-form');
+      form.setAttribute('novalidate', 'novalidate');
+      form.innerHTML =
+        '<label class="lb-field"><span class="lb-field-label">Name <em>*</em></span>' +
+          '<input type="text" name="name" autocomplete="name" required /></label>' +
+        '<label class="lb-field"><span class="lb-field-label">E-Mail <em>*</em></span>' +
+          '<input type="email" name="email" autocomplete="email" required /></label>' +
+        '<label class="lb-field"><span class="lb-field-label">Telefon <em>(optional)</em></span>' +
+          '<input type="tel" name="telefon" autocomplete="tel" /></label>' +
+        '<label class="lb-check"><input type="checkbox" name="dsgvo" required />' +
+          '<span>Ich habe die <a href="' + CONFIG.datenschutzUrl + '" target="_blank" rel="noopener">Datenschutzerklärung</a> ' +
+          'gelesen und bin mit der Verarbeitung meiner Angaben einverstanden. <em>*</em></span></label>' +
+        '<p class="lb-form-error" id="lbFormError" role="alert" hidden></p>';
+
+      // Vorbelegen (Zurück-Navigation)
+      form.name.value = A.kontakt.name || '';
+      form.email.value = A.kontakt.email || '';
+      form.telefon.value = A.kontakt.telefon || '';
+      form.dsgvo.checked = !!A.kontakt.dsgvo;
+
+      const sync = () => {
+        A.kontakt.name = form.name.value.trim();
+        A.kontakt.email = form.email.value.trim();
+        A.kontakt.telefon = form.telefon.value.trim();
+        A.kontakt.dsgvo = form.dsgvo.checked;
+      };
+      ['input', 'change'].forEach((ev) => form.addEventListener(ev, sync));
+
+      const err = form.querySelector('#lbFormError');
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        sync();
+        const problems = [];
+        if (!A.kontakt.name) problems.push('Bitte gib deinen Namen an.');
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(A.kontakt.email)) problems.push('Bitte gib eine gültige E-Mail an.');
+        if (!A.kontakt.dsgvo) problems.push('Bitte bestätige die Datenschutzerklärung.');
+        if (problems.length) {
+          err.hidden = false;
+          err.textContent = problems[0];
+          return;
+        }
+        err.hidden = true;
+        submitBriefing();
       });
 
-      // Simulierte Sofort-Vorschau (3 Richtungen im gewählten Stil)
-      html += '<h4 style="margin-top:22px;">Deine Sofort-Vorschau · 3 Richtungen</h4>';
-      html += '<div class="lumi-preview-grid">';
-      for (let i = 0; i < 3; i++) {
-        html += '<div class="lumi-preview-shot"><div class="lumi-style-preview ' + stilOpt.flavor + '">' +
-                '<span class="bar a"></span><span class="bar b"></span><span class="bar c"></span></div></div>';
-      }
-      html += '</div>';
+      stage.appendChild(form);
+      actions({
+        onBack: back,
+        onNext: function () { if (form.requestSubmit) form.requestSubmit(); else form.dispatchEvent(new Event('submit', { cancelable: true })); },
+        nextLabel: 'Briefing absenden',
+      });
+      return h;
+    }},
 
-      html += '<div class="lumi-cta-row">' +
-                '<a href="preise.html" class="btn btn-primary">Paket „' + paket.name + '" ansehen <span class="arrow">→</span></a>' +
-                '<a href="kontakt.html" class="btn btn-outline">Kostenlosen Check anfordern</a>' +
-              '</div>';
+    /* ---------- 9 · Abschluss (Zusammenfassung + Bestätigung) ---------- */
+    { name: 'done', step: null, render: function () {
+      const h = lumiSays('Danke, ' + (A.kontakt.name.split(' ')[0] || '') + '! Das habe ich verstanden:');
+      // Read-back, jede Zeile per Klick korrigierbar (springt zurück, Daten bleiben)
+      const list = el('div', 'lb-summary');
+      summaryRows().forEach((r) => {
+        const row = el('div', 'lb-summary-row');
+        row.innerHTML = '<span class="k">' + r.k + '</span><span class="v"></span>';
+        row.querySelector('.v').textContent = r.v || '—';
+        const edit = el('button', 'lb-edit', 'ändern');
+        edit.type = 'button';
+        edit.setAttribute('aria-label', r.k + ' ändern');
+        edit.addEventListener('click', () => goToScreen(r.screen));
+        row.appendChild(edit);
+        list.appendChild(row);
+      });
+      stage.appendChild(list);
 
-      card.innerHTML = html;
-      // Werte sicher als Text setzen (kein HTML-Injection)
-      const valCells = card.querySelectorAll('.lumi-summary-row .v');
-      rows.forEach(function (r, idx) { valCells[idx].textContent = r[1]; });
+      const box = el('div', 'lb-done');
+      box.innerHTML =
+        '<p class="lb-done-status" id="lbSendStatus">' + (lastSendState.msg || '') + '</p>' +
+        '<p class="lb-done-msg">Sartu meldet sich in der Regel innerhalb von <strong>1 Werktag</strong> mit deinem Angebot.</p>';
+      stage.appendChild(box);
 
-      chat.appendChild(card);
-
-      const restart = document.createElement('button');
-      restart.className = 'lumi-restart';
+      const restart = el('button', 'lb-restart', 'Neues Briefing starten');
       restart.type = 'button';
-      restart.textContent = 'Briefing neu starten';
-      restart.style.marginTop = '16px';
-      restart.addEventListener('click', reset);
-      const wrapR = document.createElement('div');
-      wrapR.style.textAlign = 'center';
-      wrapR.appendChild(restart);
-      chat.appendChild(wrapR);
+      restart.addEventListener('click', resetAll);
+      stage.appendChild(restart);
+      return h;
+    }},
+  ];
 
-      scrollDown();
+  // Hilfsfunktion: Chips in einen bestimmten Container rendern (statt direkt in stage)
+  function buildChipsInto(container, slot, options, conf) {
+    const before = stage.childNodes.length;
+    const wrap = buildChips(slot, options, conf);
+    stage.removeChild(wrap);          // buildChips hängt an stage an → hier umhängen
+    container.appendChild(wrap);
+    void before;
+    return wrap;
+  }
+
+  // Upload-Feld (optional, nie blockierend) — speichert nur Metadaten in der Demo
+  function fileField(labelText, key, conf) {
+    conf = conf || {};
+    const lbl = el('label', 'lb-field lb-upload');
+    let head = '<span class="lb-field-label">' + labelText + ' <em>(optional)</em></span>';
+    if (conf.hint) head += '<span class="lb-upload-hint">' + conf.hint + '</span>';
+    lbl.innerHTML = head;
+    const inp = el('input');
+    inp.type = 'file';
+    if (conf.multiple) inp.multiple = true;
+    const chosen = el('span', 'lb-upload-files');
+    const existing = A.uploads[key] || [];
+    if (existing.length) chosen.textContent = existing.map((f) => f.name).join(', ');
+    inp.addEventListener('change', (e) => {
+      A.uploads[key] = Array.prototype.map.call(e.target.files, (f) => ({ name: f.name, size: f.size, type: f.type }));
+      chosen.textContent = A.uploads[key].map((f) => f.name).join(', ');
+      // Hinweis: echte Datei-Uploads erfolgen serverseitig (Supabase Storage) — siehe persist()
+    });
+    lbl.appendChild(inp);
+    lbl.appendChild(chosen);
+    return lbl;
+  }
+
+  /* ============================================================
+     EINZIGE ERLAUBTE RÜCKFRAGE (max. 1 im ganzen Flow)
+     Nur wenn Branche = "Sonstiges" UND Freitext leer/zu kurz.
+     ============================================================ */
+  function leaveBranche() {
+    const txt = (A.branche_sonstiges || '').trim();
+    const unklar = A.branche === 'sonstiges' && txt.length < 3;
+    if (unklar && !ui.askedClarification) {
+      ui.askedClarification = true; // harte Obergrenze
+      clearStage();
+      const h = lumiSays('Magst du kurz sagen, was du anbietest?', 'Zwei, drei Worte reichen — das hilft mir bei der Empfehlung. (Kannst du auch überspringen.)');
+      const lbl = el('label', 'lb-field');
+      lbl.innerHTML = '<span class="lb-field-label">Deine Tätigkeit</span>';
+      const inp = el('input');
+      inp.type = 'text';
+      inp.placeholder = 'z. B. „mobiler Friseur“';
+      inp.value = A.branche_sonstiges || '';
+      inp.addEventListener('input', (e) => { A.branche_sonstiges = e.target.value; });
+      lbl.appendChild(inp);
+      stage.appendChild(lbl);
+      actions({ onBack: back, onNext: next, skip: next, nextLabel: 'Weiter' });
+      if (h && h.focus) h.focus();
+      return;
+    }
+    next();
+  }
+
+  /* ============================================================
+     PAKET-EMPFEHLUNG (Schritt 8a) — aus Umfang (3) + Features (4)
+     ============================================================ */
+  function recommend() {
+    const u = A.umfang;
+    const f = A.features || [];
+    const has = (v) => f.indexOf(v) > -1;
+
+    // Enterprise: Shop/Bezahlung, Mehrsprachig, Kundenbereich/Portal
+    if (has('shop') || has('mehrsprachig') || has('login')) return 'enterprise';
+    if (u === 'gross') return has('shop') ? 'enterprise' : 'platin';
+    if (u === 'onepager') return 'basis';
+    // Platin: umfangreich mit erweiterten Funktionen (Galerie, Buchung …)
+    if (u === 'umfangreich' && (has('galerie') || has('terminbuchung'))) return 'platin';
+    if (u === 'kompakt' || u === 'umfangreich') return 'pro';
+    // Fallback (Umfang übersprungen): an Features orientieren
+    if (has('galerie') || has('terminbuchung')) return 'platin';
+    return 'pro';
+  }
+
+  /* ============================================================
+     ZUSAMMENFASSUNG / READ-BACK
+     ============================================================ */
+  function labelsFor(slot, values) {
+    const list = OPT[slot] || [];
+    return (values || []).map((v) => {
+      const o = list.find((x) => x.value === v);
+      return o ? o.label : v;
     });
   }
-
-  function reset() {
-    chat.innerHTML = '';
-    inputZone.innerHTML = '';
-    for (const k in answers) delete answers[k];
-    answered = 0;
-    setProgress();
-    queue = buildFlow();
-    advance();
+  function labelFor(slot, value) {
+    const o = (OPT[slot] || []).find((x) => x.value === value);
+    return o ? o.label : (value || '');
+  }
+  function summaryRows() {
+    const rows = [];
+    let branche = labelFor('branche', A.branche);
+    if (A.branche === 'sonstiges' && A.branche_sonstiges) branche += ' (' + A.branche_sonstiges + ')';
+    rows.push({ k: 'Branche', v: branche, screen: 1 });
+    rows.push({ k: 'Ziele', v: labelsFor('ziele', A.ziele).join(', '), screen: 2 });
+    let umfang = labelFor('umfang', A.umfang);
+    if (A.umfang && A.umfang !== 'onepager' && A.seiten.length) umfang += ' · ' + labelsFor('seiten', A.seiten).join(', ');
+    rows.push({ k: 'Umfang', v: umfang, screen: 3 });
+    rows.push({ k: 'Funktionen', v: labelsFor('features', A.features).join(', '), screen: 4 });
+    let design = labelsFor('stil', A.stil).join(', ');
+    if (A.farbwelt.length) design += (design ? ' · ' : '') + labelsFor('farbwelt', A.farbwelt).join(', ');
+    if (A.markenfarben_hex) design += ' · ' + A.markenfarben_hex;
+    rows.push({ k: 'Design', v: design, screen: 5 });
+    const mat = labelsFor('material', A.material).join(', ');
+    rows.push({ k: 'Material', v: mat, screen: 6 });
+    rows.push({ k: 'Zeitrahmen', v: labelFor('zeitrahmen', A.zeitrahmen), screen: 7 });
+    const pk = A.paket_gewaehlt === 'unsicher'
+      ? 'Noch unsicher (mit Sartu klären)'
+      : (PAKETE[A.paket_gewaehlt] ? PAKETE[A.paket_gewaehlt].name + ' · ' + PAKETE[A.paket_gewaehlt].preis : '');
+    rows.push({ k: 'Paket', v: pk, screen: 8 });
+    return rows;
   }
 
-  /* ---------- Start ---------- */
-  queue = buildFlow();
-  setProgress();
-  advance();
+  /* ============================================================
+     STRUKTURIERTE AUSGABE (für Speicherung + optionalen LLM-Call)
+     ============================================================ */
+  function collect() {
+    return {
+      schemaVersion: SCHEMA.version,
+      stage: 1,
+      createdAt: new Date().toISOString(),
+      slots: {
+        branche: A.branche,
+        branche_label: labelFor('branche', A.branche),
+        branche_sonstiges: A.branche_sonstiges,
+        ziele: A.ziele, ziele_labels: labelsFor('ziele', A.ziele),
+        umfang: A.umfang, umfang_label: labelFor('umfang', A.umfang),
+        seiten: A.seiten, seiten_labels: labelsFor('seiten', A.seiten),
+        features: A.features, features_labels: labelsFor('features', A.features),
+        stil: A.stil, stil_labels: labelsFor('stil', A.stil),
+        farbwelt: A.farbwelt, farbwelt_labels: labelsFor('farbwelt', A.farbwelt),
+        markenfarben_hex: A.markenfarben_hex,
+        material: A.material, material_labels: labelsFor('material', A.material),
+        uploads: A.uploads,
+        zeitrahmen: A.zeitrahmen, zeitrahmen_label: labelFor('zeitrahmen', A.zeitrahmen),
+        paket_empfohlen: A.paket_empfohlen,
+        paket_gewaehlt: A.paket_gewaehlt,
+        kontakt: A.kontakt,
+      },
+    };
+  }
+
+  /* ============================================================
+     OPTIONAL: EIN einziger LLM-Call am Ende (später aktivieren)
+     ------------------------------------------------------------
+     Läuft NUR, wenn CONFIG.useLLM = true und ein Endpoint gesetzt ist.
+     Der API-Key gehört NICHT in den Browser — CONFIG.llmEndpoint zeigt
+     auf eine serverlose Function (z. B. Vercel), die Claude
+     (empfohlen: claude-sonnet-4-6) per Structured Output / Tool-Use
+     aufruft und EXAKT dieses JSON-Schema erzwingt:
+
+       {
+         "briefing_markdown": "string – lesbares Briefing fürs Sartu-Team",
+         "paket_empfehlung": {
+           "paket": "basis|pro|platin|enterprise",
+           "begruendung": "string"
+         },
+         "zusammenfassung": "string"
+       }
+     ============================================================ */
+  async function requestBriefingFromLLM(payload) {
+    if (!CONFIG.useLLM || isPlaceholder(CONFIG.llmEndpoint)) return null;
+    try {
+      const r = await fetch(CONFIG.llmEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slots: payload.slots }),
+      });
+      if (!r.ok) throw new Error('LLM ' + r.status);
+      return await r.json();
+    } catch (e) {
+      console.warn('[Lumi] LLM-Call übersprungen:', e.message);
+      return null;
+    }
+  }
+
+  /* ============================================================
+     SPEICHERUNG / VERSAND
+     Reihenfolge: Supabase → E-Mail-Endpoint → Demo-Fallback (localStorage)
+     ============================================================ */
+  async function persist(payload) {
+    // 1) Supabase (Tabelle "briefings"), wenn konfiguriert
+    if (!isPlaceholder(CONFIG.supabaseUrl) && !isPlaceholder(CONFIG.supabaseKey)) {
+      const r = await fetch(CONFIG.supabaseUrl.replace(/\/$/, '') + '/rest/v1/briefings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: CONFIG.supabaseKey,
+          Authorization: 'Bearer ' + CONFIG.supabaseKey,
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error('Supabase ' + r.status);
+      // Hinweis: echte Datei-Uploads → Supabase Storage (separat, hier TODO)
+      return 'supabase';
+    }
+    // 2) E-Mail-Versand (Formspree / Resend-Proxy o. Ä.)
+    if (!isPlaceholder(CONFIG.formEndpoint)) {
+      const r = await fetch(CONFIG.formEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ to: CONFIG.notifyEmail, briefing: payload }),
+      });
+      if (!r.ok) throw new Error('Mail ' + r.status);
+      return 'email';
+    }
+    // 3) Demo-Fallback: lokal speichern + in Konsole (nichts wird gesendet)
+    try { localStorage.setItem('sartu_briefing_' + Date.now(), JSON.stringify(payload)); } catch (e) { /* ignore */ }
+    console.info('[Lumi] Briefing (Demo – kein Versand konfiguriert):', payload);
+    return 'demo';
+  }
+
+  const lastSendState = { msg: '' };
+
+  async function submitBriefing() {
+    // Sende-Zustand anzeigen
+    clearStage();
+    const h = lumiSays('Einen Moment — ich stelle dein Briefing zusammen …');
+    const spinner = el('div', 'lb-sending');
+    spinner.innerHTML = '<span class="lb-dot"></span><span class="lb-dot"></span><span class="lb-dot"></span>';
+    stage.appendChild(spinner);
+    if (h && h.focus) h.focus();
+
+    const payload = collect();
+    try {
+      const ai = await requestBriefingFromLLM(payload); // null, wenn deaktiviert
+      if (ai) payload.ai = ai;
+      const via = await persist(payload);
+      lastSendState.msg = via === 'demo'
+        ? '✓ Briefing erstellt. (Demo-Modus: Versand noch nicht konfiguriert.)'
+        : '✓ Dein Briefing ist bei Sartu angekommen.';
+    } catch (e) {
+      console.warn('[Lumi] Versand fehlgeschlagen:', e.message);
+      lastSendState.msg = 'Hinweis: Der automatische Versand hat nicht geklappt — Sartu wird sich trotzdem kümmern.';
+    }
+    // Abschluss-Screen
+    show(screens.findIndex((s) => s.name === 'done'));
+  }
+
+  /* ============================================================
+     RESET
+     ============================================================ */
+  function resetAll() {
+    A.branche = null; A.branche_sonstiges = '';
+    A.ziele = []; A.umfang = null; A.seiten = [];
+    A.features = []; A.stil = []; A.farbwelt = []; A.markenfarben_hex = '';
+    A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
+    A.zeitrahmen = null; A.paket_empfohlen = null; A.paket_gewaehlt = null;
+    A.kontakt = { name: '', email: '', telefon: '', dsgvo: false };
+    ui.askedClarification = false;
+    lastSendState.msg = '';
+    show(0);
+  }
+
+  /* ============================================================
+     START
+     ============================================================ */
+  show(0);
 })();
