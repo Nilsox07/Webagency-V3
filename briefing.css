@@ -339,3 +339,197 @@
 @media (max-width: 380px) {
   .lb-tiles, .lb-cards, .lb-moods, .lb-pakete { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   ZWEI PFADE · KONFIGURATOR · LIVE-PREISLEISTE
+   ============================================================ */
+
+/* ---- Einstieg: Pfad-Auswahl ---- */
+.lb-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lb-path-card {
+  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  font: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark);
+  border-radius: 16px; padding: 22px 20px; min-height: 120px;
+  transition: border-color .15s ease, transform .12s ease;
+}
+.lb-path-card:hover { border-color: var(--green); transform: translateY(-2px); }
+.lb-path-icon { font-size: 26px; }
+.lb-path-title { font-size: 16px; font-weight: 800; color: var(--white); }
+.lb-path-sub { font-size: 13.5px; color: var(--text-light-muted); }
+
+/* ---- Konfigurator-Gerüst ---- */
+.lb-cfg-top { margin-bottom: 6px; }
+.lb-cfg-section { margin-top: 26px; }
+.lb-cfg-h { font-size: 15px; font-weight: 800; color: var(--white); margin-bottom: 14px; letter-spacing: -0.01em; }
+.lb-cfg-opt { font-weight: 500; font-size: 12.5px; color: var(--text-light-muted); }
+.lb-cfg-cta { margin-top: 30px; text-align: center; }
+
+/* ---- Paketauswahl ---- */
+.lb-pkgs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.lb-pkg {
+  position: relative; display: flex; flex-direction: column; gap: 4px; text-align: left;
+  font: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark);
+  border-radius: 14px; padding: 18px 16px 16px;
+  transition: border-color .15s ease, transform .12s ease, background .15s ease;
+}
+.lb-pkg:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-1px); }
+.lb-pkg.is-on { border-color: var(--green); background: rgba(174,240,0,0.1); }
+.lb-pkg-badge {
+  position: absolute; top: -10px; left: 14px;
+  background: var(--green); color: #0a1200;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 999px;
+}
+.lb-pkg-badge-rec { left: auto; right: 14px; background: var(--white); color: #0d1320; }
+.lb-pkg-name { font-size: 16px; font-weight: 800; color: var(--white); }
+.lb-pkg-price { font-size: 17px; font-weight: 800; color: var(--green); }
+.lb-pkg-scope { font-size: 12.5px; color: var(--text-light-muted); }
+
+/* ---- Wartung ---- */
+.lb-warts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.lb-wart {
+  position: relative; display: flex; flex-direction: column; gap: 4px; text-align: left;
+  font: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark);
+  border-radius: 14px; padding: 16px;
+  transition: border-color .15s ease, transform .12s ease;
+}
+.lb-wart:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-1px); }
+.lb-wart.is-on { border-color: var(--green); background: rgba(174,240,0,0.1); }
+.lb-wart-rec {
+  position: absolute; top: -10px; right: 14px;
+  background: var(--white); color: #0d1320;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  padding: 4px 9px; border-radius: 999px;
+}
+.lb-wart-name { font-size: 14.5px; font-weight: 700; color: var(--white); }
+.lb-wart-price { font-size: 15px; font-weight: 800; color: var(--green); }
+.lb-wart-hint { font-size: 12px; color: var(--text-light-muted); }
+
+/* ---- Add-ons ---- */
+.lb-addons { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.lb-addon {
+  border: 1.5px solid var(--border-dark); border-radius: 14px;
+  background: rgba(255,255,255,0.04); overflow: hidden;
+  transition: border-color .15s ease;
+}
+.lb-addon.is-on { border-color: var(--green); background: rgba(174,240,0,0.08); }
+.lb-addon-toggle {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  font: inherit; cursor: pointer; background: transparent; border: 0;
+  padding: 14px 16px;
+}
+.lb-addon-check {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid var(--text-light-muted); position: relative; transition: .15s;
+}
+.lb-addon.is-on .lb-addon-check { border-color: var(--green); background: var(--green); }
+.lb-addon.is-on .lb-addon-check::after {
+  content: ""; position: absolute; left: 6px; top: 2px; width: 6px; height: 11px;
+  border: solid #0a1200; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg);
+}
+.lb-addon-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.lb-addon-name { font-size: 15px; font-weight: 700; color: var(--white); }
+.lb-addon-desc { font-size: 12.5px; color: var(--text-light-muted); }
+.lb-addon-price { flex-shrink: 0; font-size: 14px; font-weight: 800; color: var(--green); text-align: right; }
+.lb-addon-unit { display: block; font-size: 11px; font-weight: 500; color: var(--text-light-muted); }
+.lb-qty { display: flex; align-items: center; gap: 10px; padding: 0 16px 14px 52px; }
+.lb-qty-label { font-size: 13px; color: var(--text-light); }
+.lb-qty-btn {
+  width: 34px; height: 34px; border-radius: 8px; font: inherit; font-size: 20px; line-height: 1;
+  cursor: pointer; background: rgba(255,255,255,0.06); border: 1.5px solid var(--border-dark); color: var(--white);
+}
+.lb-qty-btn:hover { border-color: var(--green); }
+.lb-qty-num { min-width: 24px; text-align: center; font-weight: 800; color: var(--white); }
+.lb-qty-total { font-size: 13px; font-weight: 700; color: var(--green); margin-left: 4px; }
+
+/* ---- Zahlungsstaffelung (Anzeige) ---- */
+.lb-cfg-pay { background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark); border-radius: 14px; padding: 18px; }
+.lb-pay-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
+.lb-pay-steps li {
+  display: flex; align-items: baseline; gap: 8px;
+  background: rgba(174,240,0,0.08); border: 1px solid rgba(159,219,0,0.3);
+  border-radius: 999px; padding: 8px 14px;
+}
+.lb-pay-pct { font-size: 16px; font-weight: 800; color: var(--green-strong); }
+.lb-pay-when { font-size: 13px; color: var(--text-light); }
+.lb-pay-guarantee { margin-top: 12px; font-size: 13.5px; font-weight: 600; color: var(--text-light); }
+
+/* ---- Recap auf dem Kontakt-Screen ---- */
+.lb-recap {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-dark);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 14px; color: var(--text-light);
+}
+.lb-recap strong { color: var(--white); }
+.lb-recap-sums strong { color: var(--green); }
+
+/* ---- Zahlungs-Block im Abschluss ---- */
+.lb-done-pay { margin-top: 18px; }
+.lb-done-pay h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--green-strong); margin-bottom: 10px; }
+
+/* ============================================================
+   STICKY LIVE-PREISLEISTE
+   ============================================================ */
+.lb-pricebar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 300;
+  background: #0b1426; border-top: 2px solid var(--green);
+  box-shadow: 0 -12px 34px rgba(0,0,0,0.4);
+}
+.lb-pricebar-inner {
+  max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px;
+}
+.lb-pricebar-toggle {
+  font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  background: transparent; border: 1.5px solid var(--border-dark); color: var(--text-light);
+  border-radius: 8px; padding: 9px 12px; min-height: 40px; white-space: nowrap;
+}
+.lb-pricebar-toggle:hover { border-color: var(--green); color: var(--green); }
+.lb-pricebar-sums { display: flex; gap: 22px; margin-right: auto; }
+.lb-sum { display: flex; flex-direction: column; line-height: 1.15; }
+.lb-sum span { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-light-muted); }
+.lb-sum strong { font-size: 18px; font-weight: 800; color: var(--white); }
+.lb-sum-mo strong { color: var(--green); }
+.lb-pricebar-cta { min-height: 46px; white-space: nowrap; }
+.lb-pricebar-note {
+  max-width: 760px; margin: 0 auto; padding: 0 20px 8px;
+  font-size: 11px; color: var(--text-light-muted); text-align: center;
+}
+.lb-pricebar-detail {
+  max-width: 760px; margin: 0 auto; padding: 16px 20px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  border-bottom: 1px solid var(--border-dark); background: #0e1626;
+  max-height: 44vh; overflow: auto;
+}
+.lb-detail-col h5 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--green-strong); margin-bottom: 8px; }
+.lb-detail-row { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; color: var(--text-light); padding: 4px 0; }
+.lb-detail-empty { font-size: 13.5px; color: var(--text-light-muted); }
+.lb-detail-sum { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-dark); font-weight: 800; color: var(--white); }
+
+body.lb-has-pricebar { padding-bottom: 156px; }
+
+/* ---- Mobil ---- */
+@media (max-width: 560px) {
+  .lb-paths { grid-template-columns: 1fr; }
+  .lb-pkgs, .lb-warts { grid-template-columns: 1fr 1fr; }
+  .lb-pricebar-inner { flex-wrap: wrap; gap: 10px; padding: 10px 16px; }
+  .lb-pricebar-toggle { order: 3; }
+  .lb-pricebar-sums { width: 100%; order: 1; justify-content: space-between; gap: 12px; }
+  .lb-pricebar-cta { order: 2; flex: 1; }
+  .lb-pricebar-detail { grid-template-columns: 1fr; gap: 14px; }
+  body.lb-has-pricebar { padding-bottom: 200px; }
+  .lb-addon-toggle { flex-wrap: wrap; }
+  .lb-addon-price { width: 100%; text-align: left; padding-left: 36px; }
+}
+@media (max-width: 380px) {
+  .lb-pkgs, .lb-warts { grid-template-columns: 1fr; }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .lb-path-card, .lb-pkg, .lb-wart { transition: none; }
+  .lb-path-card:hover, .lb-pkg:hover, .lb-wart:hover { transform: none; }
+}
