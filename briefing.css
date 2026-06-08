@@ -607,3 +607,121 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   .lb-colortile { width: 56px; }
   .lb-pages-extra { flex-direction: column; align-items: stretch; }
 }
+
+/* ============================================================
+   FARB-VORSCHAU-MOCKUP  (optional, entfernbar – siehe color-mockup.js)
+   Entfernt man color-mockup.js, sind diese Regeln einfach ungenutzt.
+   Live-Einfärbung über --haupt / --neben (von color-mockup.js gesetzt).
+   ============================================================ */
+.cmock {
+  --haupt: #94A3B8; /* Fallback: neutralgrau, bis eine Farbe gewählt ist */
+  --neben: #94A3B8;
+  --cmock-neutral: #E2E8F0;
+  margin: 16px 0 6px;
+}
+.cmock-cap { font-size: 12.5px; font-weight: 600; color: var(--text-light); margin-bottom: 8px; }
+.cmock-cap span { font-weight: 400; color: var(--text-light-muted); }
+
+/* Brauser-Rahmen mit heller Beispielseite */
+.cmock-browser {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.6);
+  max-width: 460px;
+}
+.cmock-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 12px; background: #eef2f6; border-bottom: 1px solid #e2e8f0;
+}
+.cmock-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
+.cmock-url { flex: 1; height: 8px; border-radius: 5px; background: #e2e8f0; margin-left: 6px; }
+
+.cmock-page { padding: 14px; background: #ffffff; }
+
+/* Kopfzeile */
+.cmock-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cmock-logo { width: 46px; height: 14px; border-radius: 4px; background: var(--haupt); }
+.cmock-navlinks { display: flex; gap: 7px; }
+.cmock-navlinks i { width: 18px; height: 6px; border-radius: 3px; background: var(--cmock-neutral); display: block; }
+
+/* Hero */
+.cmock-hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px; align-items: center; margin-bottom: 14px; }
+.cmock-copy { display: flex; flex-direction: column; gap: 8px; }
+.cmock-title { height: 14px; width: 72%; border-radius: 5px; background: var(--haupt); }
+.cmock-line { height: 8px; width: 100%; border-radius: 4px; background: var(--cmock-neutral); }
+.cmock-line.cmock-short { width: 58%; }
+.cmock-btn { margin-top: 4px; width: 88px; height: 26px; border-radius: 8px; background: var(--neben); }
+.cmock-media { min-height: 84px; border-radius: 10px; background: linear-gradient(135deg, var(--haupt), var(--neben)); }
+
+/* Karten */
+.cmock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cmock-card { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--cmock-neutral); border-radius: 10px; }
+.cmock-ico { width: 18px; height: 18px; border-radius: 6px; background: var(--haupt); }
+.cmock-cl { height: 6px; width: 100%; border-radius: 3px; background: var(--cmock-neutral); }
+.cmock-cl.cmock-short { width: 60%; }
+
+/* Sanfte Farbüberblendung */
+.cmock-logo, .cmock-title, .cmock-ico, .cmock-btn, .cmock-media { transition: background .25s ease; }
+
+/* Sehr helle Farben → dezenter 1px-Rahmen, damit sie nicht verschwinden */
+.cmock.is-haupt-light .cmock-logo,
+.cmock.is-haupt-light .cmock-title,
+.cmock.is-haupt-light .cmock-ico { box-shadow: inset 0 0 0 1px #cbd5e1; }
+.cmock.is-neben-light .cmock-btn { box-shadow: inset 0 0 0 1px #cbd5e1; }
+.cmock.is-haupt-light .cmock-media,
+.cmock.is-neben-light .cmock-media { box-shadow: inset 0 0 0 1px #cbd5e1; }
+
+/* ---- Stil-Layout-Anpassung (subtil, gleiche Grundelemente) ---- */
+/* Minimalistisch & clean: viel Weißraum, dünne Linien, kein Verlauf, schmaler Button */
+.cmock[data-stil="minimal"] .cmock-page { padding: 20px; }
+.cmock[data-stil="minimal"] .cmock-line { height: 6px; }
+.cmock[data-stil="minimal"] .cmock-btn { width: 64px; height: 22px; }
+.cmock[data-stil="minimal"] .cmock-media { background: #eef2f6; }
+.cmock[data-stil="minimal"] .cmock-hero { gap: 18px; }
+/* Elegant & edel: zentriert, schmalere Spalten, gedämpft */
+.cmock[data-stil="elegant"] .cmock-hero { grid-template-columns: 1fr; }
+.cmock[data-stil="elegant"] .cmock-copy { align-items: center; }
+.cmock[data-stil="elegant"] .cmock-copy > * { margin-left: auto; margin-right: auto; }
+.cmock[data-stil="elegant"] .cmock-title { width: 58%; }
+.cmock[data-stil="elegant"] .cmock-media { min-height: 52px; opacity: .85; }
+/* Verspielt & bunt: rundere Ecken, größerer Verlaufsblock, größerer Button */
+.cmock[data-stil="verspielt"] .cmock-browser,
+.cmock[data-stil="verspielt"] .cmock-media,
+.cmock[data-stil="verspielt"] .cmock-card,
+.cmock[data-stil="verspielt"] .cmock-btn { border-radius: 16px; }
+.cmock[data-stil="verspielt"] .cmock-media { min-height: 96px; }
+.cmock[data-stil="verspielt"] .cmock-btn { width: 104px; height: 30px; }
+/* Bold & modern: große Titel-Linie, größerer Button */
+.cmock[data-stil="bold"] .cmock-title { height: 20px; width: 82%; }
+.cmock[data-stil="bold"] .cmock-btn { width: 110px; height: 30px; }
+.cmock[data-stil="bold"] .cmock-media { min-height: 92px; }
+/* Warm & natürlich: weichere/rundere Formen, größere Abstände */
+.cmock[data-stil="warm"] .cmock-browser,
+.cmock[data-stil="warm"] .cmock-media,
+.cmock[data-stil="warm"] .cmock-card,
+.cmock[data-stil="warm"] .cmock-btn { border-radius: 18px; }
+.cmock[data-stil="warm"] .cmock-copy { gap: 11px; }
+.cmock[data-stil="warm"] .cmock-cards { gap: 13px; }
+/* Corporate & seriös: strenges Raster, gerade Kanten */
+.cmock[data-stil="corporate"] .cmock-browser { border-radius: 6px; }
+.cmock[data-stil="corporate"] .cmock-media,
+.cmock[data-stil="corporate"] .cmock-card,
+.cmock[data-stil="corporate"] .cmock-btn { border-radius: 4px; }
+
+/* Reduced motion */
+.cmock-reduce .cmock-logo, .cmock-reduce .cmock-title, .cmock-reduce .cmock-ico,
+.cmock-reduce .cmock-btn, .cmock-reduce .cmock-media { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cmock-logo, .cmock-title, .cmock-ico, .cmock-btn, .cmock-media { transition: none; }
+}
+
+/* Responsive: Mockup schmaler, Hero stapelt, kein Überlauf */
+@media (max-width: 560px) {
+  .cmock-browser { max-width: 100%; }
+  .cmock-hero { grid-template-columns: 1fr; }
+  .cmock[data-stil="elegant"] .cmock-copy > * { margin-left: 0; margin-right: 0; }
+  .cmock-cards { gap: 8px; }
+  .cmock-card { padding: 8px; }
+}

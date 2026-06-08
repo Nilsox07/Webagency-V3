@@ -526,6 +526,7 @@
           if (i > -1) A.stil.splice(i, 1); else A.stil.push(opt.value);
           var sel = A.stil.indexOf(opt.value) > -1;
           b.classList.toggle('is-on', sel); b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+          refreshMock(); // Mockup-Layout an gewählten Stil anpassen (optional, s. u.)
         });
         moods.appendChild(b);
       });
@@ -548,6 +549,7 @@
               x.classList.remove('is-on'); x.setAttribute('aria-pressed', 'false');
             });
             if (A[slot] === opt.value) { b.classList.add('is-on'); b.setAttribute('aria-pressed', 'true'); }
+            refreshMock(); // Farb-Vorschau-Mockup live aktualisieren (optional, s. u.)
           });
           tiles.appendChild(b);
         });
@@ -555,6 +557,17 @@
         return wrap;
       }
       subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.');
+
+      // === Farb-Vorschau-Mockup – optional, entfernbar (siehe color-mockup.js) ===
+      // Entfernen genügt: <script src="color-mockup.js"> aus briefing.html nehmen.
+      // Dieser Block prüft auf window.SARTU_COLOR_MOCKUP und überspringt sich sonst.
+      var mock = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
+      function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
+      function stilFlavor() { return A.stil.length ? A.stil[0] : 'default'; } // erstes gewähltes Stil bestimmt das Layout
+      function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
+      if (mock) { stage.appendChild(mock); refreshMock(); }
+      // === Ende Farb-Vorschau-Mockup ===
+
       stage.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
       stage.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
 
