@@ -59,6 +59,7 @@
     paket_empfohlen: null,
     wartung: null, wartungTouched: false,
     addons: {},                       // { addonId: {selected:bool, qty:int} }
+    _prefilled: false,                // Pfad-B-Vorbefüllung nur einmal anwenden
     // Abschluss
     kontakt: { name: '', email: '', telefon: '', dsgvo: false },
   };
@@ -336,6 +337,39 @@
       if (!A.addons[a.id]) A.addons[a.id] = { selected: false, qty: a.qty ? a.qty.default : 1 };
     });
   }
+  // Betrag eines Add-ons (berücksichtigt Menge + Prozent-Typ wie Express)
+  function addonAmount(a, st) {
+    if (a.type === 'percent') {
+      var p = pkgById(A.paket_gewaehlt);
+      return Math.round((p && p.price ? p.price : 0) * (a.pct || 0) / 100);
+    }
+    if (typeof a.price !== 'number') return null;
+    return a.price * (a.qty ? st.qty : 1);
+  }
+  // Pfad B: Konfigurator aus den Lumi-Antworten VORBEFÜLLEN (nur einmal)
+  function prefillFromBriefing() {
+    if (A._prefilled || A.pfad !== 'B') return;
+    A._prefilled = true;
+    var f = A.features || [], m = A.material || [], z = A.ziele || [];
+    var hasF = function (v) { return f.indexOf(v) > -1; };
+    var hasM = function (v) { return m.indexOf(v) > -1; };
+    var on = function (id, qty) {
+      if (A.addons[id]) { A.addons[id].selected = true; if (qty) A.addons[id].qty = qty; }
+    };
+    // Funktionen → passende Add-ons
+    if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung');
+    if (hasF('blog')) on('blog');
+    if (hasF('newsletter')) on('newsletter');
+    if (hasF('mehrsprachig')) on('sprache', 1);
+    // Kein Logo vorhanden → Logo-Add-on vorschlagen
+    if (!hasM('logo')) on('logo-wort');
+    // Keine Texte vorhanden → Texte vorschlagen (Onepager: 1 Seite, sonst Komplettpaket)
+    if (!hasM('texte')) { if (A.umfang === 'onepager') on('texte', 1); else on('texte-paket'); }
+    // Bestehende Website → Migration
+    if (hasM('website')) on('migration');
+    // Sehr eilig → Express
+    if (A.zeitrahmen === 'asap') on('express');
+  }
 
   /* ============================================================
      SCREENS
@@ -543,10 +577,12 @@
       }
       ensureWartungDefault();
       ensureAddonState();
+      prefillFromBriefing();
+      var addonsExpanded = false;
 
       var intro = A.pfad === 'B'
         ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-            hint: 'Stell dir alles nach Wunsch zusammen — du kannst das Paket jederzeit ändern. Der Preis rechnet live mit.' }
+            hint: 'Paket, Wartung und passende Add-ons habe ich schon vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
         : { q: 'Stell dir dein Paket zusammen.',
             hint: 'Wähle Paket, Wartung und Add-ons — der Preis unten rechnet live mit. Unverbindlich.' };
       var h = lumiSays(intro.q, intro.hint);
@@ -588,7 +624,8 @@
             (p.id === A.paket_empfohlen && A.pfad === 'B' ? '<span class="lb-pkg-badge lb-pkg-badge-rec">Empfohlen</span>' : '') +
             '<span class="lb-pkg-name">' + p.name + '</span>' +
             '<span class="lb-pkg-price">' + priceLabel(p.price, { from: p.from }) + '</span>' +
-            '<span class="lb-pkg-scope">' + p.scope + '</span>';
+            '<span class="lb-pkg-scope">' + p.scope + '</span>' +
+            (p.perks && p.perks.length ? '<ul class="lb-perks">' + p.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
           if (A.paket_gewaehlt === p.id) c.classList.add('is-on');
           c.addEventListener('click', function () {
             A.paket_gewaehlt = p.id;
@@ -611,6 +648,7 @@
           c.innerHTML =
             (m.id === rec ? '<span class="lb-wart-rec">Empfohlen</span>' : '') +
             '<span class="lb-wart-name">' + m.name + '</span>' + right +
+            (m.perks && m.perks.length ? '<ul class="lb-perks">' + m.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') +
             (m.id === 'none' ? '<span class="lb-wart-hint">' + PRICING.maintenanceDropHint + '</span>' : '');
           if (A.wartung === m.id) c.classList.add('is-on');
           c.addEventListener('click', function () {
@@ -622,57 +660,68 @@
         wartSec.appendChild(grid);
       }
 
-      /* -- Add-ons -- */
+      /* -- Add-ons (kurze Standardliste + „mehr anzeigen") -- */
+      function buildAddonCard(a, st) {
+        var card = el('div', 'lb-addon');
+        if (st.selected) card.classList.add('is-on');
+
+        var priceTxt = a.type === 'percent'
+          ? '+' + a.pct + ' %'
+          : priceLabel(a.price, { from: a.from }) + (a.type === 'month' ? '/Monat' : ' einmalig');
+        var unit = a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '';
+
+        var toggle = el('button', 'lb-addon-toggle'); toggle.type = 'button';
+        toggle.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
+        toggle.innerHTML =
+          '<span class="lb-addon-check" aria-hidden="true"></span>' +
+          '<span class="lb-addon-main">' +
+            '<span class="lb-addon-name">' + a.name + '</span>' +
+            '<span class="lb-addon-desc">' + (a.desc || '') + '</span>' +
+          '</span>' +
+          '<span class="lb-addon-price">' + priceTxt + unit + '</span>';
+        toggle.addEventListener('click', function () {
+          st.selected = !st.selected;
+          renderAddons(); renderPriceBar();
+        });
+        card.appendChild(toggle);
+
+        // Mengen-Stepper (nur wenn ausgewählt & Mengen-Add-on)
+        if (a.qty && st.selected) {
+          var q = el('div', 'lb-qty');
+          q.innerHTML = '<span class="lb-qty-label">Anzahl ' + a.qty.unit.replace(/^pro /, '') + ':</span>';
+          var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger');
+          var num = el('span', 'lb-qty-num', String(st.qty));
+          var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr');
+          var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(a.price * st.qty));
+          var sync = function () { num.textContent = String(st.qty); lineTotal.textContent = '= ' + fmtEUR(a.price * st.qty); renderPriceBar(); };
+          minus.addEventListener('click', function () { st.qty = Math.max(a.qty.min, (st.qty || a.qty.default) - 1); sync(); });
+          plus.addEventListener('click', function () { st.qty = Math.min(a.qty.max, (st.qty || a.qty.default) + 1); sync(); });
+          q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);
+          card.appendChild(q);
+        }
+        return card;
+      }
       function renderAddons() {
         addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Add-ons <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-addons');
+        var hidden = 0;
         PRICING.addons.forEach(function (a) {
           var st = A.addons[a.id];
-          var card = el('div', 'lb-addon');
-          if (st.selected) card.classList.add('is-on');
-
-          var priceTxt = a.onRequest ? 'auf Anfrage'
-            : priceLabel(a.price, { from: a.from }) + (a.type === 'month' ? '/Monat' : ' einmalig');
-          var unit = a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '';
-
-          var toggle = el('button', 'lb-addon-toggle'); toggle.type = 'button';
-          toggle.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
-          toggle.innerHTML =
-            '<span class="lb-addon-check" aria-hidden="true"></span>' +
-            '<span class="lb-addon-main">' +
-              '<span class="lb-addon-name">' + a.name + '</span>' +
-              '<span class="lb-addon-desc">' + (a.desc || '') + '</span>' +
-            '</span>' +
-            '<span class="lb-addon-price">' + priceTxt + unit + '</span>';
-          toggle.addEventListener('click', function () {
-            st.selected = !st.selected;
-            renderAddons(); renderPriceBar();
-          });
-          card.appendChild(toggle);
-
-          // Mengen-Stepper (nur sichtbar, wenn ausgewählt & Mengen-Add-on)
-          if (a.qty && st.selected) {
-            var q = el('div', 'lb-qty');
-            q.innerHTML = '<span class="lb-qty-label">Anzahl ' + a.qty.unit.replace(/^pro /, '') + ':</span>';
-            var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger');
-            var num = el('span', 'lb-qty-num', String(st.qty));
-            var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr');
-            minus.addEventListener('click', function () {
-              st.qty = Math.max(a.qty.min, (st.qty || a.qty.default) - 1);
-              num.textContent = String(st.qty); renderPriceBar(); updateAddonLineTotal();
-            });
-            plus.addEventListener('click', function () {
-              st.qty = Math.min(a.qty.max, (st.qty || a.qty.default) + 1);
-              num.textContent = String(st.qty); renderPriceBar(); updateAddonLineTotal();
-            });
-            var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(a.price * st.qty));
-            function updateAddonLineTotal() { lineTotal.textContent = '= ' + fmtEUR(a.price * st.qty); }
-            q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);
-            card.appendChild(q);
+          // Sichtbar: kurze Standardliste (common), ausgewählte/vorbefüllte oder wenn aufgeklappt
+          if (a.common || st.selected || addonsExpanded) {
+            grid.appendChild(buildAddonCard(a, st));
+          } else {
+            hidden++;
           }
-          grid.appendChild(card);
         });
         addSec.appendChild(grid);
+        if (hidden > 0 || addonsExpanded) {
+          var more = el('button', 'lb-addon-more');
+          more.type = 'button';
+          more.textContent = addonsExpanded ? 'Weniger Add-ons anzeigen' : 'Alle Add-ons anzeigen (+' + hidden + ')';
+          more.addEventListener('click', function () { addonsExpanded = !addonsExpanded; renderAddons(); });
+          addSec.appendChild(more);
+        }
       }
 
       /* -- Zahlungsstaffelung (nur Anzeige) -- */
@@ -846,7 +895,8 @@
       var st = A.addons[a.id];
       if (st && st.selected) {
         var q = a.qty ? ' ×' + st.qty : '';
-        var price = a.onRequest ? 'auf Anfrage' : fmtEUR(a.price * (a.qty ? st.qty : 1)) + (a.type === 'month' ? '/Mon.' : '');
+        var amt = addonAmount(a, st);
+        var price = amt == null ? '–' : fmtEUR(amt) + (a.type === 'month' ? '/Mon.' : '');
         out.push(a.name + q + ' (' + price + ')');
       }
     });
@@ -893,8 +943,8 @@
         selectedAddons.push({
           id: a.id, name: a.name, type: a.type,
           qty: a.qty ? st.qty : 1,
-          unitPrice: a.price, onRequest: !!a.onRequest,
-          lineTotal: a.onRequest ? null : a.price * (a.qty ? st.qty : 1),
+          unitPrice: a.price, pct: a.pct || null,
+          lineTotal: addonAmount(a, st),
         });
       }
     });
@@ -1008,7 +1058,7 @@
     A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
     A.zeitrahmen = null;
     A.paket_gewaehlt = null; A.paket_empfohlen = null;
-    A.wartung = null; A.wartungTouched = false; A.addons = {};
+    A.wartung = null; A.wartungTouched = false; A.addons = {}; A._prefilled = false;
     A.kontakt = { name: '', email: '', telefon: '', dsgvo: false };
     ui.askedClarification = false; lastSendState.msg = '';
     history = []; showPriceBar(false);

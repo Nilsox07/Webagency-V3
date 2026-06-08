@@ -50,7 +50,19 @@
     pricing.addons.forEach(function (a) {
       var st = state.addons && state.addons[a.id];
       if (!st || !st.selected) return;
-      if (typeof a.price !== 'number') return; // "auf Anfrage" → nicht summieren
+
+      // Prozent-Add-on (z. B. Express +20 % auf den Paketpreis)
+      if (a.type === 'percent') {
+        var base = pkg && typeof pkg.price === 'number' ? pkg.price : 0;
+        var pamount = Math.round(base * (a.pct || 0) / 100);
+        if (pamount > 0) {
+          once += pamount;
+          lines.push({ group: 'once', label: a.name + ' (+' + a.pct + ' %)', amount: pamount });
+        }
+        return;
+      }
+
+      if (typeof a.price !== 'number') return; // ohne Festpreis → nicht summieren
       var qty = clampQty(a, st.qty);
       var amount = a.price * qty;
       var label = a.name + (a.qty ? ' × ' + qty : '');
