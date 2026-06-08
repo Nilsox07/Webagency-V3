@@ -115,6 +115,15 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: 0.04em;
   color: var(--white);
 }
+.logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+.footer-logo .logo-img { height: 30px; }
+@media (max-width: 480px) {
+  .logo-img { height: 32px; }
+}
 
 /* ============ HEADER ============ */
 .site-header {
