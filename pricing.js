@@ -35,10 +35,10 @@
         configurable: true, maintenanceFloor: 'wartung-basis', popular: false,
         perks: ['Alles Wichtige auf einer Seite', 'Mobil-optimiert & DSGVO-konform', 'In 7 Tagen online'] },
       { id: 'pro', name: 'Pro', price: 2990, scope: 'bis 8 Seiten', includedPages: 8,
-        configurable: true, maintenanceFloor: 'wartung-basis', popular: true, // [PRÜFEN] Wartungs-Floor je Paket
+        configurable: true, maintenanceFloor: 'wartung-basis', popular: false, // [PRÜFEN] Wartungs-Floor je Paket
         perks: ['Individuelles Design statt Vorlage', 'Onpage-SEO & schnelle Ladezeit', '3 Korrekturrunden'] },
       { id: 'platin', name: 'Platin', price: 5990, scope: 'bis 20 Seiten', includedPages: 20,
-        configurable: true, maintenanceFloor: 'wartung-plus', popular: false, // [PRÜFEN] Wartungs-Floor je Paket
+        configurable: true, maintenanceFloor: 'wartung-plus', popular: true, // [PRÜFEN] Wartungs-Floor je Paket
         perks: ['Bis 20 Seiten inkl. Blog', 'Lokales SEO inklusive', '4 Korrekturrunden'] },
       // Enterprise = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null)
       { id: 'enterprise', name: 'Enterprise', price: null, scope: 'individuell', includedPages: null,
