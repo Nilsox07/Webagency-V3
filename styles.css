@@ -1923,3 +1923,67 @@ a { text-decoration: none; color: inherit; }
   .service-cards { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   COOKIE-CONSENT (Banner + Einstellungen) — siehe cookies.js
+   ============================================================ */
+.cookie-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 400;
+  background: #0b1426; border-top: 1px solid var(--border-dark);
+  box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.45);
+  transform: translateY(110%); transition: transform .32s ease;
+}
+.cookie-banner.is-visible { transform: translateY(0); }
+.cookie-banner.cookie-reduce { transition: none; }
+.cookie-inner { display: flex; align-items: center; gap: 22px; padding: 18px 24px; flex-wrap: wrap; }
+.cookie-text { flex: 1; min-width: 260px; }
+.cookie-text strong { display: block; color: var(--white); font-size: 15px; margin-bottom: 4px; }
+.cookie-text p { font-size: 13.5px; color: var(--text-light-muted); line-height: 1.5; }
+.cookie-text a { color: var(--green-strong); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cookie-btn { font-size: 14px; padding: 11px 18px; min-height: 44px; }
+
+/* Einstellungen-Modal */
+.cookie-modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.cookie-modal[hidden] { display: none; }
+.cookie-modal-backdrop { position: absolute; inset: 0; background: rgba(4, 8, 16, 0.62); }
+.cookie-modal-card {
+  position: relative; width: 100%; max-width: 520px; max-height: 86vh; overflow: auto;
+  background: #0e1626; border: 1px solid var(--border-dark); border-radius: 18px;
+  padding: 28px; box-shadow: var(--shadow);
+}
+.cookie-modal-card h2 { color: var(--white); font-size: 21px; font-weight: 800; margin-bottom: 8px; }
+.cookie-modal-card > p { font-size: 14px; color: var(--text-light-muted); line-height: 1.6; margin-bottom: 20px; }
+.cookie-cats { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px; }
+.cookie-cat { border: 1px solid var(--border-dark); border-radius: 12px; padding: 14px 16px; background: rgba(255, 255, 255, 0.02); }
+.cookie-cat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cookie-cat-name { font-weight: 700; color: var(--white); font-size: 15px; }
+.cookie-cat-name em { font-style: normal; font-weight: 500; font-size: 12.5px; color: var(--text-light-muted); }
+.cookie-cat-desc { font-size: 13px; color: var(--text-light-muted); line-height: 1.55; margin-top: 8px; }
+
+/* Schalter */
+.cookie-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.cookie-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cookie-track { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.16); border-radius: 999px; cursor: pointer; transition: background .2s ease; }
+.cookie-track::before { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s ease; }
+.cookie-switch input:checked + .cookie-track { background: var(--green); }
+.cookie-switch input:checked + .cookie-track::before { transform: translateX(18px); }
+.cookie-switch input:disabled + .cookie-track { opacity: .55; cursor: not-allowed; }
+.cookie-switch input:focus-visible + .cookie-track { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.cookie-modal-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cookie-modal-actions .btn { flex: 1; min-width: 140px; justify-content: center; }
+body.cookie-modal-open { overflow: hidden; }
+
+/* Footer-Reopener fügt sich in bestehende Footer-Links ein (erbt deren Stil) */
+.footer-nav [data-cookie-settings] { cursor: pointer; }
+
+@media (max-width: 640px) {
+  .cookie-actions { width: 100%; }
+  .cookie-actions .cookie-btn { flex: 1; }
+  .cookie-modal-actions .btn { flex: 1 1 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner { transition: none; }
+  .cookie-track, .cookie-track::before { transition: none; }
+}
