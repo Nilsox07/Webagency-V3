@@ -96,6 +96,26 @@
         { value: 'pastell',    label: 'Pastell / sanft',       dots: ['#cdb4f0', '#ffd1dc', '#bfe3e0'] },
       ],
 
+      // Laienverständliche Farbauswahl (Haupt- + Nebenfarbe, KEIN HEX-Zwang)
+      farben: [
+        { value: 'blau',      label: 'Blau',        hex: '#2a5bd7' },
+        { value: 'hellblau',  label: 'Hellblau',    hex: '#4ea3ff' },
+        { value: 'tuerkis',   label: 'Türkis',      hex: '#2bb3a3' },
+        { value: 'gruen',     label: 'Grün',        hex: '#2f7d4f' },
+        { value: 'lime',      label: 'Lime',        hex: '#b6ff3b' },
+        { value: 'gelb',      label: 'Gelb',        hex: '#f5c518' },
+        { value: 'orange',    label: 'Orange',      hex: '#f2872f' },
+        { value: 'rot',       label: 'Rot',         hex: '#d94d2a' },
+        { value: 'pink',      label: 'Pink',        hex: '#ff5a8a' },
+        { value: 'violett',   label: 'Violett',     hex: '#7b5cff' },
+        { value: 'gold',      label: 'Gold',        hex: '#c9a227' },
+        { value: 'navy',      label: 'Dunkelblau',  hex: '#07111f' },
+        { value: 'schwarz',   label: 'Schwarz',     hex: '#111317' },
+        { value: 'anthrazit', label: 'Anthrazit',   hex: '#3a3f47' },
+        { value: 'beige',     label: 'Beige',       hex: '#d8c4a0' },
+        { value: 'weiss',     label: 'Weiß',        hex: '#f4f6f8' },
+      ],
+
       material: [ // Multi-Select
         { value: 'logo',    label: 'Logo' },
         { value: 'ci',      label: 'Markenfarben / CI' },

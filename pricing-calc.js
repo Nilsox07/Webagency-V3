@@ -32,14 +32,22 @@
     var once = 0, monthly = 0;
     var lines = [];
 
-    // Paket (einmalig)
+    // Paket (einmalig) — Enterprise hat price null → zählt nicht (individuelles Angebot)
     var pkg = pricing.packages.filter(function (p) { return p.id === state.paket; })[0];
     if (pkg && typeof pkg.price === 'number') {
       once += pkg.price;
       lines.push({ group: 'once', label: pkg.name + ' (Paket)', amount: pkg.price });
     }
 
-    // Wartung (monatlich)
+    // Extraseiten (Variante A): jede Seite über dem Inklusiv-Kontingent
+    var extra = Math.max(0, parseInt(state.extraPages, 10) || 0);
+    if (extra > 0 && pricing.extraPage && typeof pricing.extraPage.price === 'number') {
+      var extraAmount = pricing.extraPage.price * extra;
+      once += extraAmount;
+      lines.push({ group: 'once', label: 'Zusätzliche Seiten × ' + extra, amount: extraAmount });
+    }
+
+    // Wartung (monatlich, Pflicht)
     var w = pricing.maintenance.filter(function (m) { return m.id === state.wartung; })[0];
     if (w && typeof w.price === 'number' && w.price > 0) {
       monthly += w.price;

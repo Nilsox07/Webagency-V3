@@ -51,15 +51,18 @@
     // Lumi-Flow (Pfad B)
     branche: null, branche_sonstiges: '',
     ziele: [], umfang: null, seiten: [],
-    features: [], stil: [], farbwelt: [], markenfarben_hex: '',
+    features: [], stil: [], hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
     material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
     zeitrahmen: null,
     // Konfigurator
     paket_gewaehlt: null,
     paket_empfohlen: null,
-    wartung: null, wartungTouched: false,
+    wartung: null,
+    extraPages: 0,                    // Seiten über dem Inklusiv-Kontingent (Variante A)
     addons: {},                       // { addonId: {selected:bool, qty:int} }
     _prefilled: false,                // Pfad-B-Vorbefüllung nur einmal anwenden
+    // Enterprise-Abzweig (strukturierte Anfrage statt Fixpreis)
+    enterprise: { sonderfunktionen: [], seitenzahl: null, shopGroesse: null, sprachen: '', schnittstellen: '', zeithorizont: null, notiz: '' },
     // Abschluss
     kontakt: { name: '', email: '', telefon: '', dsgvo: false },
   };
@@ -292,13 +295,27 @@
     }
   }
   function totals() {
-    return CALC.computeTotals({ paket: A.paket_gewaehlt, wartung: A.wartung, addons: A.addons }, PRICING);
+    return CALC.computeTotals({ paket: A.paket_gewaehlt, wartung: A.wartung, addons: A.addons, extraPages: A.extraPages }, PRICING);
   }
   function renderPriceBar() {
     ensurePriceBar();
+    var sums = priceBar.querySelector('.lb-pricebar-sums');
+    var toggle = priceBar.querySelector('.lb-pricebar-toggle');
+    // Enterprise-Abzweig: KEIN Fixpreis, sondern Hinweis auf individuelles Angebot
+    if (isEnterprise()) {
+      priceBar.classList.add('is-enterprise');
+      sums.innerHTML = '<div class="lb-sum-individual">Individuelles Festpreis-Angebot</div>';
+      if (toggle) toggle.style.visibility = 'hidden';
+      return;
+    }
+    priceBar.classList.remove('is-enterprise');
+    if (toggle) toggle.style.visibility = '';
     var t = totals();
-    priceBar.querySelector('#lbSumOnce').textContent = fmtEUR(t.once);
-    priceBar.querySelector('#lbSumMonthly').textContent = fmtEUR(t.monthly) + '/Mon.';
+    sums.innerHTML =
+      '<div class="lb-sum"><span>Einmalig</span><strong></strong></div>' +
+      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflicht</span><strong></strong></div>';
+    sums.children[0].querySelector('strong').textContent = fmtEUR(t.once);
+    sums.children[1].querySelector('strong').textContent = fmtEUR(t.monthly) + '/Mon.';
     if (priceDetailOpen) renderPriceDetail();
   }
   function renderPriceDetail() {
@@ -329,8 +346,16 @@
     if (value == null) return 'auf Anfrage';
     return (opts.from ? 'ab ' : '') + value.toLocaleString('de-DE') + ' €' + (opts.period ? '/Monat' : '');
   }
+  function pkgFloor(id) { var p = pkgById(id); return (p && p.maintenanceFloor) || PRICING.maintenanceOrder[0]; }
+  function maintIndex(id) { return PRICING.maintenanceOrder.indexOf(id); }
+  function isEnterprise() {
+    var p = pkgById(A.paket_gewaehlt);
+    return !!(p && p.configurable === false); // Enterprise = nicht konfigurierbar → Abzweig
+  }
+  // Hosting/Wartung ist PFLICHT: immer mind. der Paket-Floor, nur Upgrade nach oben.
   function ensureWartungDefault() {
-    if (A.wartung == null) A.wartung = PRICING.maintenanceDefault[A.paket_gewaehlt] || 'none';
+    var floor = pkgFloor(A.paket_gewaehlt);
+    if (A.wartung == null || maintIndex(A.wartung) < maintIndex(floor)) A.wartung = floor;
   }
   function ensureAddonState() {
     PRICING.addons.forEach(function (a) {
@@ -369,6 +394,17 @@
     if (hasM('website')) on('migration');
     // Sehr eilig → Express
     if (A.zeitrahmen === 'asap') on('express');
+
+    // Enterprise-Abzweig vorbefüllen (falls Empfehlung/Funktionen darauf hindeuten)
+    var E = A.enterprise;
+    ['shop', 'login', 'mehrsprachig'].forEach(function (v) {
+      if (hasF(v) && E.sonderfunktionen.indexOf(v) < 0) E.sonderfunktionen.push(v);
+    });
+    if (!E.seitenzahl) E.seitenzahl = A.umfang === 'gross' ? '20-50' : (A.umfang === 'umfangreich' ? 'bis20' : null);
+    if (!E.zeithorizont && A.zeitrahmen) {
+      var zmap = { asap: 'asap', '4-6w': '1-3m', '2-3m': '3-6m', offen: 'flex' };
+      E.zeithorizont = zmap[A.zeitrahmen] || null;
+    }
   }
 
   /* ============================================================
@@ -495,31 +531,44 @@
       });
       stage.appendChild(moods);
 
-      subQuestion('Welche Farbstimmung passt zu dir?');
-      var sw = el('div', 'lb-swatches');
-      OPT.farbwelt.forEach(function (opt) {
-        var b = el('button', 'lb-swatch'); b.type = 'button';
-        var dots = opt.dots.map(function (c) { return '<span style="background:' + c + '"></span>'; }).join('');
-        b.innerHTML = '<span class="lb-swatch-dots" aria-hidden="true">' + dots + '</span><small>' + opt.label + '</small>';
-        var on = A.farbwelt.indexOf(opt.value) > -1;
-        if (on) b.classList.add('is-on');
-        b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        b.addEventListener('click', function () {
-          var i = A.farbwelt.indexOf(opt.value);
-          if (i > -1) A.farbwelt.splice(i, 1); else A.farbwelt.push(opt.value);
-          var sel = A.farbwelt.indexOf(opt.value) > -1;
-          b.classList.toggle('is-on', sel); b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+      // Farbe: NUR zwei Farben — Hauptfarbe + Nebenfarbe (laienverständlich, kein Regler)
+      function colorRow(label, slot) {
+        var wrap = el('div', 'lb-colorrow');
+        wrap.appendChild(el('span', 'lb-colorrow-label', label));
+        var tiles = el('div', 'lb-colortiles');
+        OPT.farben.forEach(function (opt) {
+          var b = el('button', 'lb-colortile'); b.type = 'button';
+          b.setAttribute('aria-label', label + ': ' + opt.label);
+          b.setAttribute('aria-pressed', A[slot] === opt.value ? 'true' : 'false');
+          b.innerHTML = '<span class="lb-colordot" style="background:' + opt.hex + '"></span><small>' + opt.label + '</small>';
+          if (A[slot] === opt.value) b.classList.add('is-on');
+          b.addEventListener('click', function () {
+            A[slot] = (A[slot] === opt.value) ? null : opt.value; // erneut klicken = abwählen
+            Array.prototype.forEach.call(tiles.querySelectorAll('.lb-colortile'), function (x) {
+              x.classList.remove('is-on'); x.setAttribute('aria-pressed', 'false');
+            });
+            if (A[slot] === opt.value) { b.classList.add('is-on'); b.setAttribute('aria-pressed', 'true'); }
+          });
+          tiles.appendChild(b);
         });
-        sw.appendChild(b);
-      });
-      stage.appendChild(sw);
+        wrap.appendChild(tiles);
+        return wrap;
+      }
+      subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.');
+      stage.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
+      stage.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
 
+      // optionales Markenfarben-Feld (kein Pflichtfeld, kein HEX-Zwang)
       var lbl = el('label', 'lb-field lb-field-optional');
-      lbl.innerHTML = '<span class="lb-field-label">Feste Markenfarben? <em>(HEX-Code, falls bekannt — sonst überspringen)</em></span>';
+      lbl.innerHTML = '<span class="lb-field-label">Feste Markenfarbe vorhanden? <em>(HEX-Code, falls bekannt — sonst überspringen)</em></span>';
       var inp = el('input'); inp.type = 'text'; inp.placeholder = 'z. B. #B6FF3B';
       inp.value = A.markenfarben_hex || '';
       inp.addEventListener('input', function (e) { A.markenfarben_hex = e.target.value; });
       lbl.appendChild(inp); stage.appendChild(lbl);
+
+      // dezenter Realitäts-Hinweis (kein Baukasten)
+      stage.appendChild(el('p', 'lb-design-note',
+        'Das ist nur eine grobe Richtung zur Veranschaulichung — den Feinschliff und die genauen Farbtöne machen wir gemeinsam nach dem Start. Alles wird handgemacht, kein Baukasten.'));
 
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
@@ -580,11 +629,14 @@
       prefillFromBriefing();
       var addonsExpanded = false;
 
-      var intro = A.pfad === 'B'
-        ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-            hint: 'Paket, Wartung und passende Add-ons habe ich schon vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
-        : { q: 'Stell dir dein Paket zusammen.',
-            hint: 'Wähle Paket, Wartung und Add-ons — der Preis unten rechnet live mit. Unverbindlich.' };
+      var intro = isEnterprise()
+        ? { q: 'Enterprise – wir erstellen dir ein individuelles Festpreis-Angebot.',
+            hint: 'Für Shop, Portal, Mehrsprachigkeit oder Sonderfunktionen sammle ich kurz deine Anforderungen — ohne Fixpreis. Du kannst jederzeit zu einem kleineren Paket wechseln.' }
+        : (A.pfad === 'B'
+          ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
+              hint: 'Paket, Pflicht-Wartung und passende Add-ons sind vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
+          : { q: 'Stell dir dein Paket zusammen.',
+              hint: 'Wähle Paket und Add-ons — Hosting & Wartung ist Pflicht und schon gesetzt. Der Preis unten rechnet live mit.' });
       var h = lumiSays(intro.q, intro.hint);
 
       // Zurück-Link oben
@@ -593,14 +645,14 @@
       backLink.addEventListener('click', back); top.appendChild(backLink);
       stage.appendChild(top);
 
-      // Sektion-Container (refresh-bar)
+      // Paket immer sichtbar (keine Sackgasse); restliche Sektionen je nach Modus
       var pkgSec = el('div', 'lb-cfg-section');
-      var wartSec = el('div', 'lb-cfg-section');
-      var addSec = el('div', 'lb-cfg-section');
+      var dynSec = el('div');
       var paySec = el('div', 'lb-cfg-section lb-cfg-pay');
-      stage.appendChild(pkgSec); stage.appendChild(wartSec); stage.appendChild(addSec); stage.appendChild(paySec);
+      var wartSec, pageSec, addSec; // in renderDynamic() befüllt
+      stage.appendChild(pkgSec); stage.appendChild(dynSec); stage.appendChild(paySec);
 
-      renderPkg(); renderWartung(); renderAddons(); renderPayTerms();
+      renderPkg(); renderDynamic(); renderPayTerms();
 
       // CTA unter den Sektionen (zusätzlich zur Preisleiste)
       var cta = el('div', 'lb-cfg-cta');
@@ -613,51 +665,160 @@
       showPriceBar(true);
       renderPriceBar();
 
+      function rerenderAll() { renderPkg(); renderDynamic(); renderPayTerms(); renderPriceBar(); }
+      function renderDynamic() {
+        dynSec.innerHTML = '';
+        if (isEnterprise()) { renderEnterprise(dynSec); return; }
+        wartSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wartSec);
+        pageSec = el('div', 'lb-cfg-section'); dynSec.appendChild(pageSec);
+        addSec = el('div', 'lb-cfg-section'); dynSec.appendChild(addSec);
+        renderWartung(); renderPages(); renderAddons();
+      }
+
       /* -- Paketauswahl -- */
       function renderPkg() {
         pkgSec.innerHTML = '<h3 class="lb-cfg-h">1 · Paket</h3>';
         var grid = el('div', 'lb-pkgs');
         PRICING.packages.forEach(function (p) {
           var c = el('button', 'lb-pkg'); c.type = 'button';
+          var priceTxt = p.configurable === false ? 'Individuelles Angebot' : priceLabel(p.price, { from: p.from });
+          var pagesLine = p.includedPages
+            ? '<span class="lb-pkg-pages">' + p.includedPages + ' Seite' + (p.includedPages > 1 ? 'n' : '') + ' inkl. · jede weitere ab ' + PRICING.extraPage.price + ' €</span>'
+            : '';
           c.innerHTML =
             (p.popular ? '<span class="lb-pkg-badge">Beliebt</span>' : '') +
             (p.id === A.paket_empfohlen && A.pfad === 'B' ? '<span class="lb-pkg-badge lb-pkg-badge-rec">Empfohlen</span>' : '') +
             '<span class="lb-pkg-name">' + p.name + '</span>' +
-            '<span class="lb-pkg-price">' + priceLabel(p.price, { from: p.from }) + '</span>' +
-            '<span class="lb-pkg-scope">' + p.scope + '</span>' +
+            '<span class="lb-pkg-price">' + priceTxt + '</span>' +
+            '<span class="lb-pkg-scope">' + p.scope + '</span>' + pagesLine +
             (p.perks && p.perks.length ? '<ul class="lb-perks">' + p.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
           if (A.paket_gewaehlt === p.id) c.classList.add('is-on');
           c.addEventListener('click', function () {
             A.paket_gewaehlt = p.id;
-            if (!A.wartungTouched) { A.wartung = PRICING.maintenanceDefault[p.id] || 'none'; }
-            renderPkg(); renderWartung(); renderPayTerms(); renderPriceBar();
+            ensureWartungDefault();                 // Pflicht-Wartung auf Paket-Floor heben
+            if (p.includedPages == null) A.extraPages = 0; // Enterprise: keine Extraseiten-Logik
+            rerenderAll();
           });
           grid.appendChild(c);
         });
         pkgSec.appendChild(grid);
       }
 
-      /* -- Wartung / Hosting -- */
+      /* -- Hosting & Wartung (PFLICHT, nur Upgrade über den Paket-Floor) -- */
       function renderWartung() {
-        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Wartung &amp; Hosting <span class="lb-cfg-opt">(empfohlen, abwählbar)</span></h3>';
-        var rec = PRICING.maintenanceDefault[A.paket_gewaehlt];
+        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Hosting &amp; Wartung <span class="lb-cfg-opt">(Pflicht – im Paket enthalten)</span></h3>';
+        var floor = pkgFloor(A.paket_gewaehlt);
+        var floorIdx = maintIndex(floor);
         var grid = el('div', 'lb-warts');
         PRICING.maintenance.forEach(function (m) {
+          var locked = maintIndex(m.id) < floorIdx; // unter dem Paket-Floor → nicht wählbar
           var c = el('button', 'lb-wart'); c.type = 'button';
-          var right = m.id === 'none' ? '' : '<span class="lb-wart-price">' + priceLabel(m.price, { from: m.from, period: true }) + '</span>';
+          if (locked) { c.disabled = true; c.classList.add('is-locked'); }
           c.innerHTML =
-            (m.id === rec ? '<span class="lb-wart-rec">Empfohlen</span>' : '') +
-            '<span class="lb-wart-name">' + m.name + '</span>' + right +
-            (m.perks && m.perks.length ? '<ul class="lb-perks">' + m.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '') +
-            (m.id === 'none' ? '<span class="lb-wart-hint">' + PRICING.maintenanceDropHint + '</span>' : '');
+            (m.id === floor ? '<span class="lb-wart-rec">Im Paket</span>' : (m.recommended ? '<span class="lb-wart-rec">Empfohlen</span>' : '')) +
+            '<span class="lb-wart-name">' + m.name + '</span>' +
+            '<span class="lb-wart-price">' + priceLabel(m.price, { from: m.from, period: true }) + '</span>' +
+            (m.perks && m.perks.length ? '<ul class="lb-perks">' + m.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
           if (A.wartung === m.id) c.classList.add('is-on');
-          c.addEventListener('click', function () {
-            A.wartung = m.id; A.wartungTouched = true;
-            renderWartung(); renderPriceBar();
-          });
+          if (!locked) c.addEventListener('click', function () { A.wartung = m.id; renderWartung(); renderPriceBar(); });
           grid.appendChild(c);
         });
         wartSec.appendChild(grid);
+        wartSec.appendChild(el('p', 'lb-cfg-foot', PRICING.mandatoryNote + ' Standardpreis monatlich – günstiger bei Jahreszahlung.'));
+      }
+
+      /* -- Seiten: Inklusiv-Kontingent + Extraseiten (Variante A) -- */
+      function renderPages() {
+        var p = pkgById(A.paket_gewaehlt);
+        var inc = p.includedPages || 0;
+        var total = inc + (A.extraPages || 0);
+        pageSec.innerHTML = '<h3 class="lb-cfg-h">3 · Seiten <span class="lb-cfg-opt">(' + inc + ' inklusive)</span></h3>';
+        var box = el('div', 'lb-pages');
+        box.innerHTML =
+          '<div class="lb-pages-info"><strong>' + total + ' Seiten</strong> gesamt · ' + inc + ' inklusive' +
+          ((A.extraPages || 0) > 0 ? ' + ' + A.extraPages + ' extra' : '') + '</div>' +
+          '<div class="lb-pages-extra"><span>Zusätzliche Seiten (je ' + (PRICING.extraPage.from ? 'ab ' : '') + PRICING.extraPage.price + ' €)</span></div>';
+        var stepper = el('div', 'lb-qty');
+        var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger Seiten');
+        var num = el('span', 'lb-qty-num', String(A.extraPages || 0));
+        var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr Seiten');
+        var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(PRICING.extraPage.price * (A.extraPages || 0)));
+        var sync = function () { renderPages(); renderPriceBar(); };
+        minus.addEventListener('click', function () { A.extraPages = Math.max(0, (A.extraPages || 0) - 1); sync(); });
+        plus.addEventListener('click', function () { A.extraPages = Math.min(50, (A.extraPages || 0) + 1); sync(); });
+        stepper.appendChild(minus); stepper.appendChild(num); stepper.appendChild(plus); stepper.appendChild(lineTotal);
+        box.querySelector('.lb-pages-extra').appendChild(stepper);
+        pageSec.appendChild(box);
+      }
+
+      /* -- Enterprise-Abzweig: strukturierte Anforderungen statt Fixpreis -- */
+      function renderEnterprise(container) {
+        var E = A.enterprise;
+        var EOPT = PRICING.enterpriseOptions;
+        var sec = el('div', 'lb-cfg-section lb-ent');
+
+        function entSingle(opts, key) {
+          var grid = el('div', 'lb-cards');
+          opts.forEach(function (o) {
+            var b = el('button', 'lb-card'); b.type = 'button';
+            b.innerHTML = '<span class="lb-card-label">' + o.label + '</span>';
+            if (E[key] === o.value) b.classList.add('is-on');
+            b.addEventListener('click', function () {
+              E[key] = o.value;
+              Array.prototype.forEach.call(grid.children, function (x) { x.classList.remove('is-on'); });
+              b.classList.add('is-on');
+            });
+            grid.appendChild(b);
+          });
+          return grid;
+        }
+        function entText(label, key, ph, area) {
+          var lbl = el('label', 'lb-field');
+          lbl.innerHTML = '<span class="lb-field-label">' + label + '</span>';
+          var inp = area ? el('textarea') : el('input');
+          if (area) inp.rows = 2; else inp.type = 'text';
+          inp.placeholder = ph; inp.value = E[key] || '';
+          inp.addEventListener('input', function (e) { E[key] = e.target.value; });
+          lbl.appendChild(inp); return lbl;
+        }
+
+        sec.appendChild(el('h3', 'lb-cfg-h', 'Welche Sonderfunktionen brauchst du?'));
+        var fwrap = el('div', 'lb-chips');
+        EOPT.sonderfunktionen.forEach(function (o) {
+          var b = el('button', 'lb-chip'); b.type = 'button'; b.textContent = o.label;
+          var on = E.sonderfunktionen.indexOf(o.value) > -1;
+          if (on) b.classList.add('is-on');
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            var i = E.sonderfunktionen.indexOf(o.value);
+            if (i > -1) E.sonderfunktionen.splice(i, 1); else E.sonderfunktionen.push(o.value);
+            renderEnterprise(container); // konditionale Felder neu zeichnen
+          });
+          fwrap.appendChild(b);
+        });
+        sec.appendChild(fwrap);
+
+        sec.appendChild(el('h3', 'lb-cfg-h', 'Ungefähre Seitenzahl?'));
+        sec.appendChild(entSingle(EOPT.seitenzahl, 'seitenzahl'));
+
+        if (E.sonderfunktionen.indexOf('shop') > -1) {
+          sec.appendChild(el('h3', 'lb-cfg-h', 'Wie groß ist dein Shop (grob)?'));
+          sec.appendChild(entSingle(EOPT.shopGroesse, 'shopGroesse'));
+        }
+        if (E.sonderfunktionen.indexOf('mehrsprachig') > -1) {
+          sec.appendChild(entText('Welche Sprachen?', 'sprachen', 'z. B. Deutsch, Englisch, Französisch'));
+        }
+        if (E.sonderfunktionen.indexOf('schnittstelle') > -1) {
+          sec.appendChild(entText('Welche Systeme / Schnittstellen?', 'schnittstellen', 'z. B. HubSpot, DATEV, Lexware …'));
+        }
+
+        sec.appendChild(el('h3', 'lb-cfg-h', 'Zeithorizont?'));
+        sec.appendChild(entSingle(EOPT.zeithorizont, 'zeithorizont'));
+
+        sec.appendChild(entText('Magst du dein Projekt kurz beschreiben? (optional)', 'notiz', 'Worum geht es, was ist dir wichtig?', true));
+
+        container.innerHTML = '';
+        container.appendChild(sec);
       }
 
       /* -- Add-ons (kurze Standardliste + „mehr anzeigen") -- */
@@ -746,10 +907,15 @@
         'Unverbindlich: Es entsteht KEIN Vertrag. Sartu bestätigt dein Angebot separat.');
 
       var recap = el('div', 'lb-recap');
-      recap.innerHTML =
-        '<span><strong>' + pkgById(A.paket_gewaehlt).name + '</strong>' +
-        (A.wartung && A.wartung !== 'none' ? ' + ' + wartById(A.wartung).name : '') + '</span>' +
-        '<span class="lb-recap-sums">Einmalig <strong>' + fmtEUR(t.once) + '</strong> · Monatlich <strong>' + fmtEUR(t.monthly) + '</strong></span>';
+      if (isEnterprise()) {
+        recap.innerHTML =
+          '<span><strong>Enterprise</strong></span>' +
+          '<span class="lb-recap-sums">Individuelles Festpreis-Angebot</span>';
+      } else {
+        recap.innerHTML =
+          '<span><strong>' + pkgById(A.paket_gewaehlt).name + '</strong> + ' + wartById(A.wartung).name + '</span>' +
+          '<span class="lb-recap-sums">Einmalig <strong>' + fmtEUR(t.once) + '</strong> · Monatlich <strong>' + fmtEUR(t.monthly) + '</strong> (Pflicht)</span>';
+      }
       stage.appendChild(recap);
 
       var form = el('form', 'lb-form');
@@ -902,8 +1068,11 @@
     });
     return out.join(', ');
   }
+  function colorLabel(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.label : ''; }
+  function entLabel(group, value) { var o = (PRICING.enterpriseOptions[group] || []).filter(function (x) { return x.value === value; })[0]; return o ? o.label : value; }
   function summaryRows() {
-    var t = totals();
+    var ent = isEnterprise();
+    var t = ent ? null : totals();
     var rows = [];
     // Pfad B: Briefing-Angaben zuerst
     if (A.pfad === 'B') {
@@ -916,18 +1085,35 @@
       rows.push({ k: 'Umfang', v: umfang, screen: 'umfang' });
       rows.push({ k: 'Funktionen', v: labelsFor('features', A.features).join(', '), screen: 'features' });
       var design = labelsFor('stil', A.stil).join(', ');
-      if (A.farbwelt.length) design += (design ? ' · ' : '') + labelsFor('farbwelt', A.farbwelt).join(', ');
+      var farben = [colorLabel(A.hauptfarbe), colorLabel(A.nebenfarbe)].filter(Boolean).join(' + ');
+      if (farben) design += (design ? ' · ' : '') + farben;
       if (A.markenfarben_hex) design += ' · ' + A.markenfarben_hex;
       rows.push({ k: 'Design', v: design, screen: 'design' });
       rows.push({ k: 'Material', v: labelsFor('material', A.material).join(', '), screen: 'material' });
       rows.push({ k: 'Zeitrahmen', v: labelFor('zeitrahmen', A.zeitrahmen), screen: 'zeitrahmen' });
     }
-    // Konfiguration (beide Pfade)
-    rows.push({ k: 'Paket', v: pkgById(A.paket_gewaehlt).name + ' · ' + priceLabel(pkgById(A.paket_gewaehlt).price, { from: pkgById(A.paket_gewaehlt).from }), screen: 'configurator' });
-    rows.push({ k: 'Wartung', v: A.wartung && A.wartung !== 'none' ? wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) : 'Keine Wartung', screen: 'configurator' });
-    rows.push({ k: 'Add-ons', v: selectedAddonsText() || 'keine', screen: 'configurator' });
-    rows.push({ k: 'Einmalig', v: fmtEUR(t.once) + ' netto', screen: null });
-    rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto', screen: null });
+    // Konfiguration
+    if (ent) {
+      rows.push({ k: 'Paket', v: 'Enterprise · individuelles Angebot', screen: 'configurator' });
+      var E = A.enterprise;
+      var sf = (E.sonderfunktionen || []).map(function (v) { return entLabel('sonderfunktionen', v); }).join(', ');
+      if (sf) rows.push({ k: 'Sonderfunktionen', v: sf, screen: 'configurator' });
+      if (E.seitenzahl) rows.push({ k: 'Seitenzahl', v: entLabel('seitenzahl', E.seitenzahl), screen: 'configurator' });
+      if (E.shopGroesse) rows.push({ k: 'Shop', v: entLabel('shopGroesse', E.shopGroesse), screen: 'configurator' });
+      if (E.sprachen) rows.push({ k: 'Sprachen', v: E.sprachen, screen: 'configurator' });
+      if (E.schnittstellen) rows.push({ k: 'Schnittstellen', v: E.schnittstellen, screen: 'configurator' });
+      if (E.zeithorizont) rows.push({ k: 'Zeithorizont', v: entLabel('zeithorizont', E.zeithorizont), screen: 'configurator' });
+      if (E.notiz) rows.push({ k: 'Notiz', v: E.notiz, screen: 'configurator' });
+    } else {
+      var p = pkgById(A.paket_gewaehlt);
+      rows.push({ k: 'Paket', v: p.name + ' · ' + priceLabel(p.price, { from: p.from }), screen: 'configurator' });
+      var inc = p.includedPages || 0, tot = inc + (A.extraPages || 0);
+      rows.push({ k: 'Seiten', v: tot + ' (' + inc + ' inkl.' + ((A.extraPages || 0) > 0 ? ' + ' + A.extraPages + ' extra' : '') + ')', screen: 'configurator' });
+      rows.push({ k: 'Hosting & Wartung', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (Pflicht)', screen: 'configurator' });
+      rows.push({ k: 'Add-ons', v: selectedAddonsText() || 'keine', screen: 'configurator' });
+      rows.push({ k: 'Einmalig', v: fmtEUR(t.once) + ' netto', screen: null });
+      rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto (Pflicht)', screen: null });
+    }
     return rows;
   }
 
@@ -955,18 +1141,28 @@
       briefing: A.pfad === 'B' ? {
         branche: A.branche, branche_sonstiges: A.branche_sonstiges,
         ziele: A.ziele, umfang: A.umfang, seiten: A.seiten,
-        features: A.features, stil: A.stil, farbwelt: A.farbwelt,
+        features: A.features, stil: A.stil,
+        hauptfarbe: A.hauptfarbe, nebenfarbe: A.nebenfarbe,
         markenfarben_hex: A.markenfarben_hex, material: A.material,
         uploads: A.uploads, zeitrahmen: A.zeitrahmen,
         paket_empfohlen: A.paket_empfohlen,
       } : null,
-      konfiguration: {
+      konfiguration: isEnterprise() ? {
+        modus: 'enterprise',
+        paket: 'enterprise',
+        anforderungen: A.enterprise,
+        zahlungsstaffelung: PAY.forPackage('enterprise'),
+      } : {
+        modus: 'fixpreis',
         paket: A.paket_gewaehlt,
         paket_name: pkgById(A.paket_gewaehlt).name,
         paket_preis: pkgById(A.paket_gewaehlt).price,
+        inklusiv_seiten: pkgById(A.paket_gewaehlt).includedPages,
+        extra_seiten: A.extraPages,
+        extra_seiten_preis: PRICING.extraPage.price * (A.extraPages || 0),
         wartung: A.wartung,
-        wartung_name: wartById(A.wartung) ? wartById(A.wartung).name : null,
-        wartung_preis: wartById(A.wartung) ? wartById(A.wartung).price : null,
+        wartung_name: wartById(A.wartung).name,
+        wartung_preis: wartById(A.wartung).price,
         addons: selectedAddons,
         summe_einmalig: t.once,
         summe_monatlich: t.monthly,
@@ -1054,11 +1250,12 @@
     A.pfad = null;
     A.branche = null; A.branche_sonstiges = '';
     A.ziele = []; A.umfang = null; A.seiten = [];
-    A.features = []; A.stil = []; A.farbwelt = []; A.markenfarben_hex = '';
+    A.features = []; A.stil = []; A.hauptfarbe = null; A.nebenfarbe = null; A.markenfarben_hex = '';
     A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
     A.zeitrahmen = null;
     A.paket_gewaehlt = null; A.paket_empfohlen = null;
-    A.wartung = null; A.wartungTouched = false; A.addons = {}; A._prefilled = false;
+    A.wartung = null; A.extraPages = 0; A.addons = {}; A._prefilled = false;
+    A.enterprise = { sonderfunktionen: [], seitenzahl: null, shopGroesse: null, sprachen: '', schnittstellen: '', zeithorizont: null, notiz: '' };
     A.kontakt = { name: '', email: '', telefon: '', dsgvo: false };
     ui.askedClarification = false; lastSendState.msg = '';
     history = []; showPriceBar(false);
