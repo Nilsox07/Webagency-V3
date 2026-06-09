@@ -1987,3 +1987,35 @@ body.cookie-modal-open { overflow: hidden; }
   .cookie-banner { transition: none; }
   .cookie-track, .cookie-track::before { transition: none; }
 }
+
+/* ============================================================
+   ZAHLEN / STATISTIK-SEKTION (Startseite) — jede Zahl mit Quelle+Jahr
+   ============================================================ */
+.stats { background: var(--bg-dark); color: var(--white); padding: 84px 0 90px; }
+.stats .pricing-head .section-title { color: var(--white); }
+.stats .pricing-head p { color: var(--text-light); }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+}
+.stat-num {
+  font-size: clamp(40px, 6vw, 54px); font-weight: 900; line-height: 1;
+  letter-spacing: -0.02em; color: var(--green); margin-bottom: 14px;
+}
+.stat-claim { font-size: 14.5px; line-height: 1.6; color: var(--text-light); }
+.stat-src { margin-top: 14px; font-size: 11.5px; color: var(--text-light-muted); }
+
+.stat-mini-list { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
+.stat-mini-list li { font-size: 14px; color: var(--text-light); border-top: 2px solid var(--green); padding-top: 12px; }
+.stat-mini-list li strong { color: var(--white); font-weight: 800; }
+.stat-mini-list li span { display: block; margin-top: 6px; font-size: 11.5px; color: var(--text-light-muted); }
+
+.stats-note { margin-top: 28px; font-size: 12px; color: var(--text-light-muted); text-align: center; }
+
+@media (max-width: 860px) {
+  .stats-grid, .stat-mini-list { grid-template-columns: 1fr; }
+}
