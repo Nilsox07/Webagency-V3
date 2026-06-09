@@ -1278,5 +1278,22 @@
   /* ============================================================
      START
      ============================================================ */
-  renderScreen('welcome');
+  // Direkteinstieg aus der Preise-Seite: briefing.html?paket=basis|pro|platin|enterprise
+  // → Pfad A (Konfigurator) mit vorausgewähltem Paket, Banner/Einstieg übersprungen.
+  function startFromUrl() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var p = params.get('paket');
+      if (!p) return false;
+      var valid = PRICING.packages.some(function (x) { return x.id === p; });
+      if (!valid) return false;
+      A.pfad = 'A';
+      A.paket_gewaehlt = p;
+      history = ['path'];          // „Zurück" führt zur Pfad-Auswahl, nicht ins Nichts
+      renderScreen('configurator');
+      return true;
+    } catch (e) { return false; }
+  }
+
+  if (!startFromUrl()) renderScreen('welcome');
 })();
