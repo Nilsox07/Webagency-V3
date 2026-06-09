@@ -86,17 +86,8 @@
         { value: 'corporate', label: 'Corporate & seriös',     flavor: 'mood-corporate' },
       ],
 
-      farbwelt: [ // Multi-Select Farbkacheln (sichtbare Farbe, KEIN HEX-Zwang)
-        { value: 'blau',       label: 'Blau / seriös',         dots: ['#1b3a8f', '#0b1426', '#ffffff'] },
-        { value: 'gruen',      label: 'Grün / natürlich',      dots: ['#2f7d4f', '#0f2a1c', '#eef6ef'] },
-        { value: 'schwarzgold',label: 'Schwarz-Gold / edel',   dots: ['#0a0a0a', '#c9a227', '#f5efe0'] },
-        { value: 'warm',       label: 'Warm (Rot/Orange)',     dots: ['#d94d2a', '#f2a541', '#fcefe3'] },
-        { value: 'bunt',       label: 'Bunt / lebendig',       dots: ['#ff5a8a', '#ffb020', '#5ad1ff'] },
-        { value: 'neutral',    label: 'Neutral / zurückhaltend',dots: ['#3a3f47', '#9aa3ad', '#f2f3f5'] },
-        { value: 'pastell',    label: 'Pastell / sanft',       dots: ['#cdb4f0', '#ffd1dc', '#bfe3e0'] },
-      ],
-
-      // Laienverständliche Farbauswahl (Haupt- + Nebenfarbe, KEIN HEX-Zwang)
+      // Farbauswahl im Design-Schritt: laienverständlich, Haupt- + Nebenfarbe
+      // (jeweils Single-Select aus dieser Liste; KEIN HEX-Zwang)
       farben: [
         { value: 'blau',      label: 'Blau',        hex: '#2a5bd7' },
         { value: 'hellblau',  label: 'Hellblau',    hex: '#4ea3ff' },
@@ -133,14 +124,9 @@
       ],
     },
 
-    /* ---- Pakete (für Empfehlung in Schritt 8a) ---- */
-    pakete: {
-      basis:      { id: 'basis',      name: 'Basis',      preis: '1.290 €',    note: 'One-Pager, schlüsselfertig' },
-      pro:        { id: 'pro',        name: 'Pro',        preis: '2.990 €',    note: 'Mehrseitige Website' },
-      platin:     { id: 'platin',     name: 'Platin',     preis: '5.990 €',    note: 'Umfangreich inkl. Extras' },
-      enterprise: { id: 'enterprise', name: 'Enterprise', preis: 'ab 9.990 €', note: 'Shop / Portal / individuell' },
-    },
-    wartungHinweis: 'Optional: Wartung & Hosting ab 49 €/Monat.',
+    /* ---- Hinweis: Preise, Pakete und Wartung werden NICHT hier gepflegt,
+       sondern zentral in pricing.js (Single Source of Truth für Konfigurator
+       UND Live-Berechnung). Dieses Schema enthält nur die Briefing-Fragen. ---- */
 
     /* ---- Slot-Definition: so wird die gesammelte Antwort gespeichert ----
        Jeder Slot landet 1:1 im finalen Briefing-Objekt (siehe collect()).  */
@@ -152,7 +138,8 @@
       seiten:             { type: 'multi',  step: 3, required: false }, // bedingt
       features:           { type: 'multi',  step: 4, required: false },
       stil:               { type: 'multi',  step: 5, required: false },
-      farbwelt:           { type: 'multi',  step: 5, required: false },
+      hauptfarbe:         { type: 'single', step: 5, required: false },
+      nebenfarbe:         { type: 'single', step: 5, required: false },
       markenfarben_hex:   { type: 'text',   step: 5, required: false }, // optional, kein Zwang
       material:           { type: 'multi',  step: 6, required: false },
       uploads:            { type: 'files',  step: 6, required: false }, // {logo, fotos, texte, texte_notiz, website_link}

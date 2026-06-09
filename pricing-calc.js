@@ -24,7 +24,7 @@
   }
 
   /**
-   * @param {{paket:string, wartung:string, addons:Object}} state
+   * @param {{paket:string, wartung:string, addons:Object, extraPages:number}} state
    * @param {Object} pricing  window.SARTU_PRICING
    * @returns {{once:number, monthly:number, lines:Array}}
    */
