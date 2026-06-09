@@ -613,6 +613,7 @@ a { text-decoration: none; color: inherit; }
   gap: 60px;
   align-items: center;
 }
+.cta-grid > * { min-width: 0; } /* Grid-Items dürfen auf schmalen Screens schrumpfen */
 .cta-copy .section-title { margin-bottom: 18px; }
 .cta-lead {
   font-size: 16px;
@@ -651,7 +652,7 @@ a { text-decoration: none; color: inherit; }
   gap: 24px;
   flex-wrap: wrap;
 }
-.footer-nav { display: flex; gap: 32px; }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 14px 28px; max-width: 100%; }
 .footer-nav a {
   color: var(--text-light);
   font-size: 14px;
@@ -755,6 +756,7 @@ a { text-decoration: none; color: inherit; }
   height: 100%;
   position: relative;
   transition: transform .2s ease, box-shadow .2s ease;
+  min-width: 0; /* Grid-Item darf auf sehr schmalen Screens schrumpfen */
 }
 .price-card:hover {
   transform: translateY(-4px);
@@ -989,6 +991,9 @@ a { text-decoration: none; color: inherit; }
   gap: 26px;
   align-items: start;
 }
+/* Grid-Items dürfen unter ihre Inhalts-Min-Breite schrumpfen, damit die
+   Preistabelle innerhalb von .price-table-wrap scrollt statt die Seite zu sprengen. */
+.addon-block { min-width: 0; }
 .addon-block h3 {
   font-size: 18px;
   font-weight: 800;
@@ -1559,6 +1564,8 @@ a { text-decoration: none; color: inherit; }
   border-radius: var(--radius);
   padding: 22px 22px 24px;
   transition: transform .15s ease, box-shadow .15s ease;
+  min-width: 0; /* Grid-Item darf auf sehr schmalen Screens schrumpfen */
+  overflow-wrap: break-word;
 }
 .term-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -26px rgba(13,19,32,.3); }
 .term-cat {
@@ -1596,6 +1603,7 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   padding: 44px 48px;
+  overflow-wrap: break-word; /* lange URLs/E-Mails/Wörter umbrechen statt überlaufen */
 }
 .legal-content h2 {
   font-size: 21px;
@@ -1744,6 +1752,8 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   flex-direction: column;
   transition: transform .2s ease, box-shadow .2s ease;
+  min-width: 0; /* Grid-Item darf unter Inhalts-Min-Breite schrumpfen (kein Mobil-Überlauf) */
+  overflow-wrap: break-word; /* lange Wörter (z. B. „Suchmaschinenoptimierung") umbrechen */
 }
 .service-card:hover { transform: translateY(-4px); box-shadow: 0 24px 50px -24px rgba(13, 19, 32, 0.25); }
 .service-card .svc-icon {
@@ -1780,6 +1790,9 @@ a { text-decoration: none; color: inherit; }
   gap: 44px;
   align-items: start;
 }
+/* Grid-Items dürfen unter ihre Inhalts-Min-Breite schrumpfen + lange Wörter umbrechen */
+.svc-lead-grid > * { min-width: 0; }
+.svc-prose { overflow-wrap: break-word; }
 .svc-prose h2 {
   font-size: clamp(24px, 3vw, 32px);
   font-weight: 800;
