@@ -6,10 +6,10 @@
 
 - [Webdesign & Website-Erstellung](https://[DOMAIN]/leistung-webdesign.html): Moderne, responsive Websites ab 1.290 €, in 7 Tagen online. Vom Onepager bis zur 20-seitigen Firmenwebsite.
 - [Suchmaschinenoptimierung (SEO)](https://[DOMAIN]/leistung-seo.html): Keyword-Strategie, Onpage- und technisches SEO, Core Web Vitals, strukturierte Daten. Basis-SEO in jedem Paket, Onpage-SEO ab Pro.
-- [Lokales SEO & Google-Profil](https://[DOMAIN]/leistung-lokales-seo.html): Google-Unternehmensprofil, NAP-Konsistenz, lokale Keywords, Bewertungs-Monitoring. Inklusive ab Platin oder als Add-on ab 99 €/Monat.
+- [Lokales SEO & Google-Profil](https://[DOMAIN]/leistung-lokales-seo.html): Google-Unternehmensprofil, NAP-Konsistenz, lokale Keywords, Bewertungs-Monitoring. Inklusive ab Platin oder als Google-Profil-Pflege ab 79 €/Monat.
 - [Wartung, Hosting & Betrieb](https://[DOMAIN]/leistung-wartung.html): Hosting in Deutschland, SSL, automatische Backups, Updates, Support. Ab 49 €/Monat bei Jahreszahlung.
 - [Texterstellung & Content](https://[DOMAIN]/leistung-texte.html): Verkaufsstarke, SEO-optimierte Website-Texte ab 120 € pro Seite, Komplettpaket (5 Seiten) für 490 €.
-- [Logo & Branding](https://[DOMAIN]/leistung-logo.html): Professionelles Logo und Erscheinungsbild. Wortmarke ab 390 €, Wort-Bild-Marke ab 690 €.
+- [Logo & Branding](https://[DOMAIN]/leistung-logo.html): Professionelles Logo und Erscheinungsbild. Logo Lite ab 490 €, Branding Pro ab 990 €, Corporate Design ab 1.890 €.
 
 ## Preise
 

@@ -31,12 +31,12 @@ Pflicht-Wartung widersprachen).
 
 | ID | Name | Preis | Inkl. Seiten | „Beliebt" | Wartungs-Floor |
 |---|---|---|---|---|---|
-| `basis` | Basis | **1.290 €** | 1 (One-Pager) | – | Basis-Wartung |
-| `pro` | Pro | **2.990 €** | 8 | – | Basis-Wartung · `[PRÜFEN]` |
-| `platin` | Platin | **5.990 €** | 20 | **✓** | Plus-Wartung · `[PRÜFEN]` |
-| `enterprise` | Enterprise | **kein Fixpreis** (`price: null`) | – | – | Premium-Wartung · `[PRÜFEN]` |
+| `basis` | Basis | **1.290 €** | 1 (One-Pager) | – | Care S |
+| `pro` | Pro | **2.990 €** | 8 | – | Care M |
+| `platin` | Platin | **5.990 €** | 20 | **✓** | Care L |
+| `enterprise` | Enterprise | **kein Fixpreis** (`price: null`) | – | – | Care L |
 
-- Werte stimmen mit `preise.html` überein.
+- Quelle: Leistungsbeschreibung v1.0 (Stand Juni 2026); stimmt mit `preise.html` überein.
 - **Enterprise** ist ein **Abzweig**: kein Live-Fixpreis, sondern „Individuelles Angebot"
   + strukturierte Anforderungs-Abfrage (siehe Abschnitt 6).
 - **„Beliebt"** sitzt auf **Platin** (Start­seite, Preise-Seite und Konfigurator lesen das
@@ -44,29 +44,26 @@ Pflicht-Wartung widersprachen).
 
 ---
 
-## 3. Hosting & Wartung (monatlich, **PFLICHT**) — `pricing.js → maintenance`
+## 3. Sartu Care — Hosting, Sicherheit & Wartung (monatlich, **PFLICHT**) — `pricing.js → maintenance`
 
-| ID | Name | Standard / Monat | Jahreszahlung | Empfohlen |
-|---|---|---|---|---|
-| `wartung-basis` | Basis-Wartung | **69 €** | 49 € | – |
-| `wartung-plus` | Plus-Wartung | **149 €** | 119 € | **✓** |
-| `wartung-premium` | Premium-Wartung | **ab 299 €** | individuell | – |
+| ID | Name | € / Monat (Jahreszahlung) | Empfohlen |
+|---|---|---|---|
+| `care-s` | Care S | **49 €** | – |
+| `care-m` | Care M | **99 €** | **✓** |
+| `care-l` | Care L | **249 €** | – |
 
-- Werte aus `preise.html` (Abschnitt „Wartung & Betrieb"). Live gerechnet wird der
-  **Standard-Monatspreis** (49/119 € gelten nur bei Jahreszahlung — als `yearly` hinterlegt).
-- **Keine „Keine Wartung"-Option** mehr. Jedes Paket startet auf seinem `maintenanceFloor`;
-  der Kunde kann **nur nach oben** wechseln (niedrigere Stufen sind gesperrt).
-- Reihenfolge der Upgrades: `maintenanceOrder = [basis, plus, premium]`.
-
-> **`[PRÜFEN]` — Wartungs-Floor je Paket:** Aktuell Basis→Basis, Pro→Basis, Platin→Plus,
-> Enterprise→Premium. Das ist eine Annahme (in `preise.html` nicht eindeutig zugeordnet).
-> Bitte bestätigen oder in `pricing.js` (`maintenanceFloor`) anpassen.
+- Care ist bei jeder Website **Pflicht** (keine „Keine-Wartung"-Option). Preise gelten bei
+  jährlicher Vorauszahlung.
+- Jedes Paket startet auf seinem `maintenanceFloor` (Basis→Care S, Pro→Care M, Platin→Care L,
+  Enterprise→Care L). Der Kunde kann **nur nach oben** wechseln (niedrigere Stufen gesperrt).
+- Reihenfolge: `maintenanceOrder = [care-s, care-m, care-l]`.
+- Enterprise nutzt **Care XL** (individuell) — im Konfigurator nicht relevant (Abzweig).
 
 ---
 
 ## 4. Extraseiten (Variante A) — `pricing.js → extraPage`
 
-- **190 € (ab)** pro zusätzlicher Seite über dem Inklusiv-Kontingent.
+- **199 €** pro zusätzlicher Seite über dem Inklusiv-Kontingent (ab 3 Seiten Bundle-Rabatt).
 - Eigener Stepper im Konfigurator; fließt live in die Einmalsumme ein.
 - So kann z. B. **Pro + 5 Extraseiten** gewählt werden, ohne zu Enterprise gezwungen zu sein.
 
@@ -79,39 +76,39 @@ Pflicht-Wartung widersprachen).
 | ID | Name | Preis | Menge |
 |---|---|---|---|
 | `texte` | Texterstellung pro Seite | 120 € | 1–10 (pro Seite) |
-| `texte-paket` | Texte-Komplettpaket (5 Seiten) | 490 € | – |
-| `logo-wort` | Logo – Wortmarke | 390 € | – |
-| `logo-wortbild` | Logo – Wort-Bild-Marke | 690 € | – |
-| `terminbuchung` | Online-Terminbuchung | 290 € | – |
-| `google-profil` | Google-Unternehmensprofil | 350 € | – |
-| `blog` | Blog-/News-Bereich | ab 590 € | – |
-| `newsletter` | Newsletter-Einrichtung | 290 € | – |
-| `analytics` | Analytics & Tracking | 190 € | – |
-| `google-ads` | Google-Ads-Setup | 390 € | – |
-| `sprache` | Zusätzliche Sprache | 490 € | 1–5 (pro Sprache) |
-| `foto` | Fotooptimierung / KI-Bildbearbeitung | ab 90 € | – |
+| `texte-paket` | Texte-Paket (5 Seiten) | 490 € | – |
+| `texte-paket10` | Texte-Paket (10 Seiten) | 890 € | – |
+| `logo-lite` | Logo Lite | 490 € | – |
+| `branding-pro` | Branding Pro | 990 € | – |
+| `corporate` | Corporate Design | 1.890 € | – |
+| `terminbuchung` | Online-Terminbuchung | ab 290 € | – |
+| `google-profil` | Google-Profil-Setup | 290 € | – |
+| `chatbot` | KI-Chatbot (Einrichtung) | 490 € | – |
+| `newsletter` | Newsletter-Anbindung | 290 € | – |
+| `analytics` | Analytics-/Tracking-Setup | 190 € | – |
+| `social-feed` | Bewertungs-/Social-Feed | ab 90 € | – |
 | `migration` | Domain-Umzug / Migration | ab 190 € | – |
-| `korrektur` | Zusätzliche Korrekturrunde | 90 € | 1–5 (pro Runde) |
-| `express` | Express (Lieferung in 7 Tagen) | **+20 % vom Paketpreis** | – |
+| `korrektur` | Zusätzliche Korrekturrunde | 140 € | 1–5 (pro Runde) |
+| `mehrsprachig` | Mehrsprachigkeit | **+40 % je Sprache** | 1–5 (pro Sprache) |
+| `express` | Express-Lieferung | **+50 %, mind. 390 €** | – |
 
 **Monatlich**
 
 | ID | Name | Preis / Monat |
 |---|---|---|
-| `local-seo` | Local-SEO Light | ab 99 € |
-| `chatbot` | KI-Chatbot (Betrieb & Pflege) | 39 € |
-| `aenderung-30` | Änderungs-Kontingent +30 Min | 29 € |
-| `aenderung-60` | Änderungs-Kontingent +1 Std | 49 € |
+| `chatbot-betrieb` | KI-Chatbot (Betrieb & Pflege) | 49 € |
+| `seo-lite` | SEO-Betreuung (Lite) | ab 149 € |
+| `profil-basic` | Google-Profil-Pflege (Basic) | ab 79 € |
+
+> Höhere Retainer-Stufen (SEO Pro 390 / Premium 790, Profil-Pflege Pro 149, Branding/Texte-
+> Varianten) stehen auf den jeweiligen Leistungsseiten; der Konfigurator bietet die
+> Einstiegsstufen als Add-on.
 
 - Alle Werte 1:1 aus der Aufpreisliste in `preise.html`.
 - `type`: `once` (einmalig) · `month` (monatlich) · `percent` (Prozent vom Paketpreis, z. B. Express).
-- `from: true` = „ab"-Preis; gerechnet wird mit der Untergrenze (z. B. Local-SEO 99 €).
+- `from: true` = „ab"-Preis; gerechnet wird mit der Untergrenze (z. B. SEO Lite 149 €).
 - UX: nur die `common`-Add-ons sind direkt sichtbar, der Rest hinter „Alle Add-ons anzeigen".
 
-> **Bewusste Abweichung:** „**Hosting-Only (19–29 €)**" aus der `preise.html`-Aufpreisliste
-> ist **nicht** im Konfigurator, weil dort Hosting/Wartung Pflicht ist (Hosting-Only = „ohne
-> Wartung"). Auf der Marketing-Seite bleibt es als Alternative bestehen. Bei Bedarf entfernen
-> oder als eigene Wartungsstufe ergänzen.
 
 ---
 
@@ -182,8 +179,8 @@ Pro Schritt erfasste Slots (landen 1:1 im gespeicherten Briefing):
   öffnet den Konfigurator mit vorausgewähltem Paket (Pfad A).
 - **Pfad-B-Vorbefüllung** (aus den Briefing-Antworten):
   - Funktion „Terminbuchung" / Ziel „Termine" → Add-on `terminbuchung`
-  - „Blog" → `blog`, „Newsletter" → `newsletter`, „Mehrsprachig" → `sprache`
-  - **kein** Logo im Material → `logo-wort` vorgeschlagen
+  - „Newsletter" → `newsletter`, „Mehrsprachig" → `mehrsprachig`
+  - **kein** Logo im Material → `logo-lite` vorgeschlagen
   - **keine** Texte im Material → `texte-paket` (bzw. `texte` beim One-Pager)
   - „Bestehende Website" → `migration`
   - Zeitrahmen „asap" → `express`
@@ -218,9 +215,7 @@ Mengen-Clamp, Pflicht-Wartung, Staffelung = 100 %).
 |---|---|
 | `[SARTU-EMAIL]` + Versand-Endpoint (Formspree/Resend) **oder** Supabase-Keys | `briefing.js → CONFIG` |
 | Optionaler LLM-Call aktivieren (nur Pfad B) | `briefing.js → CONFIG.useLLM` |
-| **Wartungs-Floor je Paket** bestätigen `[PRÜFEN]` | `pricing.js → packages[].maintenanceFloor` |
-| Entscheidung **Hosting-Only** (im Konfigurator weglassen vs. als Stufe ergänzen) | `pricing.js` |
-| Range-Preise (Local-SEO 99–149, Premium-Wartung ab 299) — Fixwert gewünscht? | `pricing.js` |
+| Range-Preise (SEO Lite/Profil/Terminbuchung „ab") — Fixwert gewünscht? | `pricing.js` |
 | Platzhalter `[DOMAIN]`, `[OG-IMAGE]`, `[NACHNAME]` etc. | diverse HTML-Dateien |
 
 ---
