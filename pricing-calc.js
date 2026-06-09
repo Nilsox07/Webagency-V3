@@ -59,13 +59,17 @@
       var st = state.addons && state.addons[a.id];
       if (!st || !st.selected) return;
 
-      // Prozent-Add-on (z. B. Express +20 % auf den Paketpreis)
+      // Prozent-Add-on: Express (+50 %, mind. min) bzw. Mehrsprachigkeit (+40 % je Sprache)
       if (a.type === 'percent') {
         var base = pkg && typeof pkg.price === 'number' ? pkg.price : 0;
-        var pamount = Math.round(base * (a.pct || 0) / 100);
+        var per = Math.round(base * (a.pct || 0) / 100);
+        var pqty = a.qty ? clampQty(a, st.qty) : 1;
+        var pamount = per * pqty;
+        if (typeof a.min === 'number') pamount = Math.max(a.min, pamount); // Mindestbetrag (z. B. Express min. 390 €)
         if (pamount > 0) {
           once += pamount;
-          lines.push({ group: 'once', label: a.name + ' (+' + a.pct + ' %)', amount: pamount });
+          var plabel = a.name + ' (+' + a.pct + ' %' + (a.qty ? ' × ' + pqty : '') + ')';
+          lines.push({ group: 'once', label: plabel, amount: pamount });
         }
         return;
       }

@@ -1,19 +1,15 @@
 /* ============================================================
    Sartu · ZENTRALE PREISDATEN  (entspricht später /lib/pricing)
    ------------------------------------------------------------
-   >>> EINZIGE Pflegestelle. Werte 1:1 aus preise.html übernommen. <<<
+   >>> EINZIGE Pflegestelle. Werte 1:1 aus der Leistungsbeschreibung
+       (Sartu — Leistungsbeschreibung, Version 1.0, Stand Juni 2026). <<<
    Speist Konfigurator-Karten UND Live-Berechnung.
 
-   Übernommen aus preise.html:
-     Pakete:   Basis 1.290 € (One-Pager / 1 Seite), Pro 2.990 € (bis 8),
-               Platin 5.990 € (bis 20), Enterprise ab 9.990 € (individuell)
-     Wartung:  Basis 69 €/Mon (49 € jährl.), Plus 149 €/Mon (119 € jährl.),
-               Premium ab 299 €/Mon  — Hosting/Wartung ist PFLICHT
-     Extraseite: ab 190 € pro Seite (Add-on-Liste)
-     Add-ons:  siehe unten (alle aus der Aufpreisliste)
-
-   [PRÜFEN] = Wert/Logik nicht eindeutig aus preise.html ableitbar,
-             bitte bestätigen (statt geraten).
+   Pakete:   Basis 1.290 € (1 Seite), Pro 2.990 € (8), Platin 5.990 € (20),
+             Enterprise ab 9.990 € (individuell)
+   Care:     Care S 49, Care M 99, Care L 249 €/Mon (bei Jahreszahlung) — PFLICHT
+   Extraseite: 199 € pro Seite
+   Add-ons / Funktionen: siehe unten (aus der Leistungsbeschreibung)
    ============================================================ */
 (function (root, factory) {
   var api = factory();
@@ -24,86 +20,96 @@
 
   return {
     currency: '€',
-    taxNote: 'Alle Preise netto zzgl. MwSt.',
+    taxNote: 'Alle Preise netto zzgl. gesetzl. MwSt. · Stand Juni 2026',
 
-    /* ---- Extraseite (Variante A): Inklusiv-Kontingent je Paket + Festpreis je weiterer Seite ---- */
-    extraPage: { price: 190, from: true, label: 'Zusätzliche Seite' }, // preise.html: „Zusätzliche Unterseite ab 190 €"
+    /* ---- Extraseite (Variante A): Inklusiv-Kontingent + Festpreis je weiterer Seite ---- */
+    extraPage: { price: 199, label: 'Zusätzliche Seite' }, // Leistungsbeschreibung: 199 €/Seite
 
     /* ---- Pakete (einmalig) ---- */
     packages: [
       { id: 'basis', name: 'Basis', price: 1290, scope: 'One-Pager', includedPages: 1,
-        configurable: true, maintenanceFloor: 'wartung-basis', popular: false,
-        perks: ['Alles Wichtige auf einer Seite', 'Mobil-optimiert & DSGVO-konform', 'In 7 Tagen online'] },
+        configurable: true, maintenanceFloor: 'care-s', popular: false,
+        perks: ['Alles Wichtige auf einer Seite', 'Mobil-optimiert & DSGVO-konform', '2 Korrekturrunden'] },
       { id: 'pro', name: 'Pro', price: 2990, scope: 'bis 8 Seiten', includedPages: 8,
-        configurable: true, maintenanceFloor: 'wartung-basis', popular: false, // [PRÜFEN] Wartungs-Floor je Paket
-        perks: ['Individuelles Design statt Vorlage', 'Onpage-SEO & schnelle Ladezeit', '3 Korrekturrunden'] },
+        configurable: true, maintenanceFloor: 'care-m', popular: false,
+        perks: ['Bis 8 Unterseiten, individuell', 'OnPage-SEO für alle Seiten', '3 Korrekturrunden'] },
       { id: 'platin', name: 'Platin', price: 5990, scope: 'bis 20 Seiten', includedPages: 20,
-        configurable: true, maintenanceFloor: 'wartung-plus', popular: true, // [PRÜFEN] Wartungs-Floor je Paket
-        perks: ['Bis 20 Seiten inkl. Blog', 'Lokales SEO inklusive', '4 Korrekturrunden'] },
+        configurable: true, maintenanceFloor: 'care-l', popular: true,
+        perks: ['Bis 20 Seiten', 'Lokales SEO inkl. Google-Profil-Setup', '4 Korrekturrunden'] },
       // Enterprise = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null)
       { id: 'enterprise', name: 'Enterprise', price: null, scope: 'individuell', includedPages: null,
-        configurable: false, maintenanceFloor: 'wartung-premium', popular: false, // [PRÜFEN] Floor
-        perks: ['Individueller Funktionsumfang', 'Shop, Login, Mehrsprachig, Schnittstellen', 'Festpreis-Angebot nach Erstgespräch'] },
+        configurable: false, maintenanceFloor: 'care-l', popular: false,
+        perks: ['Individueller Seitenumfang', 'Sonderprogrammierung / Integrationen', 'Persönlicher Projektplan'] },
     ],
 
-    /* ---- Wartung / Hosting (monatlich, PFLICHT — keine "Keine Wartung"-Option) ----
-       Standard-Monatspreis verwendet (49/119 € gelten nur bei Jahreszahlung). */
+    /* ---- Sartu Care — Hosting, Sicherheit & Wartung (monatlich, PFLICHT) ----
+       Preise gelten bei Jahreszahlung. Pro Paket gilt ein Mindest-Care, Upgrade nach oben möglich. */
     maintenance: [
-      { id: 'wartung-basis',   name: 'Basis-Wartung',   price: 69,  yearly: 49,
-        perks: ['Hosting in DE, SSL, Backups', 'Updates & Sicherheit', 'E-Mail-Support'] },
-      { id: 'wartung-plus',    name: 'Plus-Wartung',    price: 149, yearly: 119, recommended: true,
-        perks: ['Alles aus Basis', '30 Min Änderungen / Monat', 'Support + Telefon, Monitoring'] },
-      { id: 'wartung-premium', name: 'Premium-Wartung', price: 299, from: true,
-        perks: ['Alles aus Plus', '90 Min Änderungen / Monat', 'Priorisiert + Local-SEO inkl.'] },
+      { id: 'care-s', name: 'Care S', price: 49,
+        perks: ['Hosting in Deutschland + SSL', 'Automatische Backups', 'Software- & Sicherheitsupdates', 'Echtzeit-Sicherheitsmonitoring'] },
+      { id: 'care-m', name: 'Care M', price: 99, recommended: true,
+        perks: ['Alles aus Care S', 'Auto-Update der Rechtstexte (eRecht24)', '30 Min. Änderungen / Monat', 'Schnellere Reaktionszeit'] },
+      { id: 'care-l', name: 'Care L', price: 249,
+        perks: ['Alles aus Care M', '90 Min. Änderungen / Monat', 'Staging-Tests vor Live-Updates', 'Reaktion innerhalb 1 Werktag'] },
     ],
-    maintenanceOrder: ['wartung-basis', 'wartung-plus', 'wartung-premium'],
-    mandatoryNote: 'Hosting & Wartung ist fester Bestandteil jedes Pakets.',
+    maintenanceOrder: ['care-s', 'care-m', 'care-l'],
+    mandatoryNote: 'Hosting & Pflege (Sartu Care) ist bei jeder Website Pflicht. Preise bei Jahreszahlung.',
 
-    /* ---- Add-ons (aus der Aufpreisliste preise.html) ---- */
+    /* ---- Add-ons / Funktionen (aus der Leistungsbeschreibung) ---- */
     addons: [
       /* — Einmalig — */
       { id: 'texte',        name: 'Texterstellung pro Seite', price: 120, type: 'once', common: true,
-        qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' }, desc: 'Verkaufsstarke, SEO-optimierte Texte je Seite.' },
-      { id: 'texte-paket',  name: 'Texte-Komplettpaket (5 Seiten)', price: 490, type: 'once', common: true,
-        desc: 'Texte für 5 Seiten – günstiger als einzeln.' },
-      { id: 'logo-wort',    name: 'Logo – Wortmarke', price: 390, type: 'once', common: true,
-        desc: 'Professionelle Wortmarke.' },
-      { id: 'logo-wortbild',name: 'Logo – Wort-Bild-Marke', price: 690, type: 'once', common: true,
-        desc: 'Wortmarke plus Bildzeichen.' },
-      { id: 'terminbuchung',name: 'Online-Terminbuchung', price: 290, type: 'once', common: true,
-        desc: 'Kalender für Termine & Buchungen.' },
-      { id: 'google-profil',name: 'Google-Unternehmensprofil', price: 350, type: 'once', common: true,
-        desc: 'Einrichtung für lokale Sichtbarkeit.' },
-      { id: 'blog',         name: 'Blog-/News-Bereich', price: 590, type: 'once', from: true,
-        desc: 'Redaktionsfähiger Blog-Bereich.' },
-      { id: 'newsletter',   name: 'Newsletter-Einrichtung', price: 290, type: 'once', desc: 'Anmeldeformular + Tool-Anbindung.' },
-      { id: 'analytics',    name: 'Analytics & Tracking', price: 190, type: 'once', desc: 'DSGVO-konformes Tracking-Setup.' },
-      { id: 'google-ads',   name: 'Google-Ads-Setup', price: 390, type: 'once', desc: 'Grundeinrichtung deiner Kampagnen.' },
-      { id: 'sprache',      name: 'Zusätzliche Sprache', price: 490, type: 'once',
-        qty: { min: 1, max: 5, default: 1, unit: 'pro Sprache' }, desc: 'Weitere vollständige Sprachversion.' },
-      { id: 'foto',         name: 'Fotooptimierung / KI-Bildbearbeitung', price: 90, type: 'once', from: true, desc: 'Bilder optimiert & aufbereitet.' },
-      { id: 'migration',    name: 'Domain-Umzug / Migration', price: 190, type: 'once', from: true, desc: 'Umzug deiner bestehenden Website.' },
-      { id: 'korrektur',    name: 'Zusätzliche Korrekturrunde', price: 90, type: 'once',
+        qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' }, desc: 'Professioneller Text je Seite, eine Korrekturrunde.' },
+      { id: 'texte-paket',  name: 'Texte-Paket (5 Seiten)', price: 490, type: 'once', common: true,
+        desc: 'Texte für 5 Seiten – ca. 98 €/Seite.' },
+      { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', price: 890, type: 'once',
+        desc: 'Texte für 10 Seiten – ca. 89 €/Seite.' },
+      { id: 'logo-lite',    name: 'Logo Lite', price: 490, type: 'once', common: true,
+        desc: '3 Entwürfe, 2 Runden, Standardformate, Mini-Styleguide.' },
+      { id: 'branding-pro', name: 'Branding Pro', price: 990, type: 'once', common: true,
+        desc: 'Individuelles Logo, Visitenkarte, Briefpapier, Styleguide.' },
+      { id: 'corporate',    name: 'Corporate Design', price: 1890, type: 'once',
+        desc: 'Umfassendes Designsystem + komplette Geschäftsausstattung.' },
+      { id: 'terminbuchung',name: 'Online-Terminbuchung', price: 290, type: 'once', from: true, common: true,
+        desc: 'Einrichtung & Einbindung eines Buchungstools.' },
+      { id: 'google-profil',name: 'Google-Profil-Setup', price: 290, type: 'once', common: true,
+        desc: 'Einmalige Einrichtung & Optimierung des Profils.' },
+      { id: 'chatbot',      name: 'KI-Chatbot (Einrichtung)', price: 490, type: 'once',
+        desc: 'FAQ-Bot auf Basis deiner Website-Inhalte. Betrieb: siehe monatlich.' },
+      { id: 'newsletter',   name: 'Newsletter-Anbindung', price: 290, type: 'once',
+        desc: 'Anmeldeformular + Anbindung an dein Newsletter-Tool.' },
+      { id: 'analytics',    name: 'Analytics-/Tracking-Setup', price: 190, type: 'once',
+        desc: 'GA4 oder Matomo + Search Console, DSGVO-konform an Consent gekoppelt.' },
+      { id: 'social-feed',  name: 'Bewertungs-/Social-Feed', price: 90, type: 'once', from: true,
+        desc: 'Einbindung von Google-Bewertungen oder Social-Feed.' },
+      { id: 'migration',    name: 'Domain-Umzug / Migration', price: 190, type: 'once', from: true,
+        desc: 'Umzug Domain bzw. Migration der alten Seite.' },
+      { id: 'korrektur',    name: 'Zusätzliche Korrekturrunde', price: 140, type: 'once',
         qty: { min: 1, max: 5, default: 1, unit: 'pro Runde' }, desc: 'Eine weitere vollständige Feedback-Runde.' },
-      { id: 'express',      name: 'Express (Lieferung in 7 Tagen)', price: null, type: 'percent', pct: 20,
-        desc: 'Priorisierte Umsetzung – +20 % auf den Paketpreis.' },
+      { id: 'mehrsprachig', name: 'Mehrsprachigkeit', price: null, type: 'percent', pct: 40,
+        qty: { min: 1, max: 5, default: 1, unit: 'pro Sprache' },
+        desc: '+40 % je zusätzliche Sprache (technische Einrichtung; Übersetzung extra).' },
+      { id: 'express',      name: 'Express-Lieferung', price: null, type: 'percent', pct: 50, min: 390,
+        desc: 'Priorisierte, schnellere Fertigstellung (+50 %, mind. 390 €).' },
 
       /* — Wiederkehrend (monatlich) — */
-      { id: 'local-seo',    name: 'Local-SEO Light', price: 99, type: 'month', from: true, desc: 'Profil-Pflege, 1 Post/Monat, Monitoring.' },
-      { id: 'chatbot',      name: 'KI-Chatbot (Betrieb & Pflege)', price: 39, type: 'month', desc: 'Laufender Betrieb des KI-Chatbots.' },
-      { id: 'aenderung-30', name: 'Änderungs-Kontingent +30 Min', price: 29, type: 'month', desc: 'Zusätzliche Änderungszeit pro Monat.' },
-      { id: 'aenderung-60', name: 'Änderungs-Kontingent +1 Std', price: 49, type: 'month', desc: 'Zusätzliche Änderungszeit pro Monat.' },
+      { id: 'chatbot-betrieb', name: 'KI-Chatbot (Betrieb & Pflege)', price: 49, type: 'month',
+        desc: 'Laufender Betrieb des Chatbots (zzgl. Einrichtung).' },
+      { id: 'seo-lite',     name: 'SEO-Betreuung (Lite)', price: 149, type: 'month', from: true,
+        desc: 'Basis-Local-SEO, Profil-Grundpflege, Title/Meta, Monatsreport. Höhere Stufen auf der SEO-Seite.' },
+      { id: 'profil-basic', name: 'Google-Profil-Pflege (Basic)', price: 79, type: 'month', from: true,
+        desc: 'Rezensionen beantworten, Kerninfos pflegen, Monitoring.' },
     ],
 
     /* ---- Enterprise-Abzweig: Optionen für die strukturierte Anfrage ---- */
     enterpriseOptions: {
       sonderfunktionen: [
-        { value: 'shop',        label: 'Shop / Bezahlung' },
-        { value: 'login',       label: 'Login / Mitgliederbereich' },
-        { value: 'buchung',     label: 'Buchungssystem' },
+        { value: 'shop',         label: 'Shop / Bezahlung' },
+        { value: 'login',        label: 'Login / Mitgliederbereich' },
+        { value: 'buchung',      label: 'Buchungssystem' },
         { value: 'schnittstelle',label: 'Schnittstelle / CRM / API' },
-        { value: 'mehrsprachig',label: 'Mehrsprachigkeit' },
-        { value: 'portal',      label: 'Portal / Community' },
+        { value: 'mehrsprachig', label: 'Mehrsprachigkeit' },
+        { value: 'portal',       label: 'Portal / Community' },
       ],
       seitenzahl: [
         { value: 'bis20', label: 'bis 20 Seiten' },
@@ -124,7 +130,6 @@
         { value: 'flex', label: 'Flexibel' },
       ],
     },
-    // Funktionen, die generell den Enterprise-Abzweig auslösen
     enterpriseTriggerFeatures: ['shop', 'login'],
   };
 });

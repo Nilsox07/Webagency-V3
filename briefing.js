@@ -362,11 +362,16 @@
       if (!A.addons[a.id]) A.addons[a.id] = { selected: false, qty: a.qty ? a.qty.default : 1 };
     });
   }
-  // Betrag eines Add-ons (berücksichtigt Menge + Prozent-Typ wie Express)
+  // Betrag eines Add-ons (berücksichtigt Menge, Prozent-Typ und Mindestbetrag)
   function addonAmount(a, st) {
     if (a.type === 'percent') {
       var p = pkgById(A.paket_gewaehlt);
-      return Math.round((p && p.price ? p.price : 0) * (a.pct || 0) / 100);
+      var base = p && p.price ? p.price : 0;
+      var per = Math.round(base * (a.pct || 0) / 100);
+      var pq = a.qty ? (st.qty || a.qty.default) : 1;
+      var amt = per * pq;
+      if (typeof a.min === 'number') amt = Math.max(a.min, amt);
+      return amt;
     }
     if (typeof a.price !== 'number') return null;
     return a.price * (a.qty ? st.qty : 1);
@@ -383,11 +388,10 @@
     };
     // Funktionen → passende Add-ons
     if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung');
-    if (hasF('blog')) on('blog');
     if (hasF('newsletter')) on('newsletter');
-    if (hasF('mehrsprachig')) on('sprache', 1);
+    if (hasF('mehrsprachig')) on('mehrsprachig', 1);
     // Kein Logo vorhanden → Logo-Add-on vorschlagen
-    if (!hasM('logo')) on('logo-wort');
+    if (!hasM('logo')) on('logo-lite');
     // Keine Texte vorhanden → Texte vorschlagen (Onepager: 1 Seite, sonst Komplettpaket)
     if (!hasM('texte')) { if (A.umfang === 'onepager') on('texte', 1); else on('texte-paket'); }
     // Bestehende Website → Migration
@@ -866,8 +870,8 @@
           var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger');
           var num = el('span', 'lb-qty-num', String(st.qty));
           var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr');
-          var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(a.price * st.qty));
-          var sync = function () { num.textContent = String(st.qty); lineTotal.textContent = '= ' + fmtEUR(a.price * st.qty); renderPriceBar(); };
+          var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(addonAmount(a, st)));
+          var sync = function () { num.textContent = String(st.qty); lineTotal.textContent = '= ' + fmtEUR(addonAmount(a, st)); renderPriceBar(); };
           minus.addEventListener('click', function () { st.qty = Math.max(a.qty.min, (st.qty || a.qty.default) - 1); sync(); });
           plus.addEventListener('click', function () { st.qty = Math.min(a.qty.max, (st.qty || a.qty.default) + 1); sync(); });
           q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);

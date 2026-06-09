@@ -28,47 +28,51 @@ function t(state) { return CALC.computeTotals(state, PRICING); }
 
 console.log('— Preis-Tests —');
 
-// 1) Basis + Basis-Wartung (69 €/Mon, Pflicht), keine Add-ons
-var r1 = t({ paket: 'basis', wartung: 'wartung-basis', addons: addons({}) });
+// 1) Basis + Care S (49 €/Mon, Pflicht), keine Add-ons
+var r1 = t({ paket: 'basis', wartung: 'care-s', addons: addons({}) });
 eq('Basis einmalig', r1.once, 1290);
-eq('Basis monatlich (Pflicht 69)', r1.monthly, 69);
+eq('Basis monatlich (Care S 49)', r1.monthly, 49);
 
-// 2) Pro + Plus-Wartung (149) + Logo-Wortmarke (390) + Texte ×3 (120×3)
-var r2 = t({ paket: 'pro', wartung: 'wartung-plus', addons: addons({ 'logo-wort': true, texte: 3 }) });
-eq('Pro+Logo+Texte×3 einmalig', r2.once, 2990 + 390 + 360);
-eq('Pro+Plus-Wartung monatlich', r2.monthly, 149);
+// 2) Pro + Care M (99) + Logo Lite (490) + Texte ×3 (120×3)
+var r2 = t({ paket: 'pro', wartung: 'care-m', addons: addons({ 'logo-lite': true, texte: 3 }) });
+eq('Pro+Logo Lite+Texte×3 einmalig', r2.once, 2990 + 490 + 360);
+eq('Pro+Care M monatlich', r2.monthly, 99);
 
-// 3) Platin + Premium-Wartung (299) + KI-Chatbot (39/Mon) + Terminbuchung (290 einmalig)
-var r3 = t({ paket: 'platin', wartung: 'wartung-premium', addons: addons({ chatbot: true, terminbuchung: true }) });
+// 3) Platin + Care L (249) + Chatbot-Betrieb (49/Mon) + Terminbuchung (290 einmalig)
+var r3 = t({ paket: 'platin', wartung: 'care-l', addons: addons({ 'chatbot-betrieb': true, terminbuchung: true }) });
 eq('Platin einmalig (Termin)', r3.once, 5990 + 290);
-eq('Platin monatlich (Premium 299 + Chatbot 39)', r3.monthly, 299 + 39);
+eq('Platin monatlich (Care L 249 + Chatbot 49)', r3.monthly, 249 + 49);
 
 // 4) Enterprise = price null → Paket zählt NICHT in die Einmalsumme
-var r4 = t({ paket: 'enterprise', wartung: 'wartung-premium', addons: addons({ sprache: 2 }) });
-eq('Enterprise einmalig (Paket null, nur Sprache ×2)', r4.once, 980);
-eq('Enterprise monatlich (Premium 299)', r4.monthly, 299);
+var r4 = t({ paket: 'enterprise', wartung: 'care-l', addons: addons({ analytics: true }) });
+eq('Enterprise einmalig (Paket null, nur Analytics 190)', r4.once, 190);
+eq('Enterprise monatlich (Care L 249)', r4.monthly, 249);
 
 // 5) Mengen-Clamp: Texte ×20 → max 10
-var r5 = t({ paket: 'basis', wartung: 'wartung-basis', addons: addons({ texte: 20 }) });
+var r5 = t({ paket: 'basis', wartung: 'care-s', addons: addons({ texte: 20 }) });
 eq('Texte ×20 → geclamped auf 10 (120×10)', r5.once, 1290 + 1200);
 
 // 6) Abgewähltes Add-on zählt nicht
-var st6 = addons({ 'logo-wort': true }); st6['logo-wort'].selected = false;
-var r6 = t({ paket: 'basis', wartung: 'wartung-basis', addons: st6 });
+var st6 = addons({ 'logo-lite': true }); st6['logo-lite'].selected = false;
+var r6 = t({ paket: 'basis', wartung: 'care-s', addons: st6 });
 eq('Abgewähltes Add-on zählt nicht', r6.once, 1290);
 
-// 7) Express = +20 % vom Paketpreis (Pro 2990 → +598)
-var r7 = t({ paket: 'pro', wartung: 'wartung-basis', addons: addons({ express: true }) });
-eq('Express +20 % auf Pro (2990→+598)', r7.once, 2990 + 598);
+// 7) Express = +50 % vom Paketpreis, mind. 390 € (Pro 2990 → +1495)
+var r7 = t({ paket: 'pro', wartung: 'care-m', addons: addons({ express: true }) });
+eq('Express +50 % auf Pro (2990→+1495)', r7.once, 2990 + 1495);
 
-// 8) Extraseiten (Variante A): Pro + 5 Extraseiten (190×5)
-var r8 = t({ paket: 'pro', wartung: 'wartung-basis', extraPages: 5, addons: addons({}) });
-eq('Pro + 5 Extraseiten einmalig (2990 + 950)', r8.once, 2990 + 950);
-eq('Pro + 5 Extraseiten monatlich (Basis-Wartung 69)', r8.monthly, 69);
+// 8) Mehrsprachigkeit = +40 % je Sprache (Basis 1290, ×2 → +1032)
+var r8 = t({ paket: 'basis', wartung: 'care-s', addons: addons({ mehrsprachig: 2 }) });
+eq('Mehrsprachig ×2 (+40 % je Sprache) einmalig', r8.once, 1290 + 1032);
 
-// 9) Local-SEO Light (monatlich, ab 99) + Premium-Wartung (299)
-var r9 = t({ paket: 'platin', wartung: 'wartung-premium', addons: addons({ 'local-seo': true }) });
-eq('Local-SEO monatlich (99) + Premium-Wartung (299)', r9.monthly, 299 + 99);
+// 9) Extraseiten (Variante A): Pro + 5 Extraseiten (199×5)
+var r9 = t({ paket: 'pro', wartung: 'care-m', extraPages: 5, addons: addons({}) });
+eq('Pro + 5 Extraseiten einmalig (2990 + 995)', r9.once, 2990 + 995);
+eq('Pro + 5 Extraseiten monatlich (Care M 99)', r9.monthly, 99);
+
+// 10) Monatliche Retainer: SEO Lite (149) + Profil Basic (79) + Care M (99)
+var r10 = t({ paket: 'pro', wartung: 'care-m', addons: addons({ 'seo-lite': true, 'profil-basic': true }) });
+eq('SEO Lite + Profil Basic + Care M monatlich', r10.monthly, 99 + 149 + 79);
 
 // 7) Zahlungsstaffelung: Prozente ergeben 100 %
 ['basis', 'pro', 'platin', 'enterprise'].forEach(function (id) {
