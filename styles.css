@@ -2045,3 +2045,36 @@ body.cookie-modal-open { overflow: hidden; }
 @media (max-width: 560px) {
   .stat-inline { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+
+/* ============================================================
+   FLOATING-BUTTON (FAB) → Lumi / Konfigurator  (siehe fab.js)
+   ============================================================ */
+.fab {
+  position: fixed; right: 20px; bottom: 20px; z-index: 250;
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--green); color: #0a1200;
+  font-weight: 800; font-size: 14.5px; line-height: 1; text-decoration: none;
+  padding: 14px 20px; border-radius: 999px;
+  box-shadow: 0 14px 30px -8px rgba(174, 240, 0, 0.5), 0 10px 26px -12px rgba(0, 0, 0, 0.55);
+  opacity: 0; transform: translateY(16px); pointer-events: none;
+  transition: transform .25s ease, opacity .25s ease, background .2s ease, box-shadow .2s ease, bottom .25s ease;
+}
+.fab.is-in { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.fab:hover { background: var(--green-strong); transform: translateY(-2px); }
+.fab:focus-visible { outline: 3px solid #0a1200; outline-offset: 2px; }
+.fab-ico { display: inline-flex; }
+.fab-label { white-space: nowrap; }
+
+/* Über dem Cookie-Banner schweben, solange es sichtbar ist */
+body:has(.cookie-banner.is-visible) .fab { bottom: 110px; }
+
+@media (max-width: 520px) {
+  .fab { right: 16px; bottom: 16px; padding: 15px; }
+  .fab-label { display: none; }
+  body:has(.cookie-banner.is-visible) .fab { bottom: 200px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fab { transition: opacity .2s ease, bottom .2s ease; transform: none; }
+  .fab.is-in { transform: none; }
+  .fab:hover { transform: none; }
+}
