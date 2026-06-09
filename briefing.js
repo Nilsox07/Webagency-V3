@@ -51,7 +51,7 @@
     // Lumi-Flow (Pfad B)
     branche: null, branche_sonstiges: '',
     ziele: [], umfang: null, seiten: [],
-    features: [], stil: [], hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
+    features: [], stil: null, hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
     material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
     zeitrahmen: null,
     // Konfigurator
@@ -61,6 +61,7 @@
     extraPages: 0,                    // Seiten über dem Inklusiv-Kontingent (Variante A)
     addons: {},                       // { addonId: {selected:bool, qty:int} }
     _prefilled: false,                // Pfad-B-Vorbefüllung nur einmal anwenden
+    _recShown: false,                 // Tipp-Indikator vor der Empfehlung nur einmal zeigen
     // Enterprise-Abzweig (strukturierte Anfrage statt Fixpreis)
     enterprise: { sonderfunktionen: [], seitenzahl: null, shopGroesse: null, sprachen: '', schnittstellen: '', zeithorizont: null, notiz: '' },
     // Abschluss
@@ -233,6 +234,12 @@
     showPriceBar(false);          // Standard aus; Konfigurator schaltet selbst ein
     clearStage();
     var focusTarget = sc.render();
+    if (!REDUCE) {
+      // sanftes Einblenden des neuen Schritt-Inhalts (Opacity + leichter Versatz)
+      stage.classList.remove('lb-anim-in');
+      void stage.offsetWidth;            // Reflow erzwingen → Animation neu starten
+      stage.classList.add('lb-anim-in');
+    }
     if (name !== 'welcome') {
       var card = document.querySelector('.lumi-card');
       if (card) card.scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' });
@@ -248,6 +255,32 @@
   }
   function back() { if (history.length) renderScreen(history.pop()); }
   function advance() { var nx = flowNext(current); if (nx) goTo(nx); }
+
+  // Auto-Weiter bei eindeutigen Einfach-Auswahlen: kurze Pause, damit die
+  // Auswahl sichtbar ist, dann weiter. Bei reduzierter Bewegung sofort.
+  function autoAdvance(fn) {
+    var run = fn || advance;
+    if (REDUCE) { run(); return; }
+    setTimeout(run, 280);
+  }
+
+  // Chat-Tipp-Indikator ("Lumi schreibt …") — NUR an erzählerischen Momenten
+  // (Willkommen, Pfad-B-Empfehlung), nicht vor jeder Frage. Bei reduzierter
+  // Bewegung übersprungen: Inhalt erscheint sofort.
+  function showTyping(done) {
+    if (REDUCE) { done(); return; }
+    var row = el('div', 'lb-say lb-typing-row');
+    row.appendChild(el('span', 'lb-avatar', 'L'));
+    var bubble = el('div', 'lb-bubble lb-typing');
+    bubble.setAttribute('aria-label', 'Lumi schreibt …');
+    bubble.innerHTML = '<span class="lb-typing-dots" aria-hidden="true"><span class="lb-dot"></span><span class="lb-dot"></span><span class="lb-dot"></span></span>';
+    row.appendChild(bubble);
+    stage.appendChild(row);
+    setTimeout(function () {
+      if (row.parentNode) row.parentNode.removeChild(row);
+      done();
+    }, 520);
+  }
 
   /* ============================================================
      LIVE-PREISLEISTE (fix unten, immer sichtbar im Konfigurator)
@@ -418,16 +451,22 @@
 
     /* ---------- Willkommen ---------- */
     welcome: { step: null, render: function () {
-      var h = lumiSays('Hi, ich bin Lumi 👋',
-        'In ~2 Minuten stellst du dir – fast nur mit Klicken – dein Website-Paket zusammen. Der Preis rechnet live mit.');
-      var wrap = el('div', 'lb-welcome');
-      var btn = el('button', 'btn btn-primary btn-lg lb-start');
-      btn.type = 'button';
-      btn.innerHTML = 'Los geht’s <span class="arrow" aria-hidden="true">→</span>';
-      btn.addEventListener('click', function () { goTo('path'); });
-      wrap.appendChild(btn);
-      stage.appendChild(wrap);
-      return h;
+      // erzählerischer Moment: kurzer Tipp-Indikator beim Einstieg, dann Begrüßung
+      function buildWelcome() {
+        var h = lumiSays('Hi, ich bin Lumi 👋',
+          'In ~2 Minuten stellst du dir – fast nur mit Klicken – dein Website-Paket zusammen. Der Preis rechnet live mit.');
+        var wrap = el('div', 'lb-welcome');
+        var btn = el('button', 'btn btn-primary btn-lg lb-start');
+        btn.type = 'button';
+        btn.innerHTML = 'Los geht’s <span class="arrow" aria-hidden="true">→</span>';
+        btn.addEventListener('click', function () { goTo('path'); });
+        wrap.appendChild(btn);
+        stage.appendChild(wrap);
+        if (h && h.focus) { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }
+        return h;
+      }
+      showTyping(buildWelcome);
+      return null;
     }},
 
     /* ---------- Einstiegsfrage: zwei Pfade ---------- */
@@ -473,7 +512,9 @@
         }
       }
       buildCards('branche', OPT.branche, { cls: 'lb-tiles', onPick: function (v) {
-        renderSonst(); if (v !== 'sonstiges') leaveBranche();
+        renderSonst();
+        // Auto-Weiter bei jeder Branche AUSSER „Sonstiges" (dort erscheint ein Textfeld → bleiben)
+        if (v !== 'sonstiges') autoAdvance(leaveBranche);
       }});
       stage.appendChild(sonst); renderSonst();
       actions({ onBack: back, onNext: leaveBranche, skip: advance });
@@ -499,7 +540,11 @@
           buildChipsInto(sub, 'seiten', OPT.seiten, { exclusive: ['unsure'] });
         }
       }
-      buildCards('umfang', OPT.umfang, { onPick: renderSub });
+      buildCards('umfang', OPT.umfang, { onPick: function (v) {
+        renderSub();
+        // Auto-Weiter NUR bei „One-Pager" (sonst erscheint die Seiten-Folgefrage → bleiben)
+        if (v === 'onepager') autoAdvance();
+      }});
       stage.appendChild(sub); renderSub();
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
@@ -515,26 +560,43 @@
 
     /* ---------- Pfad B · 5 · Design (Stil + Farbe + HEX) ---------- */
     design: { step: 5, render: function () {
-      var h = lumiSays('Welcher Look gefällt dir?', 'Mehrfachauswahl möglich — Lumi nutzt das als Richtung.');
+      var h = lumiSays('Welcher Look gefällt dir?', 'Wähle einen Stil — er bestimmt die Vorschau unten.');
+
+      // Mockup + Helfer früh anlegen (gehoistet); angehängt wird es WEITER UNTEN,
+      // direkt unter den Farbkacheln, damit Klick (Farbe) und Reaktion (Vorschau)
+      // gemeinsam im Blick sind.
+      var mock = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
+      function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
+      function stilFlavor() { return A.stil || 'default'; } // EIN gewählter Stil bestimmt das Layout
+      function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
+
+      // (1) Stil-Moodboards — EINFACH-Auswahl (die Vorschau kann nur EINEN Stil zeigen)
       var moods = el('div', 'lb-moods');
+      var moodBtns = {};
       OPT.stil.forEach(function (opt) {
         var b = el('button', 'lb-mood'); b.type = 'button';
         b.innerHTML = '<span class="lb-mood-art ' + opt.flavor + '" aria-hidden="true">' +
           '<span class="m1"></span><span class="m2"></span><span class="m3"></span></span>' +
           '<span class="lb-mood-label">' + opt.label + '</span>';
-        var on = A.stil.indexOf(opt.value) > -1;
+        var on = A.stil === opt.value;
         if (on) b.classList.add('is-on');
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
         b.addEventListener('click', function () {
-          var i = A.stil.indexOf(opt.value);
-          if (i > -1) A.stil.splice(i, 1); else A.stil.push(opt.value);
-          var sel = A.stil.indexOf(opt.value) > -1;
-          b.classList.toggle('is-on', sel); b.setAttribute('aria-pressed', sel ? 'true' : 'false');
-          refreshMock(); // Mockup-Layout an gewählten Stil anpassen (optional, s. u.)
+          A.stil = opt.value; // genau einer aktiv (andere abwählen)
+          Object.keys(moodBtns).forEach(function (k) {
+            var sel = k === opt.value;
+            moodBtns[k].classList.toggle('is-on', sel);
+            moodBtns[k].setAttribute('aria-pressed', sel ? 'true' : 'false');
+          });
+          refreshMock();
         });
+        moodBtns[opt.value] = b;
         moods.appendChild(b);
       });
       stage.appendChild(moods);
+
+      // (2) Unterfrage Farben
+      subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.');
 
       // Farbe: NUR zwei Farben — Hauptfarbe + Nebenfarbe (laienverständlich, kein Regler)
       function colorRow(label, slot) {
@@ -560,22 +622,19 @@
         wrap.appendChild(tiles);
         return wrap;
       }
-      subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.');
 
-      // === Farb-Vorschau-Mockup – optional, entfernbar (siehe color-mockup.js) ===
-      // Entfernen genügt: <script src="color-mockup.js"> aus briefing.html nehmen.
-      // Dieser Block prüft auf window.SARTU_COLOR_MOCKUP und überspringt sich sonst.
-      var mock = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
-      function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
-      function stilFlavor() { return A.stil.length ? A.stil[0] : 'default'; } // erstes gewähltes Stil bestimmt das Layout
-      function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
-      if (mock) { stage.appendChild(mock); refreshMock(); }
-      // === Ende Farb-Vorschau-Mockup ===
-
+      // (3) Farbkacheln Haupt- + Nebenfarbe
       stage.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
       stage.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
 
-      // optionales Markenfarben-Feld (kein Pflichtfeld, kein HEX-Zwang)
+      // (4) DANN die Vorschau — direkt unter den Farben (Aktion & Reaktion zusammen)
+      // === Farb-Vorschau-Mockup – optional, entfernbar (siehe color-mockup.js) ===
+      // Entfernen genügt: <script src="color-mockup.js"> aus briefing.html nehmen.
+      // Dieser Block prüft auf window.SARTU_COLOR_MOCKUP und überspringt sich sonst.
+      if (mock) { stage.appendChild(mock); refreshMock(); }
+      // === Ende Farb-Vorschau-Mockup ===
+
+      // (5) optionales Markenfarben-Feld (kein Pflichtfeld, kein HEX-Zwang)
       var lbl = el('label', 'lb-field lb-field-optional');
       lbl.innerHTML = '<span class="lb-field-label">Feste Markenfarbe vorhanden? <em>(HEX-Code, falls bekannt — sonst überspringen)</em></span>';
       var inp = el('input'); inp.type = 'text'; inp.placeholder = 'z. B. #B6FF3B';
@@ -583,7 +642,7 @@
       inp.addEventListener('input', function (e) { A.markenfarben_hex = e.target.value; });
       lbl.appendChild(inp); stage.appendChild(lbl);
 
-      // dezenter Realitäts-Hinweis (kein Baukasten)
+      // (6) dezenter Realitäts-Hinweis (kein Baukasten)
       stage.appendChild(el('p', 'lb-design-note',
         'Das ist nur eine grobe Richtung zur Veranschaulichung — den Feinschliff und die genauen Farbtöne machen wir gemeinsam nach dem Start. Alles wird handgemacht, kein Baukasten.'));
 
@@ -627,13 +686,29 @@
     /* ---------- Pfad B · 7 · Zeitrahmen ---------- */
     zeitrahmen: { step: 7, render: function () {
       var h = lumiSays('Bis wann brauchst du die Website?');
-      buildCards('zeitrahmen', OPT.zeitrahmen, { cls: 'lb-cards lb-cards-wide', onPick: function () { advance(); } });
+      buildCards('zeitrahmen', OPT.zeitrahmen, { cls: 'lb-cards lb-cards-wide', onPick: function () { autoAdvance(); } });
       actions({ onBack: back, skip: advance });
       return h;
     }},
 
     /* ---------- GEMEINSAMER KONFIGURATOR (Pfad A direkt, Pfad B als Ergebnis) ---------- */
-    configurator: { step: 8, render: function () {
+    configurator: { step: 8,
+      // Pfad B: erzählerischer Moment — kurzer Tipp-Indikator vor der Empfehlung
+      // (nur einmal). Pfad A (Direkt-Konfigurator) springt sofort in den Aufbau.
+      render: function () {
+        var self = this;
+        if (A.pfad === 'B' && !A._recShown) {
+          A._recShown = true;
+          showPriceBar(false);
+          showTyping(function () {
+            var bh = self.build();
+            if (bh && bh.focus) { try { bh.focus({ preventScroll: true }); } catch (e) { bh.focus(); } }
+          });
+          return null;
+        }
+        return self.build();
+      },
+      build: function () {
       // Vorauswahl
       if (!A.paket_gewaehlt) {
         A.paket_empfohlen = A.pfad === 'B' ? recommend() : 'pro';
@@ -1101,7 +1176,7 @@
       if (A.umfang && A.umfang !== 'onepager' && A.seiten.length) umfang += ' · ' + labelsFor('seiten', A.seiten).join(', ');
       rows.push({ k: 'Umfang', v: umfang, screen: 'umfang' });
       rows.push({ k: 'Funktionen', v: labelsFor('features', A.features).join(', '), screen: 'features' });
-      var design = labelsFor('stil', A.stil).join(', ');
+      var design = labelFor('stil', A.stil); // Stil ist Einfach-Auswahl → genau ein Label (oder '')
       var farben = [colorLabel(A.hauptfarbe), colorLabel(A.nebenfarbe)].filter(Boolean).join(' + ');
       if (farben) design += (design ? ' · ' : '') + farben;
       if (A.markenfarben_hex) design += ' · ' + A.markenfarben_hex;
@@ -1267,11 +1342,11 @@
     A.pfad = null;
     A.branche = null; A.branche_sonstiges = '';
     A.ziele = []; A.umfang = null; A.seiten = [];
-    A.features = []; A.stil = []; A.hauptfarbe = null; A.nebenfarbe = null; A.markenfarben_hex = '';
+    A.features = []; A.stil = null; A.hauptfarbe = null; A.nebenfarbe = null; A.markenfarben_hex = '';
     A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
     A.zeitrahmen = null;
     A.paket_gewaehlt = null; A.paket_empfohlen = null;
-    A.wartung = null; A.extraPages = 0; A.addons = {}; A._prefilled = false;
+    A.wartung = null; A.extraPages = 0; A.addons = {}; A._prefilled = false; A._recShown = false;
     A.enterprise = { sonderfunktionen: [], seitenzahl: null, shopGroesse: null, sprachen: '', schnittstellen: '', zeithorizont: null, notiz: '' };
     A.kontakt = { name: '', email: '', telefon: '', dsgvo: false };
     ui.askedClarification = false; lastSendState.msg = '';

@@ -310,6 +310,20 @@
 .lb-sending .lb-dot:nth-child(3) { animation-delay: .3s; }
 @keyframes lbPulse { 0%, 100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1); } }
 
+/* ---- Tipp-Indikator ("Lumi schreibt …") — dosiert, nur an erzählerischen Momenten ---- */
+.lb-typing { display: inline-flex; align-items: center; min-height: 22px; padding-top: 4px; padding-bottom: 4px; }
+.lb-typing-dots { display: inline-flex; gap: 6px; }
+.lb-typing-dots .lb-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  animation: lbPulse 1s infinite ease-in-out;
+}
+.lb-typing-dots .lb-dot:nth-child(2) { animation-delay: .15s; }
+.lb-typing-dots .lb-dot:nth-child(3) { animation-delay: .3s; }
+
+/* ---- Sanftes Einblenden des neuen Inhalts bei Schrittwechsel ---- */
+.lb-anim-in { animation: lbStageIn .2s ease both; }
+@keyframes lbStageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
 /* ---- Fokus sichtbar (Tastatur-Bedienung / WCAG) ---- */
 .lb-stage button:focus-visible,
 .lb-stage a:focus-visible,
@@ -323,7 +337,8 @@
 @media (prefers-reduced-motion: reduce) {
   .lb-card, .lb-chip, .lb-mood, .lb-swatch, .lb-paket { transition: none; }
   .lb-card:hover, .lb-mood:hover, .lb-swatch:hover, .lb-paket:hover { transform: none; }
-  .lb-sending .lb-dot { animation: none; }
+  .lb-sending .lb-dot, .lb-typing-dots .lb-dot { animation: none; }
+  .lb-anim-in { animation: none; }
 }
 
 /* ---- Mobil ---- */
@@ -587,11 +602,27 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   transition: border-color .15s ease, background .15s ease;
 }
 .lb-colortile:hover { background: rgba(255,255,255,0.04); }
-.lb-colortile.is-on { border-color: var(--green); background: rgba(174,240,0,0.08); }
-.lb-colordot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.18); box-shadow: 0 2px 8px rgba(0,0,0,.3); }
-.lb-colortile.is-on .lb-colordot { border-color: var(--white); }
+.lb-colortile.is-on { border-color: var(--green); background: rgba(174,240,0,0.14); }
+.lb-colordot {
+  position: relative;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.18); box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+/* Aktive Farbe: kräftiger grüner Ring + Häkchen-Badge (hoher Kontrast unabhängig von der Farbe) */
+.lb-colortile.is-on .lb-colordot {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px var(--green), 0 2px 8px rgba(0,0,0,.35);
+}
+.lb-colortile.is-on .lb-colordot::after {
+  content: "✓";
+  position: absolute; right: -6px; bottom: -6px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--green); color: #0a1200;
+  font-size: 11px; font-weight: 900; line-height: 18px; text-align: center;
+  box-shadow: 0 0 0 2px #0e1626;
+}
 .lb-colortile small { font-size: 11px; color: var(--text-light-muted); }
-.lb-colortile.is-on small { color: var(--white); }
+.lb-colortile.is-on small { color: var(--white); font-weight: 700; }
 .lb-design-note { margin-top: 18px; font-size: 12.5px; line-height: 1.5; color: var(--text-light-muted); font-style: italic; }
 
 /* ---- Enterprise-Abzweig ---- */
@@ -673,42 +704,80 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 .cmock.is-haupt-light .cmock-media,
 .cmock.is-neben-light .cmock-media { box-shadow: inset 0 0 0 1px #cbd5e1; }
 
-/* ---- Stil-Layout-Anpassung (subtil, gleiche Grundelemente) ---- */
-/* Minimalistisch & clean: viel Weißraum, dünne Linien, kein Verlauf, schmaler Button */
-.cmock[data-stil="minimal"] .cmock-page { padding: 20px; }
-.cmock[data-stil="minimal"] .cmock-line { height: 6px; }
-.cmock[data-stil="minimal"] .cmock-btn { width: 64px; height: 22px; }
-.cmock[data-stil="minimal"] .cmock-media { background: #eef2f6; }
-.cmock[data-stil="minimal"] .cmock-hero { gap: 18px; }
-/* Elegant & edel: zentriert, schmalere Spalten, gedämpft */
+/* ---- Stil-Layout-Anpassung: auf den ersten Blick klar unterscheidbar ----
+   Bleibt bewusst abstrakt: nur wenige farbige Elemente
+   (Logo/Titel/Icon = Hauptfarbe, Button = Nebenfarbe, Media = Verlauf),
+   Rest neutralgrau. Verändert werden Weißraum, Proportionen, Rundungen. */
+
+/* Minimalistisch & clean: viel Weißraum, dünne Linien, KEIN Verlauf, kleiner schmaler Button */
+.cmock[data-stil="minimal"] .cmock-page { padding: 26px; }
+.cmock[data-stil="minimal"] .cmock-hero { gap: 24px; }
+.cmock[data-stil="minimal"] .cmock-title { height: 9px; width: 50%; }
+.cmock[data-stil="minimal"] .cmock-line { height: 5px; }
+.cmock[data-stil="minimal"] .cmock-btn { width: 52px; height: 18px; border-radius: 4px; }
+.cmock[data-stil="minimal"] .cmock-media { background: #eef2f6; min-height: 66px; } /* flach, kein Verlauf */
+.cmock[data-stil="minimal"] .cmock-navlinks i { height: 4px; }
+.cmock[data-stil="minimal"] .cmock-cards { gap: 18px; }
+.cmock[data-stil="minimal"] .cmock-card { border-color: #eef2f6; padding: 12px; }
+.cmock[data-stil="minimal"] .cmock-ico { width: 14px; height: 14px; }
+
+/* Bold & modern: große fette Titel-Linie, dicke Elemente, großer Button, starker Verlauf */
+.cmock[data-stil="bold"] .cmock-page { padding: 12px; }
+.cmock[data-stil="bold"] .cmock-title { height: 28px; width: 90%; border-radius: 6px; }
+.cmock[data-stil="bold"] .cmock-line { height: 11px; }
+.cmock[data-stil="bold"] .cmock-btn { width: 124px; height: 36px; border-radius: 8px; }
+.cmock[data-stil="bold"] .cmock-media { min-height: 108px; }
+.cmock[data-stil="bold"] .cmock-logo { width: 58px; height: 18px; }
+.cmock[data-stil="bold"] .cmock-navlinks i { height: 8px; width: 22px; }
+.cmock[data-stil="bold"] .cmock-ico { width: 26px; height: 26px; }
+
+/* Elegant & edel: zentriert, schmale Spalten, feine Linien, kleinere/gedämpfte Media */
+.cmock[data-stil="elegant"] .cmock-page { padding: 24px 32px; }
 .cmock[data-stil="elegant"] .cmock-hero { grid-template-columns: 1fr; }
-.cmock[data-stil="elegant"] .cmock-copy { align-items: center; }
+.cmock[data-stil="elegant"] .cmock-copy { align-items: center; gap: 11px; }
 .cmock[data-stil="elegant"] .cmock-copy > * { margin-left: auto; margin-right: auto; }
-.cmock[data-stil="elegant"] .cmock-title { width: 58%; }
-.cmock[data-stil="elegant"] .cmock-media { min-height: 52px; opacity: .85; }
-/* Verspielt & bunt: rundere Ecken, größerer Verlaufsblock, größerer Button */
+.cmock[data-stil="elegant"] .cmock-title { width: 44%; height: 8px; }
+.cmock[data-stil="elegant"] .cmock-line { height: 4px; }
+.cmock[data-stil="elegant"] .cmock-btn { width: 78px; height: 22px; border-radius: 2px; }
+.cmock[data-stil="elegant"] .cmock-media { min-height: 44px; opacity: .8; max-width: 60%; margin: 0 auto; }
+.cmock[data-stil="elegant"] .cmock-cards { gap: 16px; }
+
+/* Verspielt & bunt: sehr runde Ecken, großer bunter Verlaufsblock, runder großer Button */
 .cmock[data-stil="verspielt"] .cmock-browser,
 .cmock[data-stil="verspielt"] .cmock-media,
-.cmock[data-stil="verspielt"] .cmock-card,
-.cmock[data-stil="verspielt"] .cmock-btn { border-radius: 16px; }
-.cmock[data-stil="verspielt"] .cmock-media { min-height: 96px; }
-.cmock[data-stil="verspielt"] .cmock-btn { width: 104px; height: 30px; }
-/* Bold & modern: große Titel-Linie, größerer Button */
-.cmock[data-stil="bold"] .cmock-title { height: 20px; width: 82%; }
-.cmock[data-stil="bold"] .cmock-btn { width: 110px; height: 30px; }
-.cmock[data-stil="bold"] .cmock-media { min-height: 92px; }
-/* Warm & natürlich: weichere/rundere Formen, größere Abstände */
+.cmock[data-stil="verspielt"] .cmock-card { border-radius: 18px; }
+.cmock[data-stil="verspielt"] .cmock-media { min-height: 116px; }
+.cmock[data-stil="verspielt"] .cmock-btn { width: 66px; height: 34px; border-radius: 999px; } /* runder Pillen-Button */
+.cmock[data-stil="verspielt"] .cmock-logo { width: 30px; border-radius: 999px; }
+.cmock[data-stil="verspielt"] .cmock-ico { border-radius: 50%; }
+.cmock[data-stil="verspielt"] .cmock-title { border-radius: 999px; }
+
+/* Warm & natürlich: weiche/runde Formen, größere Abstände */
 .cmock[data-stil="warm"] .cmock-browser,
 .cmock[data-stil="warm"] .cmock-media,
 .cmock[data-stil="warm"] .cmock-card,
-.cmock[data-stil="warm"] .cmock-btn { border-radius: 18px; }
-.cmock[data-stil="warm"] .cmock-copy { gap: 11px; }
-.cmock[data-stil="warm"] .cmock-cards { gap: 13px; }
-/* Corporate & seriös: strenges Raster, gerade Kanten */
-.cmock[data-stil="corporate"] .cmock-browser { border-radius: 6px; }
+.cmock[data-stil="warm"] .cmock-btn { border-radius: 14px; }
+.cmock[data-stil="warm"] .cmock-page { padding: 20px; }
+.cmock[data-stil="warm"] .cmock-hero { gap: 18px; }
+.cmock[data-stil="warm"] .cmock-copy { gap: 12px; }
+.cmock[data-stil="warm"] .cmock-cards { gap: 14px; }
+.cmock[data-stil="warm"] .cmock-ico { border-radius: 50%; }
+.cmock[data-stil="warm"] .cmock-media { min-height: 90px; }
+
+/* Corporate & seriös: strenges Raster, gerade Kanten, gleichmäßige Karten */
+.cmock[data-stil="corporate"] .cmock-browser { border-radius: 4px; }
 .cmock[data-stil="corporate"] .cmock-media,
 .cmock[data-stil="corporate"] .cmock-card,
-.cmock[data-stil="corporate"] .cmock-btn { border-radius: 4px; }
+.cmock[data-stil="corporate"] .cmock-btn,
+.cmock[data-stil="corporate"] .cmock-logo,
+.cmock[data-stil="corporate"] .cmock-title,
+.cmock[data-stil="corporate"] .cmock-ico { border-radius: 2px; }
+.cmock[data-stil="corporate"] .cmock-page { padding: 14px; }
+.cmock[data-stil="corporate"] .cmock-hero { gap: 12px; align-items: stretch; }
+.cmock[data-stil="corporate"] .cmock-btn { width: 96px; height: 24px; }
+.cmock[data-stil="corporate"] .cmock-cards { gap: 8px; }
+.cmock[data-stil="corporate"] .cmock-card { border-color: #cbd5e1; padding: 10px; }
+.cmock[data-stil="corporate"] .cmock-media { min-height: 80px; }
 
 /* Reduced motion */
 .cmock-reduce .cmock-logo, .cmock-reduce .cmock-title, .cmock-reduce .cmock-ico,

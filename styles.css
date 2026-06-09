@@ -25,7 +25,10 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
+
+/* Kein horizontales Wegscrollen / kein weißer Rand auf Mobil */
+html, body { overflow-x: hidden; max-width: 100%; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

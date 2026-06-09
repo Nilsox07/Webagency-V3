@@ -77,7 +77,7 @@
         { value: 'beraten',         label: 'Weiß nicht / beraten lassen' },
       ],
 
-      stil: [ // Multi-Select, visuelle Moodboard-Karten (reine CSS-Grafik, lizenzfrei)
+      stil: [ // Single-Select, visuelle Moodboard-Karten (reine CSS-Grafik, lizenzfrei)
         { value: 'minimal',   label: 'Minimalistisch & clean', flavor: 'mood-minimal' },
         { value: 'elegant',   label: 'Elegant & edel',         flavor: 'mood-elegant' },
         { value: 'verspielt', label: 'Verspielt & bunt',       flavor: 'mood-verspielt' },
@@ -90,7 +90,6 @@
       // (jeweils Single-Select aus dieser Liste; KEIN HEX-Zwang)
       farben: [
         { value: 'blau',      label: 'Blau',        hex: '#2a5bd7' },
-        { value: 'hellblau',  label: 'Hellblau',    hex: '#4ea3ff' },
         { value: 'tuerkis',   label: 'Türkis',      hex: '#2bb3a3' },
         { value: 'gruen',     label: 'Grün',        hex: '#2f7d4f' },
         { value: 'lime',      label: 'Lime',        hex: '#b6ff3b' },
@@ -100,9 +99,7 @@
         { value: 'pink',      label: 'Pink',        hex: '#ff5a8a' },
         { value: 'violett',   label: 'Violett',     hex: '#7b5cff' },
         { value: 'gold',      label: 'Gold',        hex: '#c9a227' },
-        { value: 'navy',      label: 'Dunkelblau',  hex: '#07111f' },
-        { value: 'schwarz',   label: 'Schwarz',     hex: '#111317' },
-        { value: 'anthrazit', label: 'Anthrazit',   hex: '#3a3f47' },
+        { value: 'anthrazit', label: 'Anthrazit',   hex: '#222a36' },
         { value: 'beige',     label: 'Beige',       hex: '#d8c4a0' },
         { value: 'weiss',     label: 'Weiß',        hex: '#f4f6f8' },
       ],
@@ -137,7 +134,7 @@
       umfang:             { type: 'single', step: 3, required: false },
       seiten:             { type: 'multi',  step: 3, required: false }, // bedingt
       features:           { type: 'multi',  step: 4, required: false },
-      stil:               { type: 'multi',  step: 5, required: false },
+      stil:               { type: 'single', step: 5, required: false },
       hauptfarbe:         { type: 'single', step: 5, required: false },
       nebenfarbe:         { type: 'single', step: 5, required: false },
       markenfarben_hex:   { type: 'text',   step: 5, required: false }, // optional, kein Zwang
