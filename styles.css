@@ -25,7 +25,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -435,7 +435,7 @@ a { text-decoration: none; color: inherit; }
 /* Phone */
 .phone {
   position: absolute;
-  right: -6px; bottom: -40px;
+  right: 0; bottom: -40px;
   width: 118px;
   z-index: 4;
 }
