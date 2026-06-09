@@ -93,6 +93,8 @@ a { text-decoration: none; color: inherit; }
   text-transform: uppercase;
   color: var(--text-light-muted);
   margin-bottom: 16px;
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 .eyebrow-green { color: var(--green-strong); }
 .center { text-align: center; }
@@ -127,6 +129,9 @@ a { text-decoration: none; color: inherit; }
 .footer-logo .logo-img { height: 26px; max-height: 26px; }
 @media (max-width: 480px) {
   .logo-img { height: 26px; max-height: 26px; }
+  /* Lange Großbuchstaben-Eyebrows (z. B. „SUCHMASCHINENOPTIMIERUNG") auf
+     schmalen Screens etwas enger setzen, damit sie sicher in den Viewport passen. */
+  .eyebrow { letter-spacing: 0.08em; }
 }
 
 /* ============ HEADER ============ */
@@ -677,6 +682,9 @@ a { text-decoration: none; color: inherit; }
   color: var(--white);
   padding: 70px 0 78px;
   text-align: center;
+  /* Wie .hero auf der Startseite: horizontalen Überlauf der Hero-Inhalte
+     eindämmen, damit Unterseiten auf Mobil nicht seitlich wegscrollen. */
+  overflow-x: clip;
 }
 .page-hero h1 {
   font-size: clamp(34px, 5vw, 52px);
