@@ -15,6 +15,10 @@ Diese Punkte sind bewusst bis zum Go-live offen. **Reihenfolge bei Domain-Wechse
 - [ ] NAP füllen: `[FIRMENNAME / INHABER]`, `[STRASSE UND HAUSNUMMER]`, `[PLZ] [ORT]`, `[TELEFON]`, `[E-MAIL]`, `[NACHNAME]`, `[JAHR]`.
 - [ ] Social-Links als echte `<a>`-Tags einsetzen (`[INSTAGRAM-URL]`, `[FACEBOOK-URL]`, `[LINKEDIN-URL]`).
 
+## Performance / Assets
+- [ ] **Favicon fehlt:** favicon.ico / SVG-Favicon + `<link rel="icon">` auf allen Seiten ergänzen.
+- [ ] `assets/logo.png` (204 KB) als WebP/AVIF-Variante bereitstellen und einbinden (Logo ist das einzige Bild der Site).
+
 ## Suchmaschinen / KI
 - [ ] robots.txt: `[DOMAIN]` in der Sitemap-Zeile ersetzen.
 - [ ] Bing Webmaster Tools + IndexNow einrichten.
