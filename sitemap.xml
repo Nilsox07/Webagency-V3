@@ -12,6 +12,9 @@
   <url><loc>https://[DOMAIN]/ablauf</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://[DOMAIN]/ueber-uns</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://[DOMAIN]/ratgeber</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://[DOMAIN]/ratgeber-website-kosten</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://[DOMAIN]/ratgeber-bfsg</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://[DOMAIN]/ratgeber-onepager</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://[DOMAIN]/ratgeber-foerderung</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://[DOMAIN]/briefing</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://[DOMAIN]/kontakt</loc><changefreq>yearly</changefreq><priority>0.6</priority></url>
