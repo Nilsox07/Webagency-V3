@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Login · Sartu Kundenportal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal.css?v=1" />
+</head>
+<body>
+  <div class="pt-wrap">
+    <div class="pt-top">
+      <a class="pt-brand" href="index.html"><span class="dot"></span>Sartu</a>
+    </div>
+
+    <div class="auth-box">
+      <div class="card">
+        <p class="eyebrow">Kundenportal</p>
+        <h1>Anmelden</h1>
+        <p class="muted" style="margin-bottom:18px;">Gib deine E-Mail ein. Wir schicken dir einen Login-Link <strong>und</strong> einen 6-stelligen Code.</p>
+
+        <!-- Schritt 1: E-Mail -->
+        <form id="emailForm">
+          <div class="field">
+            <label for="email">E-Mail-Adresse</label>
+            <input type="email" id="email" name="email" autocomplete="email" placeholder="name@firma.de" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;" id="sendBtn">Login-Link anfordern</button>
+        </form>
+
+        <!-- Schritt 2: Code (erscheint nach dem Absenden) -->
+        <form id="codeForm" class="hidden" style="margin-top:6px;">
+          <div class="notice notice-ok" id="sentNote"></div>
+          <div class="field">
+            <label for="code">6-stelliger Code aus der E-Mail</label>
+            <input type="text" id="code" name="code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="6" />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;" id="verifyBtn">Code bestätigen &amp; einloggen</button>
+          <p class="muted" style="margin-top:12px;">Oder klick einfach den Link in der E-Mail — beides funktioniert.</p>
+          <button type="button" class="btn btn-ghost btn-sm" style="margin-top:10px;" id="backBtn">Andere E-Mail</button>
+        </form>
+
+        <p class="notice notice-err hidden" id="err"></p>
+        <p class="muted" id="configWarn" style="margin-top:16px;"></p>
+      </div>
+      <p class="muted" style="text-align:center; margin-top:14px;">
+        Noch kein Zugang? Konten legt Sartu an — <a href="kontakt.html">melde dich bei uns</a>.
+      </p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="portal-config.js?v=1"></script>
+  <script>
+  (function () {
+    'use strict';
+    var emailForm = document.getElementById('emailForm');
+    var codeForm = document.getElementById('codeForm');
+    var err = document.getElementById('err');
+    var sentNote = document.getElementById('sentNote');
+    var sendBtn = document.getElementById('sendBtn');
+    var verifyBtn = document.getElementById('verifyBtn');
+    var currentEmail = '';
+
+    function showErr(msg) { err.textContent = msg; err.classList.remove('hidden'); }
+    function clearErr() { err.classList.add('hidden'); }
+
+    if (!window.sb) {
+      document.getElementById('configWarn').textContent =
+        'Hinweis: Supabase ist noch nicht konfiguriert ([SUPABASE_URL]/[SUPABASE_ANON_KEY] in portal-config.js).';
+      sendBtn.disabled = true;
+      return;
+    }
+
+    // Bereits eingeloggt? → direkt weiter
+    window.sb.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) routeAfterLogin();
+    });
+
+    emailForm.addEventListener('submit', function (e) {
+      e.preventDefault(); clearErr();
+      currentEmail = document.getElementById('email').value.trim().toLowerCase();
+      if (!currentEmail) return;
+      sendBtn.disabled = true; sendBtn.innerHTML = '<span class="spinner"></span> Senden…';
+      // shouldCreateUser:false → Konten legt NUR der Admin an (kein Self-Signup!)
+      window.sb.auth.signInWithOtp({
+        email: currentEmail,
+        options: { shouldCreateUser: false }
+      }).then(function (r) {
+        sendBtn.disabled = false; sendBtn.textContent = 'Login-Link anfordern';
+        if (r.error) { showErr(deutsch(r.error.message)); return; }
+        sentNote.innerHTML = 'Wir haben dir einen <strong>Login-Link</strong> und einen <strong>6-stelligen Code</strong> an <strong>' + escapeHtml(currentEmail) + '</strong> geschickt.';
+        emailForm.classList.add('hidden');
+        codeForm.classList.remove('hidden');
+        document.getElementById('code').focus();
+      });
+    });
+
+    codeForm.addEventListener('submit', function (e) {
+      e.preventDefault(); clearErr();
+      var token = document.getElementById('code').value.trim();
+      if (token.length < 6) { showErr('Bitte den 6-stelligen Code eingeben.'); return; }
+      verifyBtn.disabled = true; verifyBtn.innerHTML = '<span class="spinner"></span> Prüfe…';
+      window.sb.auth.verifyOtp({ email: currentEmail, token: token, type: 'email' })
+        .then(function (r) {
+          verifyBtn.disabled = false; verifyBtn.textContent = 'Code bestätigen & einloggen';
+          if (r.error) { showErr(deutsch(r.error.message)); return; }
+          routeAfterLogin();
+        });
+    });
+
+    document.getElementById('backBtn').addEventListener('click', function () {
+      codeForm.classList.add('hidden'); emailForm.classList.remove('hidden'); clearErr();
+    });
+
+    // Nach Login: Admins → admin.html, sonst portal.html
+    function routeAfterLogin() {
+      window.sb.rpc('is_admin').then(function (r) {
+        window.location.href = (r.data === true) ? 'admin.html' : 'portal.html';
+      });
+    }
+
+    function deutsch(msg) {
+      msg = String(msg || '');
+      if (/not.*found|Signups not allowed|user.*not/i.test(msg)) return 'Für diese E-Mail gibt es keinen Zugang. Bitte melde dich bei Sartu.';
+      if (/rate limit|too many/i.test(msg)) return 'Zu viele Versuche — bitte kurz warten und erneut probieren.';
+      if (/expired|invalid/i.test(msg)) return 'Code ungültig oder abgelaufen. Fordere einen neuen an.';
+      return 'Es ist ein Fehler aufgetreten: ' + msg;
+    }
+    function escapeHtml(s) { return s.replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  })();
+  </script>
+</body>
+</html>

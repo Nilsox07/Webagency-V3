@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Mein Projekt · Sartu Kundenportal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal.css?v=1" />
+</head>
+<body>
+  <div class="pt-wrap">
+    <div class="pt-top">
+      <a class="pt-brand" href="index.html"><span class="dot"></span>Sartu</a>
+      <div class="pt-top-actions">
+        <select id="projSwitch" class="hidden" style="min-width:160px; padding:9px 12px; border-radius:999px; background:rgba(255,255,255,.05); border:1.5px solid var(--border); color:#fff;"></select>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn">Abmelden</button>
+      </div>
+    </div>
+
+    <div id="loading" class="card"><span class="spinner"></span> Lädt dein Projekt …</div>
+    <div id="empty" class="card hidden">
+      <h2>Noch kein Projekt hinterlegt</h2>
+      <p class="muted">Sobald dein Angebot bestätigt ist, erscheint dein Projekt hier. Fragen? <a href="kontakt.html">Schreib uns</a>.</p>
+    </div>
+
+    <main id="app" class="hidden">
+      <div class="pt-hello card">
+        <p class="eyebrow">Dein Projekt</p>
+        <h1 id="hello">Hallo</h1>
+        <p id="projTitle"></p>
+        <div class="row" style="margin-top:10px;">
+          <span class="badge" id="paketBadge"></span>
+          <span class="badge" id="careBadge"></span>
+          <span class="badge" id="terminBadge"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Status deines Projekts</h2>
+        <div class="timeline" id="timeline"></div>
+      </div>
+
+      <div class="card now-card" id="nowCard">
+        <p class="eyebrow">Jetzt dran</p>
+        <p id="nowText"></p>
+      </div>
+
+      <div class="card hidden" id="noteCard">
+        <h2>Notiz von Sartu</h2>
+        <p id="noteText" style="color:var(--text-light);"></p>
+      </div>
+
+      <!-- Platzhalter-Karten: zeigen, was kommt, ohne klickbare kaputte Funktionen -->
+      <div class="spread" style="gap:16px; align-items:stretch;">
+        <div class="card is-soon" style="flex:1; min-width:220px;">
+          <div class="spread"><h3>Inhalte hochladen</h3><span class="badge badge-soon">Bald</span></div>
+          <p class="muted" style="margin-top:8px;">Texte, Bilder &amp; Logo bequem hochladen.</p>
+        </div>
+        <div class="card is-soon" style="flex:1; min-width:220px;">
+          <div class="spread"><h3>Care-Minuten</h3><span class="badge badge-soon">Bald</span></div>
+          <p class="muted" style="margin-top:8px;">Verbrauchte &amp; offene Wartungsminuten im Blick.</p>
+        </div>
+        <div class="card is-soon" style="flex:1; min-width:220px;">
+          <div class="spread"><h3>Dokumente</h3><span class="badge badge-soon">Bald</span></div>
+          <p class="muted" style="margin-top:8px;">Angebote, Rechnungen &amp; Verträge zum Download.</p>
+        </div>
+      </div>
+
+      <div class="pt-footer">
+        <a href="datenschutz.html">Datenschutz</a>
+        <a id="kuendigung" href="mailto:?subject=Kündigung%20Sartu%20Care">Kündigung / Care beenden</a>
+        <a href="kontakt.html">Kontakt</a>
+      </div>
+    </main>
+
+    <p class="notice notice-err hidden" id="err"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="portal-config.js?v=1"></script>
+  <script>
+  (function () {
+    'use strict';
+    if (!window.sb) { window.location.href = 'login.html'; return; }
+
+    // Phasen-Reihenfolge & verständliche Labels
+    var BASE_BEFORE = ['angebot_bestaetigt', 'inhalte_liefern', 'design_laeuft'];
+    var BASE_AFTER = ['finalisierung', 'live'];
+    var LABELS = {
+      angebot_bestaetigt: 'Angebot bestätigt',
+      inhalte_liefern: 'Inhalte liefern',
+      design_laeuft: 'Design läuft',
+      korrektur_1: 'Korrektur 1', korrektur_2: 'Korrektur 2',
+      korrektur_3: 'Korrektur 3', korrektur_4: 'Korrektur 4',
+      finalisierung: 'Finalisierung', live: 'Live'
+    };
+    // Anzahl Korrekturrunden je Paket (Basis 2, Pro 3, Platin 4)
+    var ROUNDS = { basis: 2, pro: 3, platin: 4 };
+    // „Jetzt dran"-Texte je Phase — leicht editierbar.
+    var NOW = {
+      angebot_bestaetigt: 'Willkommen! Dein Angebot ist bestätigt. Wir melden uns mit den nächsten Schritten — du musst gerade nichts tun.',
+      inhalte_liefern: 'Bitte sende uns deine Texte, Bilder und dein Logo. Der Upload-Bereich kommt in Kürze — bis dahin gerne per E-Mail an uns.',
+      design_laeuft: 'Wir gestalten gerade dein Design. Lehn dich zurück — der erste Entwurf kommt bald zur Abstimmung.',
+      korrektur: 'Dein Entwurf liegt zur Durchsicht bereit. Bitte sammle dein Feedback und schick es uns gebündelt in einer Nachricht.',
+      finalisierung: 'Letzter Feinschliff: Wir bereiten alles für den Go-live vor. Bitte halte finale Freigaben bereit.',
+      live: 'Geschafft — deine Website ist live! 🎉 Ab jetzt kümmert sich Sartu Care um Betrieb, Updates und Sicherheit.'
+    };
+
+    var err = document.getElementById('err');
+    function showErr(m) { err.textContent = m; err.classList.remove('hidden'); }
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      window.sb.auth.signOut().then(function () { window.location.href = 'login.html'; });
+    });
+
+    var projects = [];
+
+    window.sb.auth.getSession().then(function (res) {
+      if (!res.data || !res.data.session) { window.location.href = 'login.html'; return; }
+      var email = res.data.session.user.email;
+      // Profil (Name) + Projekte laden (RLS-sicher: projects_customer ohne notiz_intern)
+      Promise.all([
+        window.sb.from('profiles').select('name').limit(1).maybeSingle(),
+        window.sb.from('projects_customer').select('*').order('created_at', { ascending: true })
+      ]).then(function (out) {
+        var prof = out[0].data || {};
+        projects = (out[1].data) || [];
+        if (out[1].error) { showErr('Projekte konnten nicht geladen werden.'); }
+        document.getElementById('loading').classList.add('hidden');
+        var firstName = (prof.name || email || '').split(' ')[0];
+        document.getElementById('hello').textContent = 'Hallo ' + firstName;
+
+        if (!projects.length) { document.getElementById('empty').classList.remove('hidden'); return; }
+        document.getElementById('app').classList.remove('hidden');
+
+        if (projects.length > 1) {
+          var sw = document.getElementById('projSwitch');
+          sw.classList.remove('hidden');
+          projects.forEach(function (p, i) {
+            var o = document.createElement('option'); o.value = String(i);
+            o.textContent = p.titel || ('Projekt ' + (i + 1)); sw.appendChild(o);
+          });
+          sw.addEventListener('change', function () { render(projects[+sw.value]); });
+        }
+        render(projects[0]);
+      });
+    });
+
+    function phaseSequence(paket) {
+      var n = ROUNDS[(paket || '').toLowerCase()] || 4; // Enterprise/unbekannt: bis zu 4
+      var seq = BASE_BEFORE.slice();
+      for (var i = 1; i <= n; i++) seq.push('korrektur_' + i);
+      return seq.concat(BASE_AFTER);
+    }
+
+    function render(p) {
+      document.getElementById('projTitle').textContent = p.titel || 'Dein Website-Projekt';
+      setBadge('paketBadge', p.paket ? 'Paket: ' + cap(p.paket) : '');
+      setBadge('careBadge', p.care_stufe ? p.care_stufe : '');
+      setBadge('terminBadge', p.liefertermin ? 'Liefertermin: ' + fmtDate(p.liefertermin) : '');
+
+      var seq = phaseSequence(p.paket);
+      var curr = seq.indexOf(p.phase);
+      if (curr < 0) curr = 0; // Phase nicht in Sequenz (z. B. korrektur über Paket-Limit) → Anfang
+
+      var tl = document.getElementById('timeline'); tl.innerHTML = '';
+      seq.forEach(function (ph, i) {
+        var step = document.createElement('div');
+        var state = i < curr ? 'is-done' : (i === curr ? 'is-active' : '');
+        step.className = 'tl-step ' + state;
+        var inner = i < curr ? '✓' : String(i + 1);
+        step.innerHTML = '<div class="tl-dot">' + inner + '</div><div class="tl-label">' + (LABELS[ph] || ph) + '</div>';
+        tl.appendChild(step);
+      });
+
+      var nowKey = /^korrektur_/.test(p.phase) ? 'korrektur' : p.phase;
+      document.getElementById('nowText').textContent = NOW[nowKey] || 'Wir halten dich auf dem Laufenden.';
+
+      var nc = document.getElementById('noteCard');
+      if (p.notiz_kunde) { document.getElementById('noteText').textContent = p.notiz_kunde; nc.classList.remove('hidden'); }
+      else nc.classList.add('hidden');
+    }
+
+    function setBadge(id, txt) { var el = document.getElementById(id); if (txt) { el.textContent = txt; el.classList.remove('hidden'); } else el.classList.add('hidden'); }
+    function cap(s) { return String(s).charAt(0).toUpperCase() + String(s).slice(1); }
+    function fmtDate(d) { try { return new Date(d).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }); } catch (e) { return d; } }
+  })();
+  </script>
+</body>
+</html>

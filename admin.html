@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Admin · Sartu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal.css?v=1" />
+</head>
+<body>
+  <div class="pt-wrap pt-wrap-wide">
+    <div class="pt-top">
+      <a class="pt-brand" href="index.html"><span class="dot"></span>Sartu · Admin</a>
+      <div class="pt-top-actions"><button class="btn btn-ghost btn-sm" id="logoutBtn">Abmelden</button></div>
+    </div>
+
+    <div id="gate" class="card"><span class="spinner"></span> Prüfe Zugang …</div>
+    <div id="denied" class="card hidden">
+      <h2>Kein Admin-Zugang</h2>
+      <p class="muted">Dieser Bereich ist nur für Sartu-Admins. Du wirst abgemeldet …</p>
+    </div>
+
+    <main id="app" class="hidden">
+      <div class="tabs">
+        <button class="tab is-on" data-tab="anfragen">Anfragen</button>
+        <button class="tab" data-tab="projekte">Projekte</button>
+        <button class="tab" data-tab="kunden">Kunden</button>
+      </div>
+
+      <section id="tab-anfragen">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Datum</th><th>Name</th><th>E-Mail</th><th>Status</th></tr></thead>
+            <tbody id="anfragenBody"><tr><td colspan="4"><span class="spinner"></span> Lädt …</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-projekte" class="hidden">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Projekt</th><th>Kunde</th><th>Paket</th><th>Phase</th></tr></thead>
+            <tbody id="projekteBody"><tr><td colspan="4"><span class="spinner"></span> Lädt …</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-kunden" class="hidden">
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Name</th><th>E-Mail</th><th>Firma</th><th>Rolle</th><th>Projekte</th></tr></thead>
+            <tbody id="kundenBody"><tr><td colspan="5"><span class="spinner"></span> Lädt …</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <p class="notice notice-err hidden" id="err"></p>
+  </div>
+
+  <!-- Generisches Modal -->
+  <div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="portal-config.js?v=1"></script>
+  <script>
+  (function () {
+    'use strict';
+    if (!window.sb) { window.location.href = 'login.html'; return; }
+    var sb = window.sb;
+    var PHASES = ['angebot_bestaetigt','inhalte_liefern','design_laeuft','korrektur_1','korrektur_2','korrektur_3','korrektur_4','finalisierung','live'];
+    var PHASE_LABEL = { angebot_bestaetigt:'Angebot bestätigt', inhalte_liefern:'Inhalte liefern', design_laeuft:'Design läuft', korrektur_1:'Korrektur 1', korrektur_2:'Korrektur 2', korrektur_3:'Korrektur 3', korrektur_4:'Korrektur 4', finalisierung:'Finalisierung', live:'Live' };
+    var STATUS = ['neu','in_bearbeitung','umgewandelt','abgelehnt'];
+    var PAKETE = ['Basis','Pro','Platin','Enterprise'];
+    var CARE = ['Care S','Care M','Care L'];
+
+    var err = document.getElementById('err');
+    function showErr(m) { err.textContent = m; err.classList.remove('hidden'); setTimeout(function(){err.classList.add('hidden');}, 6000); }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+    function fmtDate(d) { try { return new Date(d).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(e){ return d; } }
+    function fmtEUR(n) { return (Math.round(n)||0).toLocaleString('de-DE') + ' €'; }
+    var modalBg = document.getElementById('modalBg'), modalBox = document.getElementById('modalBox');
+    function openModal(html) { modalBox.innerHTML = html; modalBg.classList.add('is-open'); }
+    function closeModal() { modalBg.classList.remove('is-open'); modalBox.innerHTML = ''; }
+    modalBg.addEventListener('click', function (e) { if (e.target === modalBg) closeModal(); });
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      sb.auth.signOut().then(function () { window.location.href = 'login.html'; });
+    });
+
+    // ---- Admin-Gate (UX; echte Absicherung = RLS) ----
+    sb.auth.getSession().then(function (res) {
+      if (!res.data || !res.data.session) { window.location.href = 'login.html'; return; }
+      sb.rpc('is_admin').then(function (r) {
+        document.getElementById('gate').classList.add('hidden');
+        if (r.data !== true) {
+          document.getElementById('denied').classList.remove('hidden');
+          setTimeout(function () { sb.auth.signOut().then(function(){ window.location.href = 'login.html'; }); }, 2200);
+          return;
+        }
+        document.getElementById('app').classList.remove('hidden');
+        loadAnfragen(); loadProjekte(); loadKunden();
+      });
+    });
+
+    // ---- Tabs ----
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+      t.addEventListener('click', function () {
+        Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (x) { x.classList.remove('is-on'); });
+        t.classList.add('is-on');
+        ['anfragen','projekte','kunden'].forEach(function (name) {
+          document.getElementById('tab-' + name).classList.toggle('hidden', name !== t.dataset.tab);
+        });
+      });
+    });
+
+    /* ============ ANFRAGEN (Inbox) ============ */
+    function loadAnfragen() {
+      sb.from('briefings').select('*').order('created_at', { ascending: false }).then(function (r) {
+        var tb = document.getElementById('anfragenBody');
+        if (r.error) { tb.innerHTML = '<tr><td colspan="4">Fehler: ' + esc(r.error.message) + '</td></tr>'; return; }
+        var rows = r.data || [];
+        if (!rows.length) { tb.innerHTML = '<tr><td colspan="4" class="muted">Noch keine Anfragen.</td></tr>'; return; }
+        tb.innerHTML = '';
+        rows.forEach(function (b) {
+          var tr = document.createElement('tr'); tr.className = 'clickable';
+          tr.innerHTML = '<td>' + esc(fmtDate(b.created_at)) + '</td><td>' + esc(b.kontakt_name || '–') + '</td><td>' + esc(b.kontakt_email || '–') + '</td><td><span class="status-badge s-' + esc(b.status) + '">' + esc(b.status) + '</span></td>';
+          tr.addEventListener('click', function () { openAnfrage(b); });
+          tb.appendChild(tr);
+        });
+      });
+    }
+
+    function openAnfrage(b) {
+      var p = b.payload || {};
+      openModal(
+        '<div class="spread"><h2 style="color:#fff">Anfrage</h2><button class="btn btn-ghost btn-sm" id="mClose">Schließen</button></div>' +
+        '<p class="muted">' + esc(fmtDate(b.created_at)) + ' · Status: <span class="status-badge s-' + esc(b.status) + '">' + esc(b.status) + '</span></p>' +
+        renderBriefing(p) +
+        '<div class="row" style="margin-top:18px;">' +
+          '<label class="muted">Status&nbsp;</label>' +
+          '<select id="aStatus" style="padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.05);border:1.5px solid var(--border);color:#fff;">' +
+            STATUS.map(function (s) { return '<option value="' + s + '"' + (s === b.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') +
+          '</select>' +
+          '<button class="btn btn-ghost btn-sm" id="aSave">Status speichern</button>' +
+          '<button class="btn btn-primary btn-sm" id="aConvert">In Projekt umwandeln</button>' +
+        '</div>'
+      );
+      document.getElementById('mClose').addEventListener('click', closeModal);
+      document.getElementById('aSave').addEventListener('click', function () {
+        sb.from('briefings').update({ status: document.getElementById('aStatus').value }).eq('id', b.id).then(function (r) {
+          if (r.error) showErr(r.error.message); else { closeModal(); loadAnfragen(); }
+        });
+      });
+      document.getElementById('aConvert').addEventListener('click', function () { openConvert(b); });
+    }
+
+    function renderBriefing(p) {
+      if (!p || !Object.keys(p).length) return '<p class="muted" style="margin-top:12px;">Kein strukturiertes Payload.</p>';
+      var k = p.kontakt || {}, br = p.briefing || {}, cfg = p.konfiguration || {};
+      var rows = [];
+      rows.push(['Kontakt', [k.name, k.email, k.telefon].filter(Boolean).join(' · ')]);
+      rows.push(['Pfad', p.pfad === 'B' ? 'Lumi-Beratung' : 'Direkt-Konfigurator']);
+      if (p.pfad === 'B') {
+        rows.push(['Branche', br.branche]);
+        rows.push(['Ziele', arr(br.ziele)]);
+        rows.push(['Umfang', br.umfang]);
+        rows.push(['Funktionen', arr(br.features)]);
+        rows.push(['Stil / Farben', [br.stil, br.hauptfarbe, br.nebenfarbe].filter(Boolean).join(' · ')]);
+        rows.push(['Material', arr(br.material)]);
+        rows.push(['Zeitrahmen', br.zeitrahmen]);
+        rows.push(['Empfehlung', br.paket_empfohlen]);
+      }
+      if (cfg.modus === 'enterprise') {
+        rows.push(['Konfiguration', 'Enterprise — individuelles Angebot']);
+        if (cfg.anforderungen) rows.push(['Anforderungen', JSON.stringify(cfg.anforderungen)]);
+      } else if (cfg.paket) {
+        rows.push(['Paket', (cfg.paket_name || cfg.paket) + (cfg.paket_preis != null ? ' · ' + fmtEUR(cfg.paket_preis) : '')]);
+        rows.push(['Wartung', cfg.wartung_name || cfg.wartung]);
+        if (cfg.extra_seiten) rows.push(['Extraseiten', cfg.extra_seiten]);
+        if (cfg.addons && cfg.addons.length) rows.push(['Add-ons', cfg.addons.map(function (a) { return a.name + (a.qty > 1 ? ' ×' + a.qty : ''); }).join(', ')]);
+        rows.push(['Summe einmalig', cfg.summe_einmalig != null ? fmtEUR(cfg.summe_einmalig) : '–']);
+        rows.push(['Summe monatlich', cfg.summe_monatlich != null ? fmtEUR(cfg.summe_monatlich) : '–']);
+      }
+      var html = '<div class="kv" style="margin-top:14px;">';
+      rows.forEach(function (r) { if (r[1]) html += '<div class="k">' + esc(r[0]) + '</div><div class="v">' + esc(r[1]) + '</div>'; });
+      html += '</div>';
+      html += '<details style="margin-top:14px;"><summary class="muted" style="cursor:pointer;">Rohdaten (JSON)</summary><pre class="json">' + esc(JSON.stringify(p, null, 2)) + '</pre></details>';
+      return html;
+    }
+    function arr(a) { return Array.isArray(a) ? a.join(', ') : (a || ''); }
+
+    /* ---- In Projekt umwandeln ---- */
+    function openConvert(b) {
+      var p = b.payload || {}, k = p.kontakt || {}, cfg = p.konfiguration || {};
+      var paket = cap(cfg.paket || (p.briefing && p.briefing.paket_empfohlen) || '');
+      openModal(
+        '<div class="spread"><h2 style="color:#fff">In Projekt umwandeln</h2><button class="btn btn-ghost btn-sm" id="cClose">Schließen</button></div>' +
+        '<div class="field"><label>E-Mail des Kunden</label><input id="cEmail" type="email" value="' + esc(k.email || b.kontakt_email || '') + '"></div>' +
+        '<div class="field"><label>Name</label><input id="cName" type="text" value="' + esc(k.name || b.kontakt_name || '') + '"></div>' +
+        '<div class="field"><label>Projekt-Titel</label><input id="cTitel" type="text" value="Website ' + esc(k.name || '') + '"></div>' +
+        '<div class="row">' +
+          '<div class="field" style="flex:1;min-width:140px;"><label>Paket</label><select id="cPaket">' + PAKETE.map(function (x) { return '<option' + (x.toLowerCase() === (paket||'').toLowerCase() ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></div>' +
+          '<div class="field" style="flex:1;min-width:140px;"><label>Care-Stufe</label><select id="cCare">' + CARE.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></div>' +
+        '</div>' +
+        '<div class="notice" id="cInfo">Legt (falls nötig) einen Kunden an, lädt ihn per E-Mail ein und erstellt das Projekt.</div>' +
+        '<div class="row row-end" style="margin-top:8px;"><button class="btn btn-primary" id="cGo">Umwandeln &amp; einladen</button></div>'
+      );
+      document.getElementById('cClose').addEventListener('click', closeModal);
+      document.getElementById('cGo').addEventListener('click', function () { doConvert(b); });
+    }
+
+    function doConvert(b) {
+      var info = document.getElementById('cInfo'), go = document.getElementById('cGo');
+      var email = document.getElementById('cEmail').value.trim().toLowerCase();
+      var name = document.getElementById('cName').value.trim();
+      var titel = document.getElementById('cTitel').value.trim();
+      var paket = document.getElementById('cPaket').value;
+      var care = document.getElementById('cCare').value;
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { info.className = 'notice notice-err'; info.textContent = 'Bitte gültige E-Mail eingeben.'; return; }
+      go.disabled = true; go.innerHTML = '<span class="spinner"></span> Arbeite …';
+
+      // 1) Profil suchen/anlegen
+      sb.from('profiles').select('id').eq('email', email).maybeSingle().then(function (r) {
+        var existing = r.data;
+        var pid = existing ? Promise.resolve(existing.id)
+          : sb.from('profiles').insert({ email: email, name: name, role: 'customer' }).select('id').single()
+              .then(function (ins) { if (ins.error) throw ins.error; return ins.data.id; });
+        return Promise.resolve(pid).then(function (profileId) {
+          // 2) Einladung per Edge Function (service_role nur dort)
+          return sb.functions.invoke('invite_customer', { body: { email: email, name: name } })
+            .then(function (inv) { return { profileId: profileId, invite: inv, alreadyExisted: !!existing }; })
+            .catch(function () { return { profileId: profileId, invite: { error: 'edge_unavailable' }, alreadyExisted: !!existing }; });
+        });
+      }).then(function (ctx) {
+        // 3) Projekt anlegen
+        return sb.from('projects').insert({
+          customer_id: ctx.profileId, titel: titel, paket: paket, care_stufe: care, phase: 'angebot_bestaetigt'
+        }).then(function (pr) {
+          if (pr.error) throw pr.error;
+          // 4) Briefing-Status setzen
+          return sb.from('briefings').update({ status: 'umgewandelt' }).eq('id', b.id).then(function () { return ctx; });
+        });
+      }).then(function (ctx) {
+        closeModal(); loadAnfragen(); loadProjekte(); loadKunden();
+        var msg = 'Projekt angelegt.';
+        if (ctx.invite && ctx.invite.error === 'edge_unavailable') {
+          msg += ' Edge Function nicht erreichbar — lade den Kunden manuell ein: Supabase → Authentication → Users → „Invite user" mit ' + email + '.';
+        } else if (ctx.invite && ctx.invite.data && ctx.invite.data.ok === false) {
+          msg += ' (Hinweis Einladung: ' + (ctx.invite.data.error || 'evtl. bereits eingeladen') + ')';
+        } else {
+          msg += ' Einladung an ' + email + ' verschickt.';
+        }
+        alert(msg);
+      }).catch(function (e) {
+        go.disabled = false; go.textContent = 'Umwandeln & einladen';
+        info.className = 'notice notice-err'; info.textContent = 'Fehler: ' + (e.message || e);
+      });
+    }
+
+    /* ============ PROJEKTE ============ */
+    function loadProjekte() {
+      // admin_projects() liefert auch notiz_intern (security definer, prüft is_admin())
+      Promise.all([
+        sb.rpc('admin_projects'),
+        sb.from('profiles').select('id,name,email')
+      ]).then(function (out) {
+        var tb = document.getElementById('projekteBody');
+        if (out[0].error) { tb.innerHTML = '<tr><td colspan="4">Fehler: ' + esc(out[0].error.message) + '</td></tr>'; return; }
+        var projs = out[0].data || [], profs = out[1].data || [];
+        var pmap = {}; profs.forEach(function (p) { pmap[p.id] = p; });
+        if (!projs.length) { tb.innerHTML = '<tr><td colspan="4" class="muted">Noch keine Projekte.</td></tr>'; return; }
+        tb.innerHTML = '';
+        projs.forEach(function (pr) {
+          var cust = pmap[pr.customer_id] || {};
+          var tr = document.createElement('tr'); tr.className = 'clickable';
+          tr.innerHTML = '<td>' + esc(pr.titel || '–') + '</td><td>' + esc(cust.name || cust.email || '–') + '</td><td>' + esc(pr.paket || '–') + '</td><td>' + esc(PHASE_LABEL[pr.phase] || pr.phase) + '</td>';
+          tr.addEventListener('click', function () { openProjekt(pr, cust); });
+          tb.appendChild(tr);
+        });
+      });
+    }
+
+    function openProjekt(pr, cust) {
+      openModal(
+        '<div class="spread"><h2 style="color:#fff">' + esc(pr.titel || 'Projekt') + '</h2><button class="btn btn-ghost btn-sm" id="pClose">Schließen</button></div>' +
+        '<p class="muted">Kunde: ' + esc(cust.name || cust.email || '–') + '</p>' +
+        '<div class="field"><label>Phase</label><select id="pPhase">' + PHASES.map(function (ph) { return '<option value="' + ph + '"' + (ph === pr.phase ? ' selected' : '') + '>' + PHASE_LABEL[ph] + '</option>'; }).join('') + '</select></div>' +
+        '<div class="field"><label>Liefertermin</label><input id="pTermin" type="date" value="' + esc(pr.liefertermin || '') + '"></div>' +
+        '<div class="field"><label>Notiz für den Kunden (sichtbar im Portal)</label><textarea id="pNotizK" rows="3">' + esc(pr.notiz_kunde || '') + '</textarea></div>' +
+        '<div class="field"><label>Interne Notiz (nur Admin)</label><textarea id="pNotizI" rows="3">' + esc(pr.notiz_intern || '') + '</textarea></div>' +
+        '<div class="row row-end"><button class="btn btn-primary" id="pSave">Speichern</button></div>'
+      );
+      document.getElementById('pClose').addEventListener('click', closeModal);
+      document.getElementById('pSave').addEventListener('click', function () {
+        var upd = {
+          phase: document.getElementById('pPhase').value,
+          liefertermin: document.getElementById('pTermin').value || null,
+          notiz_kunde: document.getElementById('pNotizK').value || null,
+          notiz_intern: document.getElementById('pNotizI').value || null
+        };
+        sb.from('projects').update(upd).eq('id', pr.id).then(function (r) {
+          if (r.error) showErr(r.error.message); else { closeModal(); loadProjekte(); }
+        });
+      });
+    }
+
+    /* ============ KUNDEN ============ */
+    function loadKunden() {
+      Promise.all([
+        sb.from('profiles').select('*').order('created_at', { ascending: false }),
+        sb.rpc('admin_projects')
+      ]).then(function (out) {
+        var tb = document.getElementById('kundenBody');
+        if (out[0].error) { tb.innerHTML = '<tr><td colspan="5">Fehler: ' + esc(out[0].error.message) + '</td></tr>'; return; }
+        var profs = out[0].data || [], projs = (out[1].data) || [];
+        var count = {}; projs.forEach(function (p) { count[p.customer_id] = (count[p.customer_id] || 0) + 1; });
+        if (!profs.length) { tb.innerHTML = '<tr><td colspan="5" class="muted">Noch keine Kunden.</td></tr>'; return; }
+        tb.innerHTML = '';
+        profs.forEach(function (pf) {
+          var tr = document.createElement('tr'); tr.className = 'clickable';
+          tr.innerHTML = '<td>' + esc(pf.name || '–') + '</td><td>' + esc(pf.email || '–') + '</td><td>' + esc(pf.firma || '–') + '</td><td>' + esc(pf.role) + '</td><td>' + (count[pf.id] || 0) + '</td>';
+          tr.addEventListener('click', function () { openKunde(pf); });
+          tb.appendChild(tr);
+        });
+      });
+    }
+
+    function openKunde(pf) {
+      openModal(
+        '<div class="spread"><h2 style="color:#fff">' + esc(pf.name || pf.email || 'Kunde') + '</h2><button class="btn btn-ghost btn-sm" id="kClose">Schließen</button></div>' +
+        '<p class="muted">' + esc(pf.email || '') + ' · Rolle: ' + esc(pf.role) + ' · ' + (pf.user_id ? 'verknüpft' : 'noch nicht eingeloggt') + '</p>' +
+        '<div class="field"><label>Name</label><input id="kName" type="text" value="' + esc(pf.name || '') + '"></div>' +
+        '<div class="field"><label>Firma</label><input id="kFirma" type="text" value="' + esc(pf.firma || '') + '"></div>' +
+        '<div class="field"><label>Telefon</label><input id="kTel" type="text" value="' + esc(pf.telefon || '') + '"></div>' +
+        '<div class="row row-end"><button class="btn btn-primary" id="kSave">Stammdaten speichern</button></div>'
+      );
+      document.getElementById('kClose').addEventListener('click', closeModal);
+      document.getElementById('kSave').addEventListener('click', function () {
+        sb.from('profiles').update({
+          name: document.getElementById('kName').value || null,
+          firma: document.getElementById('kFirma').value || null,
+          telefon: document.getElementById('kTel').value || null
+        }).eq('id', pf.id).then(function (r) {
+          if (r.error) showErr(r.error.message); else { closeModal(); loadKunden(); }
+        });
+      });
+    }
+
+    function cap(s) { return s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : ''; }
+  })();
+  </script>
+</body>
+</html>

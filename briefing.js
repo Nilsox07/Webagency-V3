@@ -1343,10 +1343,15 @@
      ============================================================ */
   async function persist(payload) {
     if (!isPlaceholder(CONFIG.supabaseUrl) && !isPlaceholder(CONFIG.supabaseKey)) {
+      // Schreibt in die Supabase-Tabelle `briefings` (Kundenportal Stufe 1).
+      // anon-INSERT ist per RLS erlaubt (öffentlicher Lumi-Eingang); anon hat KEIN SELECT.
+      // Spalten: payload = komplettes collect()-Objekt; kontakt_email/-name für die Admin-Inbox.
+      var k = (payload && payload.kontakt) || {};
+      var row = { payload: payload, kontakt_email: k.email || null, kontakt_name: k.name || null };
       var r = await fetch(CONFIG.supabaseUrl.replace(/\/$/, '') + '/rest/v1/briefings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: CONFIG.supabaseKey, Authorization: 'Bearer ' + CONFIG.supabaseKey, Prefer: 'return=minimal' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(row),
       });
       if (!r.ok) throw new Error('Supabase ' + r.status);
       return 'supabase';

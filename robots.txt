@@ -5,6 +5,10 @@
 
 User-agent: *
 Allow: /
+# Kundenportal (privat, nicht indexieren)
+Disallow: /login.html
+Disallow: /portal.html
+Disallow: /admin.html
 
 # KI-/Answer-Engine-Crawler ausdrücklich erlauben (GEO)
 User-agent: GPTBot
