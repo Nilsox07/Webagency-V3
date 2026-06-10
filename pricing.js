@@ -102,7 +102,7 @@
         qty: { min: 1, max: 5, default: 1, unit: 'pro Sprache' },
         desc: '+40 % je Sprache: deine Website in weiteren Sprachen, mit Sprach-Umschalter und sauberer Technik, damit Google jede Sprachversion findet. Die Übersetzung lieferst du.' },
       { id: 'express',      name: 'Express-Lieferung', price: null, type: 'percent', pct: 50, min: 390,
-        desc: 'Deine Website kommt mit Vorrang dran: One-Pager in 5, einzelne Seite/Text in 2 Werktagen, sobald alle Inhalte da sind (+50 %, mindestens 390 €).' },
+        desc: 'Kostet 50 % vom Paketpreis extra, mindestens 390 €. Lohnt sich nur, wenn deine Texte und Bilder schon fertig sind.' },
 
       /* — Wiederkehrend (monatlich) — */
       /* SEO-Betreuung als Retainer (Leistungsseite SEO): eine Stufe wählen */

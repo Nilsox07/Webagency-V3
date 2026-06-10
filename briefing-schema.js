@@ -17,7 +17,7 @@
   window.SARTU_BRIEFING_SCHEMA = {
     version: 1,
     stage: 1, // 1 = Erst-Briefing (dieses Lumi). 2 = Detail-Onboarding (später)
-    totalSteps: 8, // sichtbare Schrittzahl für die Fortschrittsanzeige
+    totalSteps: 5, // sichtbare Schrittzahl für die Fortschrittsanzeige (Branche, Ziele, Umfang, Material, Design)
 
     /* ---- Auswahllisten (zentral gepflegt) ---- */
     options: {
@@ -88,20 +88,21 @@
 
       // Farbauswahl im Design-Schritt: laienverständlich, Haupt- + Nebenfarbe
       // (jeweils Single-Select aus dieser Liste; KEIN HEX-Zwang)
+      // 12 benannte Presets (Name + Wirkung). value/hex bleiben technische Werte;
+      // 'wirkung' ist eine Anzeige-Ergänzung. Eigene Farben kommen als HEX-String ins Payload.
       farben: [
-        { value: 'blau',      label: 'Blau',        hex: '#2a5bd7' },
-        { value: 'tuerkis',   label: 'Türkis',      hex: '#2bb3a3' },
-        { value: 'gruen',     label: 'Grün',        hex: '#2f7d4f' },
-        { value: 'lime',      label: 'Lime',        hex: '#b6ff3b' },
-        { value: 'gelb',      label: 'Gelb',        hex: '#f5c518' },
-        { value: 'orange',    label: 'Orange',      hex: '#f2872f' },
-        { value: 'rot',       label: 'Rot',         hex: '#d94d2a' },
-        { value: 'pink',      label: 'Pink',        hex: '#ff5a8a' },
-        { value: 'violett',   label: 'Violett',     hex: '#7b5cff' },
-        { value: 'gold',      label: 'Gold',        hex: '#c9a227' },
-        { value: 'anthrazit', label: 'Anthrazit',   hex: '#222a36' },
-        { value: 'beige',     label: 'Beige',       hex: '#d8c4a0' },
-        { value: 'weiss',     label: 'Weiß',        hex: '#f4f6f8' },
+        { value: 'blau',      label: 'Blau',       hex: '#2A5BD7', wirkung: 'vertrauensvoll & seriös' },
+        { value: 'tuerkis',   label: 'Türkis',     hex: '#2BB3A3', wirkung: 'frisch & modern' },
+        { value: 'gruen',     label: 'Grün',       hex: '#2F7D4F', wirkung: 'natürlich & beruhigend' },
+        { value: 'gelb',      label: 'Gelb',       hex: '#F5C518', wirkung: 'freundlich & optimistisch' },
+        { value: 'orange',    label: 'Orange',     hex: '#F2872F', wirkung: 'voller Energie & einladend' },
+        { value: 'rot',       label: 'Rot',        hex: '#D94D2A', wirkung: 'kraftvoll & auffällig' },
+        { value: 'pink',      label: 'Pink',       hex: '#FF5A8A', wirkung: 'jung & mutig' },
+        { value: 'violett',   label: 'Violett',    hex: '#7B5CFF', wirkung: 'kreativ & hochwertig' },
+        { value: 'gold',      label: 'Gold',       hex: '#C9A227', wirkung: 'edel & exklusiv' },
+        { value: 'anthrazit', label: 'Anthrazit',  hex: '#222A36', wirkung: 'modern & zurückhaltend' },
+        { value: 'navy',      label: 'Dunkelblau', hex: '#0B1E3A', wirkung: 'souverän & professionell' },
+        { value: 'beige',     label: 'Beige',      hex: '#D8C4A0', wirkung: 'warm & natürlich' },
       ],
 
       material: [ // Multi-Select

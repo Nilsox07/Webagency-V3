@@ -53,8 +53,10 @@
     ziele: [], umfang: null, seiten: [],
     features: [], stil: null, hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
     material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
-    zeitrahmen: null,
+    zeitrahmen: null,            // entfällt als Frage, bleibt im Payload (null)
+    beratung_gewuenscht: false,  // optionaler Chip im Ziele-Schritt
     // Konfigurator
+    _recommendedAddons: [],      // [{addonId, reason}] – NUR Empfehlung, nichts vorausgewählt
     paket_gewaehlt: null,
     paket_empfohlen: null,
     wartung: null,
@@ -220,7 +222,9 @@
   }
 
   // Reihenfolge des Lumi-Flows (Pfad B) → endet im Konfigurator
-  var FLOW_B = ['branche', 'ziele', 'umfang', 'features', 'design', 'material', 'zeitrahmen', 'configurator'];
+  // 5 Fragen: Branche → Ziele → Umfang → Material → Stil & Farben → Konfigurator
+  // (Features- und Zeitrahmen-Frage entfallen; Keys werden weiter als []/null gesendet.)
+  var FLOW_B = ['branche', 'ziele', 'umfang', 'material', 'design', 'configurator'];
   function flowNext(name) { var i = FLOW_B.indexOf(name); return i > -1 ? FLOW_B[i + 1] : null; }
 
   var current = null;
@@ -409,39 +413,30 @@
     if (typeof a.price !== 'number') return null;
     return a.price * (a.qty ? st.qty : 1);
   }
-  // Pfad B: Konfigurator aus den Lumi-Antworten VORBEFÜLLEN (nur einmal)
+  // Empfehlungen aus den Antworten ABLEITEN — ohne irgendetwas auszuwählen.
+  // Liefert [{addonId, reason}] in Anzeige-Reihenfolge.
+  function recommendedAddons() {
+    if (A.pfad !== 'B') return [];
+    var m = A.material || [], z = A.ziele || [];
+    var hasM = function (v) { return m.indexOf(v) > -1; };
+    var rec = [];
+    var add = function (id, reason) {
+      if (A.addons[id] && !rec.some(function (r) { return r.addonId === id; })) rec.push({ addonId: id, reason: reason });
+    };
+    if (z.indexOf('termine') > -1) add('terminbuchung', 'dein Ziel: Termine');
+    if (!hasM('logo')) add('logo-lite', 'du hast noch kein Logo');
+    if (!hasM('texte')) add(A.umfang === 'onepager' ? 'texte' : 'texte-paket', 'du hast noch keine Texte');
+    if (hasM('website')) add('migration', 'du hast schon eine Website');
+    return rec;
+  }
+  // Pfad B: NUR Empfehlungen berechnen + Enterprise-Abzweig grob vorbefüllen.
+  // WICHTIG: setzt KEIN Add-on auf selected (keine versteckten Kosten).
   function prefillFromBriefing() {
     if (A._prefilled || A.pfad !== 'B') return;
     A._prefilled = true;
-    var f = A.features || [], m = A.material || [], z = A.ziele || [];
-    var hasF = function (v) { return f.indexOf(v) > -1; };
-    var hasM = function (v) { return m.indexOf(v) > -1; };
-    var on = function (id, qty) {
-      if (A.addons[id]) { A.addons[id].selected = true; if (qty) A.addons[id].qty = qty; }
-    };
-    // Funktionen → passende Add-ons
-    if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung');
-    if (hasF('newsletter')) on('newsletter');
-    if (hasF('mehrsprachig')) on('mehrsprachig', 1);
-    // Kein Logo vorhanden → Logo-Add-on vorschlagen
-    if (!hasM('logo')) on('logo-lite');
-    // Keine Texte vorhanden → Texte vorschlagen (Onepager: 1 Seite, sonst Komplettpaket)
-    if (!hasM('texte')) { if (A.umfang === 'onepager') on('texte', 1); else on('texte-paket'); }
-    // Bestehende Website → Migration
-    if (hasM('website')) on('migration');
-    // Sehr eilig → Express
-    if (A.zeitrahmen === 'asap') on('express');
-
-    // Enterprise-Abzweig vorbefüllen (falls Empfehlung/Funktionen darauf hindeuten)
+    A._recommendedAddons = recommendedAddons();
     var E = A.enterprise;
-    ['shop', 'login', 'mehrsprachig'].forEach(function (v) {
-      if (hasF(v) && E.sonderfunktionen.indexOf(v) < 0) E.sonderfunktionen.push(v);
-    });
     if (!E.seitenzahl) E.seitenzahl = A.umfang === 'gross' ? '20-50' : (A.umfang === 'umfangreich' ? 'bis20' : null);
-    if (!E.zeithorizont && A.zeitrahmen) {
-      var zmap = { asap: 'asap', '4-6w': '1-3m', '2-3m': '3-6m', offen: 'flex' };
-      E.zeithorizont = zmap[A.zeitrahmen] || null;
-    }
   }
 
   /* ============================================================
@@ -513,6 +508,8 @@
       }
       buildCards('branche', OPT.branche, { cls: 'lb-tiles', onPick: function (v) {
         renderSonst();
+        // Onlineshop-Weiche: ehrliche Zwischenfrage statt direktem Weiter
+        if (v === 'shop') { autoAdvance(function () { goTo('shopGate'); }); return; }
         // Auto-Weiter bei jeder Branche AUSSER „Sonstiges" (dort erscheint ein Textfeld → bleiben)
         if (v !== 'sonstiges') autoAdvance(leaveBranche);
       }});
@@ -521,10 +518,43 @@
       return h;
     }},
 
+    /* ---------- Onlineshop-Weiche (ehrliche Zwischenfrage) ---------- */
+    shopGate: { step: null, render: function () {
+      var h = lumiSays('Kurz und ehrlich:',
+        'Reine Onlineshops bauen wir bewusst nicht. Eine Website, die deine Produkte zeigt und Anfragen/Bestellungen per Formular annimmt — das machen wir gern. Größere Shop-Systeme nur als Enterprise-Projekt. Passt das für dich?');
+      var wrap = el('div', 'lb-paths');
+      var a = el('button', 'lb-path-card'); a.type = 'button';
+      a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">✅</span>' +
+        '<span class="lb-path-title">Passt — weiter</span>' +
+        '<span class="lb-path-sub">Website mit Produkt-Vorstellung und Anfrage-Formular.</span>';
+      a.addEventListener('click', function () { goTo('ziele'); });
+      var b = el('button', 'lb-path-card'); b.type = 'button';
+      b.innerHTML = '<span class="lb-path-icon" aria-hidden="true">🛒</span>' +
+        '<span class="lb-path-title">Ich brauche einen richtigen Shop</span>' +
+        '<span class="lb-path-sub">Großes Shop-System — als Enterprise-Projekt anfragen.</span>';
+      b.addEventListener('click', function () { A.paket_gewaehlt = 'enterprise'; A.paket_empfohlen = 'enterprise'; goTo('configurator'); });
+      wrap.appendChild(a); wrap.appendChild(b);
+      stage.appendChild(wrap);
+      actions({ onBack: back });
+      return h;
+    }},
+
     /* ---------- Pfad B · 2 · Ziele ---------- */
     ziele: { step: 2, render: function () {
       var h = lumiSays('Was soll deine Website vor allem erreichen?', 'Mehrfachauswahl möglich.');
       buildChips('ziele', OPT.ziele);
+      // Optionaler „beratet mich"-Chip — kein Ziel, sondern ein Flag fürs Angebot
+      var bwrap = el('div', 'lb-chips lb-chips-beratung');
+      var bc = el('button', 'lb-chip lb-chip-beratung'); bc.type = 'button';
+      bc.textContent = 'Ich bin unsicher — beratet mich';
+      if (A.beratung_gewuenscht) bc.classList.add('is-on');
+      bc.setAttribute('aria-pressed', A.beratung_gewuenscht ? 'true' : 'false');
+      bc.addEventListener('click', function () {
+        A.beratung_gewuenscht = !A.beratung_gewuenscht;
+        bc.classList.toggle('is-on', A.beratung_gewuenscht);
+        bc.setAttribute('aria-pressed', A.beratung_gewuenscht ? 'true' : 'false');
+      });
+      bwrap.appendChild(bc); stage.appendChild(bwrap);
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
@@ -651,22 +681,16 @@
     }},
 
     /* ---------- Pfad B · 6 · Material (+ Uploads) ---------- */
-    material: { step: 6, render: function () {
+    material: { step: 4, render: function () {
       var h = lumiSays('Was hast du schon?', 'Uploads sind optional — du kannst alles auch später nachreichen.');
       var uploads = el('div', 'lb-inline');
       function renderUploads() {
         uploads.textContent = '';
         var m = A.material;
-        if (m.indexOf('logo') > -1) uploads.appendChild(fileField('Logo hochladen', 'logo', { hint: 'Kann ich auch später nachreichen.' }));
-        if (m.indexOf('fotos') > -1) uploads.appendChild(fileField('Bilder hochladen', 'fotos', { multiple: true }));
-        if (m.indexOf('texte') > -1) {
-          uploads.appendChild(fileField('Texte hochladen', 'texte', {}));
-          var note = el('label', 'lb-field');
-          note.innerHTML = '<span class="lb-field-label">Notizen zu den Texten <em>(optional)</em></span>';
-          var ta = el('textarea'); ta.rows = 2; ta.placeholder = 'z. B. „Texte sind grob, bitte überarbeiten“';
-          ta.value = A.uploads.texte_notiz || '';
-          ta.addEventListener('input', function (e) { A.uploads.texte_notiz = e.target.value; });
-          note.appendChild(ta); uploads.appendChild(note);
+        // Uploads bewusst (noch) nicht — Storage folgt später. Nur ehrlicher Hinweis.
+        if (m.indexOf('logo') > -1 || m.indexOf('fotos') > -1 || m.indexOf('texte') > -1) {
+          uploads.appendChild(el('p', 'lb-upload-note',
+            'Dateien (Logo, Fotos, Texte) brauchst du jetzt noch nicht hochladen — wir fragen im Projekt aktiv danach.'));
         }
         if (m.indexOf('website') > -1) {
           var wl = el('label', 'lb-field');
@@ -692,7 +716,7 @@
     }},
 
     /* ---------- GEMEINSAMER KONFIGURATOR (Pfad A direkt, Pfad B als Ergebnis) ---------- */
-    configurator: { step: 8,
+    configurator: { step: 6,
       // Pfad B: erzählerischer Moment — kurzer Tipp-Indikator vor der Empfehlung
       // (nur einmal). Pfad A (Direkt-Konfigurator) springt sofort in den Aufbau.
       render: function () {
@@ -725,8 +749,8 @@
         ? { q: 'Enterprise – wir erstellen dir ein individuelles Festpreis-Angebot.',
             hint: 'Für Shop, Portal, Mehrsprachigkeit oder Sonderfunktionen sammle ich kurz deine Anforderungen — ohne Fixpreis. Du kannst jederzeit zu einem kleineren Paket wechseln.' }
         : (A.pfad === 'B'
-          ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-              hint: 'Paket, die Pflicht-Pflege und passende Extras sind vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
+          ? { q: recommendIntroLine(),
+              hint: 'Die Paket-Empfehlung ist gesetzt. Empfohlene Extras sind nur markiert — nichts ist vorausgewählt. Hosting & Pflege ist Pflicht. Der Preis rechnet live mit.' }
           : { q: 'Stell dir dein Paket zusammen.',
               hint: 'Wähle Paket und Extras — Hosting & Pflege ist Pflicht und schon gesetzt. Der Preis unten rechnet live mit.' });
       var h = lumiSays(intro.q, intro.hint);
@@ -802,25 +826,28 @@
 
       /* -- Hosting & Wartung (PFLICHT, nur Upgrade über den Paket-Floor) -- */
       function renderWartung() {
-        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Hosting &amp; Pflege <span class="lb-cfg-opt">(Pflicht – im Paket enthalten)</span></h3>';
+        var pkgName = pkgById(A.paket_gewaehlt).name;
+        wartSec.innerHTML = '<h3 class="lb-cfg-h">Hosting &amp; Pflege <span class="lb-cfg-opt">— gehört bei Sartu immer dazu (monatlich, zusätzlich zum Festpreis)</span></h3>';
         var floor = pkgFloor(A.paket_gewaehlt);
         var floorIdx = maintIndex(floor);
         var grid = el('div', 'lb-warts');
         PRICING.maintenance.forEach(function (m) {
-          var locked = maintIndex(m.id) < floorIdx; // unter dem Paket-Floor → nicht wählbar
+          var locked = maintIndex(m.id) < floorIdx; // unter der Mindeststufe → nicht wählbar
+          var floorPkg = PRICING.packages.filter(function (q) { return q.maintenanceFloor === m.id; })[0];
           var c = el('button', 'lb-wart'); c.type = 'button';
           if (locked) { c.disabled = true; c.classList.add('is-locked'); }
           c.innerHTML =
-            (m.id === floor ? '<span class="lb-wart-rec">Im Paket</span>' : (m.recommended ? '<span class="lb-wart-rec">Empfohlen</span>' : '')) +
+            (m.id === floor ? '<span class="lb-wart-rec">Mindeststufe für ' + pkgName + '</span>' : (m.recommended ? '<span class="lb-wart-rec">Empfohlen</span>' : '')) +
             '<span class="lb-wart-name">' + m.name + '</span>' +
             '<span class="lb-wart-price">' + priceLabel(m.price, { from: m.from, period: true }) + '</span>' +
+            (locked && floorPkg ? '<span class="lb-wart-lock">ab Paket ' + floorPkg.name + '</span>' : '') +
             (m.perks && m.perks.length ? '<ul class="lb-perks">' + m.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
           if (A.wartung === m.id) c.classList.add('is-on');
           if (!locked) c.addEventListener('click', function () { A.wartung = m.id; renderWartung(); renderPriceBar(); });
           grid.appendChild(c);
         });
         wartSec.appendChild(grid);
-        wartSec.appendChild(el('p', 'lb-cfg-foot', PRICING.mandatoryNote + ' Standardpreis monatlich – günstiger bei Jahreszahlung.'));
+        wartSec.appendChild(el('p', 'lb-cfg-foot', 'Preise gelten bei Jahreszahlung. Mindestlaufzeit 12 Monate, danach monatlich kündbar.'));
       }
 
       /* -- Seiten: Inklusiv-Kontingent + Extraseiten (Variante A) -- */
@@ -845,6 +872,15 @@
         stepper.appendChild(minus); stepper.appendChild(num); stepper.appendChild(plus); stepper.appendChild(lineTotal);
         box.querySelector('.lb-pages-extra').appendChild(stepper);
         pageSec.appendChild(box);
+        // Upgrade-Hinweis: Paketpreis + Extraseiten ≥ Preis des nächstgrößeren Pakets
+        var nextPkg = PRICING.packages.filter(function (q) {
+          return typeof q.price === 'number' && typeof p.price === 'number' && q.price > p.price;
+        }).sort(function (x, y) { return x.price - y.price; })[0];
+        var spend = (p.price || 0) + PRICING.extraPage.price * (A.extraPages || 0);
+        if (nextPkg && spend >= nextPkg.price) {
+          pageSec.appendChild(el('div', 'lb-upsell',
+            'Tipp: <strong>' + nextPkg.name + '</strong> (' + fmtEUR(nextPkg.price) + ') ist jetzt günstiger und enthält mehr.'));
+        }
       }
 
       /* -- Enterprise-Abzweig: strukturierte Anforderungen statt Fixpreis -- */
@@ -938,7 +974,7 @@
         q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);
         return q;
       }
-      function buildAddonCard(a, st) {
+      function buildAddonCard(a, st, recReason) {
         var card = el('div', 'lb-addon');
         if (st.selected) card.classList.add('is-on');
 
@@ -949,6 +985,7 @@
           '<span class="lb-addon-check" aria-hidden="true"></span>' +
           '<span class="lb-addon-main">' +
             '<span class="lb-addon-name">' + a.name + '</span>' +
+            (recReason ? '<span class="lb-rec-badge">Empfohlen — ' + recReason + '</span>' : '') +
             '<span class="lb-addon-desc">' + (a.desc || '') + '</span>' +
           '</span>' +
           '<span class="lb-addon-price">' + addonPriceText(a) + unit + '</span>';
@@ -962,11 +999,12 @@
       }
       // Varianten-Gruppe (z. B. SEO-Betreuung Lite/Pro/Premium): Karten NEBENEINANDER
       // wie bei Paket & Wartung — genau EINE Variante wählbar, erneut klicken = abwählen.
-      function buildTierGroup(groupId, members) {
+      function buildTierGroup(groupId, members, recReason) {
         var meta = (PRICING.addonGroups || {})[groupId] || {};
         var wrap = el('div', 'lb-tiergroup');
         wrap.innerHTML =
           '<div class="lb-tiergroup-h"><span class="lb-tiergroup-name">' + (meta.label || groupId) + '</span>' +
+          (recReason ? '<span class="lb-rec-badge">Empfohlen — ' + recReason + '</span>' : '') +
           '<span class="lb-tiergroup-hint">' + (meta.hint || 'eine Variante wählen') + '</span></div>';
         var grid = el('div', 'lb-tiers');
         members.forEach(function (a) {
@@ -993,28 +1031,30 @@
         return wrap;
       }
       function renderAddons() {
-        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
+        addSec.innerHTML = '<h3 class="lb-cfg-h">Extras <span class="lb-cfg-opt">(optional — nichts ist vorausgewählt)</span></h3>';
         var grid = el('div', 'lb-addons');
+        var recMap = {}; (A._recommendedAddons || []).forEach(function (r) { recMap[r.addonId] = r.reason; });
         var hidden = 0;
         var groupDone = {};
-        PRICING.addons.forEach(function (a) {
-          // Varianten-Gruppen: einmal als Karten-Reihe rendern (sichtbar, wenn ein
-          // Mitglied common/gewählt ist oder die Liste aufgeklappt wurde)
+        // Empfohlene zuerst, dann der Rest (Original-Reihenfolge bleibt stabil)
+        var ordered = PRICING.addons.slice().sort(function (x, y) {
+          return (recMap[x.id] ? 0 : 1) - (recMap[y.id] ? 0 : 1);
+        });
+        ordered.forEach(function (a) {
           if (a.group) {
             if (groupDone[a.group]) return;
             groupDone[a.group] = true;
             var members = PRICING.addons.filter(function (o) { return o.group === a.group; });
-            var visible = addonsExpanded || members.some(function (o) {
-              return o.common || (A.addons[o.id] && A.addons[o.id].selected);
-            });
-            if (visible) grid.appendChild(buildTierGroup(a.group, members));
+            var recReason = null;
+            members.forEach(function (o) { if (recMap[o.id] && !recReason) recReason = recMap[o.id]; });
+            var visible = addonsExpanded || recReason || members.some(function (o) { return A.addons[o.id] && A.addons[o.id].selected; });
+            if (visible) grid.appendChild(buildTierGroup(a.group, members, recReason));
             else hidden += members.length;
             return;
           }
           var st = A.addons[a.id];
-          // Sichtbar: kurze Standardliste (common), ausgewählte/vorbefüllte oder wenn aufgeklappt
-          if (a.common || st.selected || addonsExpanded) {
-            grid.appendChild(buildAddonCard(a, st));
+          if (recMap[a.id] || st.selected || addonsExpanded) {
+            grid.appendChild(buildAddonCard(a, st, recMap[a.id]));
           } else {
             hidden++;
           }
@@ -1106,6 +1146,21 @@
       return h;
     }},
 
+    /* ---------- Versand fehlgeschlagen: ehrlicher mailto-Fallback ---------- */
+    sendError: { step: null, render: function () {
+      var h = lumiSays('Das hat technisch gerade nicht geklappt —',
+        'deine Anfrage ist NICHT bei uns angekommen. Ein Klick, und sie geht per E-Mail raus:');
+      var subject = 'Website-Anfrage über Lumi';
+      var a = el('a', 'btn btn-primary btn-lg lb-mailto');
+      a.href = 'mailto:hallo@sartu.de?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(buildMailBody());
+      a.textContent = 'Anfrage per E-Mail senden';
+      stage.appendChild(a);
+      var retry = el('button', 'lb-restart', 'Nochmal versuchen'); retry.type = 'button';
+      retry.addEventListener('click', function () { goTo('contact'); });
+      stage.appendChild(retry);
+      return h;
+    }},
+
     /* ---------- Abschluss ---------- */
     done: { step: null, render: function () {
       var h = lumiSays('Danke, ' + (A.kontakt.name.split(' ')[0] || '') + '! Das habe ich für dich zusammengestellt:');
@@ -1173,16 +1228,28 @@
   /* ============================================================
      PAKET-EMPFEHLUNG (Pfad B) — aus Umfang + Features
      ============================================================ */
+  // Enterprise nur bei großem/Portal-Umfang (Option „12+ Seiten / Shop / Portal").
+  // Mehrsprachigkeit ist KEIN Enterprise-Trigger mehr (zählt als Add-on/Hinweis).
   function recommend() {
-    var u = A.umfang, f = A.features || [];
-    var has = function (v) { return f.indexOf(v) > -1; };
-    if (has('shop') || has('mehrsprachig') || has('login')) return 'enterprise';
-    if (u === 'gross') return has('shop') ? 'enterprise' : 'platin';
+    var u = A.umfang;
+    if (u === 'gross') return 'enterprise';
     if (u === 'onepager') return 'basis';
-    if (u === 'umfangreich' && (has('galerie') || has('terminbuchung'))) return 'platin';
-    if (u === 'kompakt' || u === 'umfangreich') return 'pro';
-    if (has('galerie') || has('terminbuchung')) return 'platin';
+    if (u === 'umfangreich') return 'platin';
+    if (u === 'kompakt') return 'pro';
     return 'pro';
+  }
+  // Personalisierte Empfehlungszeile (Pfad B); neutral bei Pfad A / fehlenden Angaben.
+  var BRANCHE_TEXT = {
+    handwerk: 'deinen Handwerksbetrieb', gastro: 'dein Lokal', beratung: 'dein Beratungsangebot',
+    gesundheit: 'deine Praxis', kreativ: 'dein Kreativbusiness', dienstleistung: 'deinen Betrieb',
+    immobilien: 'dein Immobilienbusiness', shop: 'deinen Handel', sonstiges: 'dein Vorhaben'
+  };
+  function recommendIntroLine() {
+    if (A.pfad !== 'B' || !A.branche) return 'Stell dir dein Paket zusammen.';
+    var bt = BRANCHE_TEXT[A.branche] || 'dein Vorhaben';
+    var z0 = (A.ziele && A.ziele.length) ? labelFor('ziele', A.ziele[0]) : '';
+    var zphrase = z0 ? ' mit Ziel „' + z0 + '“' : '';
+    return 'Für ' + bt + zphrase + ' passt ' + pkgById(A.paket_empfohlen).name + ' am besten.';
   }
 
   /* ============================================================
@@ -1226,17 +1293,16 @@
       if (A.branche === 'sonstiges' && A.branche_sonstiges) branche += ' (' + A.branche_sonstiges + ')';
       rows.push({ k: 'Branche', v: branche, screen: 'branche' });
       rows.push({ k: 'Ziele', v: labelsFor('ziele', A.ziele).join(', '), screen: 'ziele' });
+      if (A.beratung_gewuenscht) rows.push({ k: 'Beratung', v: 'Ja — beraten lassen', screen: 'ziele' });
       var umfang = labelFor('umfang', A.umfang);
       if (A.umfang && A.umfang !== 'onepager' && A.seiten.length) umfang += ' · ' + labelsFor('seiten', A.seiten).join(', ');
       rows.push({ k: 'Umfang', v: umfang, screen: 'umfang' });
-      rows.push({ k: 'Funktionen', v: labelsFor('features', A.features).join(', '), screen: 'features' });
       var design = labelFor('stil', A.stil); // Stil ist Einfach-Auswahl → genau ein Label (oder '')
       var farben = [colorLabel(A.hauptfarbe), colorLabel(A.nebenfarbe)].filter(Boolean).join(' + ');
       if (farben) design += (design ? ' · ' : '') + farben;
       if (A.markenfarben_hex) design += ' · ' + A.markenfarben_hex;
       rows.push({ k: 'Design', v: design, screen: 'design' });
       rows.push({ k: 'Material', v: labelsFor('material', A.material).join(', '), screen: 'material' });
-      rows.push({ k: 'Zeitrahmen', v: labelFor('zeitrahmen', A.zeitrahmen), screen: 'zeitrahmen' });
     }
     // Konfiguration
     if (ent) {
@@ -1261,6 +1327,13 @@
       rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto (Pflicht)', screen: null });
     }
     return rows;
+  }
+  // Klartext-Zusammenfassung als E-Mail-Body (Fallback, wenn der Versand scheitert)
+  function buildMailBody() {
+    var lines = ['Meine Website-Anfrage über Lumi:', ''];
+    summaryRows().forEach(function (r) { if (r.v) lines.push(r.k + ': ' + r.v); });
+    lines.push('', 'Name: ' + (A.kontakt.name || ''), 'E-Mail: ' + (A.kontakt.email || ''), 'Telefon: ' + (A.kontakt.telefon || ''));
+    return lines.join('\n');
   }
 
   /* ============================================================
@@ -1287,7 +1360,7 @@
       createdAt: new Date().toISOString(),
       briefing: A.pfad === 'B' ? {
         branche: A.branche, branche_sonstiges: A.branche_sonstiges,
-        ziele: A.ziele, umfang: A.umfang, seiten: A.seiten,
+        ziele: A.ziele, beratung_gewuenscht: A.beratung_gewuenscht, umfang: A.umfang, seiten: A.seiten,
         features: A.features, stil: A.stil,
         hauptfarbe: A.hauptfarbe, nebenfarbe: A.nebenfarbe,
         markenfarben_hex: A.markenfarben_hex, material: A.material,
@@ -1390,7 +1463,9 @@
         : '✓ Deine Anfrage ist bei Sartu angekommen.';
     } catch (e) {
       console.warn('[Lumi] Versand fehlgeschlagen:', e.message);
-      lastSendState.msg = 'Hinweis: Der automatische Versand hat nicht geklappt — Sartu kümmert sich trotzdem.';
+      try { localStorage.setItem('sartu_briefing_' + Date.now(), JSON.stringify(payload)); } catch (e2) { /* ignore */ }
+      goTo('sendError');
+      return;
     }
     goTo('done');
   }
