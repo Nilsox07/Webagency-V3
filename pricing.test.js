@@ -74,6 +74,20 @@ eq('Pro + 5 Extraseiten monatlich (Care M 99)', r9.monthly, 99);
 var r10 = t({ paket: 'pro', wartung: 'care-m', addons: addons({ 'seo-lite': true, 'profil-basic': true }) });
 eq('SEO Lite + Profil Basic + Care M monatlich', r10.monthly, 99 + 149 + 79);
 
+// 11) Höhere Retainer-Stufen (von den Leistungsseiten übernommen)
+var r11 = t({ paket: 'pro', wartung: 'care-m', addons: addons({ 'seo-pro': true }) });
+eq('SEO-Betreuung Pro + Care M monatlich', r11.monthly, 99 + 390);
+var r12 = t({ paket: 'platin', wartung: 'care-l', addons: addons({ 'seo-premium': true, 'profil-pro': true }) });
+eq('SEO Premium + Profil Pro + Care L monatlich', r12.monthly, 249 + 790 + 149);
+
+// 12) SEO-Option für Texte: +30 €/Seite (×5 = 150)
+var r13 = t({ paket: 'basis', wartung: 'care-s', addons: addons({ texte: 5, 'texte-seo': 5 }) });
+eq('Texte ×5 + SEO-Option ×5 einmalig', r13.once, 1290 + 600 + 150);
+
+// 13) Enterprise: priceFrom ist reine Anzeige und zählt NICHT in die Summe
+var r14 = t({ paket: 'enterprise', wartung: 'care-l', addons: addons({}) });
+eq('Enterprise einmalig trotz priceFrom = 0', r14.once, 0);
+
 // 7) Zahlungsstaffelung: Prozente ergeben 100 %
 ['basis', 'pro', 'platin', 'enterprise'].forEach(function (id) {
   var sum = PAY.forPackage(id).reduce(function (s, x) { return s + x.pct; }, 0);

@@ -773,7 +773,11 @@
         var grid = el('div', 'lb-pkgs');
         PRICING.packages.forEach(function (p) {
           var c = el('button', 'lb-pkg'); c.type = 'button';
-          var priceTxt = p.configurable === false ? 'Individuelles Angebot' : priceLabel(p.price, { from: p.from });
+          // Enterprise: "ab 9.990 €" wie auf Leistungs-/Preise-Seite (priceFrom = reine Anzeige,
+          // Live-Berechnung bleibt "Individuelles Angebot" über den Enterprise-Abzweig)
+          var priceTxt = p.configurable === false
+            ? (p.priceFrom ? priceLabel(p.priceFrom, { from: true }) + ' · individuell' : 'Individuelles Angebot')
+            : priceLabel(p.price, { from: p.from });
           var pagesLine = p.includedPages
             ? '<span class="lb-pkg-pages">' + p.includedPages + ' Seite' + (p.includedPages > 1 ? 'n' : '') + ' inkl. · jede weitere ab ' + PRICING.extraPage.price + ' €</span>'
             : '';
@@ -934,6 +938,13 @@
           '<span class="lb-addon-price">' + priceTxt + unit + '</span>';
         toggle.addEventListener('click', function () {
           st.selected = !st.selected;
+          // Stufen-Add-ons (gleiche group, z. B. SEO-Betreuung Lite/Pro/Premium):
+          // nur EINE Stufe gleichzeitig — neue Auswahl ersetzt die andere Stufe.
+          if (st.selected && a.group) {
+            PRICING.addons.forEach(function (o) {
+              if (o.group === a.group && o.id !== a.id && A.addons[o.id]) A.addons[o.id].selected = false;
+            });
+          }
           renderAddons(); renderPriceBar();
         });
         card.appendChild(toggle);

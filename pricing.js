@@ -36,8 +36,10 @@
       { id: 'platin', name: 'Platin', price: 5990, scope: 'bis 20 Seiten', includedPages: 20,
         configurable: true, maintenanceFloor: 'care-l', popular: true,
         perks: ['Bis 20 Seiten', 'Lokales SEO inkl. Google-Profil-Setup', '4 Korrekturrunden'] },
-      // Enterprise = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null)
-      { id: 'enterprise', name: 'Enterprise', price: null, scope: 'individuell', includedPages: null,
+      // Enterprise = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null).
+      // priceFrom ist NUR Anzeige ("ab 9.990 €" wie auf Leistungs-/Preise-Seite) und
+      // fließt bewusst NICHT in die Live-Berechnung ein.
+      { id: 'enterprise', name: 'Enterprise', price: null, priceFrom: 9990, scope: 'individuell', includedPages: null,
         configurable: false, maintenanceFloor: 'care-l', popular: false,
         perks: ['Individueller Seitenumfang', 'Sonderprogrammierung / Integrationen', 'Persönlicher Projektplan'] },
     ],
@@ -64,11 +66,15 @@
         desc: 'Texte für 5 Seiten – ca. 98 €/Seite.' },
       { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', price: 890, type: 'once',
         desc: 'Texte für 10 Seiten – ca. 89 €/Seite.' },
-      { id: 'logo-lite',    name: 'Logo Lite', price: 490, type: 'once', common: true,
+      { id: 'texte-seo',    name: 'SEO-Option für Texte', price: 30, type: 'once',
+        qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' },
+        desc: 'SEO-Optimierung deiner Texte – nur zusammen mit Texterstellung sinnvoll.' },
+      /* Branding-Stufen (Leistungsseite Logo): nur EINE Stufe gleichzeitig wählbar */
+      { id: 'logo-lite',    name: 'Logo Lite', price: 490, type: 'once', common: true, group: 'branding',
         desc: '3 Entwürfe, 2 Runden, Standardformate, Mini-Styleguide.' },
-      { id: 'branding-pro', name: 'Branding Pro', price: 990, type: 'once', common: true,
+      { id: 'branding-pro', name: 'Branding Pro', price: 990, type: 'once', common: true, group: 'branding',
         desc: 'Individuelles Logo, Visitenkarte, Briefpapier, Styleguide.' },
-      { id: 'corporate',    name: 'Corporate Design', price: 1890, type: 'once',
+      { id: 'corporate',    name: 'Corporate Design', price: 1890, type: 'once', group: 'branding',
         desc: 'Umfassendes Designsystem + komplette Geschäftsausstattung.' },
       { id: 'terminbuchung',name: 'Online-Terminbuchung', price: 290, type: 'once', from: true, common: true,
         desc: 'Einrichtung & Einbindung eines Buchungstools.' },
@@ -95,10 +101,18 @@
       /* — Wiederkehrend (monatlich) — */
       { id: 'chatbot-betrieb', name: 'KI-Chatbot (Betrieb & Pflege)', price: 49, type: 'month',
         desc: 'Laufender Betrieb des Chatbots (zzgl. Einrichtung).' },
-      { id: 'seo-lite',     name: 'SEO-Betreuung (Lite)', price: 149, type: 'month', from: true,
-        desc: 'Basis-Local-SEO, Profil-Grundpflege, Title/Meta, Monatsreport. Höhere Stufen auf der SEO-Seite.' },
-      { id: 'profil-basic', name: 'Google-Profil-Pflege (Basic)', price: 79, type: 'month', from: true,
-        desc: 'Rezensionen beantworten, Kerninfos pflegen, Monitoring.' },
+      /* SEO-Betreuung als Retainer (Leistungsseite SEO): nur EINE Stufe gleichzeitig wählbar */
+      { id: 'seo-lite',     name: 'SEO-Betreuung Lite', price: 149, type: 'month', group: 'seo-betreuung',
+        desc: 'Basis-Local-SEO, Profil-Grundpflege, Title/Meta der Kernseiten, Monatsreport.' },
+      { id: 'seo-pro',      name: 'SEO-Betreuung Pro', price: 390, type: 'month', group: 'seo-betreuung',
+        desc: 'Alles aus Lite + tiefe Keyword-Recherche, OnPage-SEO für alle Seiten, 2 Landingpages/Quartal, Strategie-Call.' },
+      { id: 'seo-premium',  name: 'SEO-Betreuung Premium', price: 790, type: 'month', group: 'seo-betreuung',
+        desc: 'Alles aus Pro + Content-Strategie, Backlink-Aufbau, KI-Suche-/GEO-Optimierung, monatlicher Call.' },
+      /* Google-Profil-Pflege (Leistungsseite Lokales SEO): nur EINE Stufe gleichzeitig wählbar */
+      { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', price: 79, type: 'month', group: 'profil-pflege',
+        desc: 'Rezensionen beantworten, Kerninfos & Öffnungszeiten pflegen, Profil-Monitoring.' },
+      { id: 'profil-pro',   name: 'Google-Profil-Pflege Pro', price: 149, type: 'month', group: 'profil-pflege',
+        desc: 'Alles aus Basic + regelmäßige Google Posts, neue Fotos, Q&A-Management, Monatsreport.' },
     ],
 
     /* ---- Enterprise-Abzweig: Optionen für die strukturierte Anfrage ---- */
