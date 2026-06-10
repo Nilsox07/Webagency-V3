@@ -36,7 +36,7 @@ Pflicht-Wartung widersprachen).
 | `platin` | Platin | **5.990 €** | 20 | **✓** | Care L |
 | `enterprise` | Enterprise | **kein Fixpreis** (`price: null`) | – | – | Care L |
 
-- Quelle: Leistungsbeschreibung v1.0 (Stand Juni 2026); stimmt mit `preise.html` überein.
+- Quelle: Leistungsbeschreibung **v2.0** (Stand Juni 2026); stimmt mit `preise.html` und den Leistungsseiten überein.
 - **Enterprise** ist ein **Abzweig**: kein Live-Fixpreis, sondern „Individuelles Angebot"
   + strukturierte Anforderungs-Abfrage (siehe Abschnitt 6).
 - **„Beliebt"** sitzt auf **Platin** (Start­seite, Preise-Seite und Konfigurator lesen das
@@ -113,7 +113,7 @@ Pflicht-Wartung widersprachen).
   (KI-Chatbot: 490 € einmalig + 49 €/Monat; `pricing-calc.js` bucht beides).
 - Enterprise-Karte zeigt `priceFrom` („ab 9.990 €") als reine Anzeige; die Live-Berechnung bleibt
   beim Enterprise-Abzweig („Individuelles Festpreis-Angebot").
-- „Weitere Arbeitszeit 99 €/Std." (preise.html) ist bewusst KEIN Add-on — Stundensatz, kein Paket.
+- „Weitere Arbeitszeit 99 €/Std." (preise.html, 5-Min-Takt) ist bewusst KEIN Add-on — Stundensatz, kein Paket.
 - UX: nur die `common`-Add-ons sind direkt sichtbar, der Rest hinter „Alle Add-ons anzeigen".
 
 

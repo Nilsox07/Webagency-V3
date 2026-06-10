@@ -861,6 +861,13 @@ a { text-decoration: none; color: inherit; }
 .price-table .no { color: var(--text-light-muted); }
 .price-table thead th.highlight { background: #16345a; }
 
+/* Leistungsseiten: Varianten-Vergleichstabelle (zusätzlich zu den Karten) */
+.svc-compare { margin-top: 46px; }
+.svc-compare h3 { font-size: clamp(20px, 3vw, 26px); font-weight: 800; letter-spacing: -0.01em; text-align: center; margin-bottom: 8px; }
+.svc-compare > p { text-align: center; color: var(--text-muted); max-width: 700px; margin: 0 auto 22px; font-size: 15px; line-height: 1.6; }
+.svc-compare .price-table td:not(.feature), .svc-compare .price-table th:not(:first-child) { text-align: center; }
+.svc-compare .price-table tfoot td { font-weight: 800; color: var(--text-dark); background: #f1f4f8; }
+
 /* Maintenance plan cards */
 .plan-grid {
   display: grid;
@@ -1614,7 +1621,10 @@ a { text-decoration: none; color: inherit; }
 .legal-content h2:first-child { margin-top: 0; }
 .legal-content h3 { font-size: 16px; font-weight: 700; margin: 22px 0 8px; }
 .legal-content p { font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; }
-.legal-content ul { margin: 0 0 16px 20px; color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+.legal-content ul, .legal-content ol { margin: 0 0 16px 20px; color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+.legal-content ol.legal-list { margin-top: 4px; }
+.legal-content ol.legal-list li { margin-bottom: 10px; }
+.legal-content ol.legal-list strong { color: var(--text-dark); }
 .legal-content a { color: var(--green-strong); font-weight: 600; }
 .legal-content a:hover { text-decoration: underline; }
 .legal-note {
