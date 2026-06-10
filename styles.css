@@ -25,6 +25,9 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Nur für Screenreader/Outline sichtbar (strukturierende Zwischenüberschriften) */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
 html { scroll-behavior: smooth; }
 
 /* Kein horizontales Wegscrollen / kein weißer Rand auf Mobil */
@@ -636,7 +639,7 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   justify-content: center;
 }
-.cta-feature h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.cta-feature h3, .cta-feature h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
 .cta-feature p { font-size: 14px; color: var(--text-light-muted); }
 
 /* ============ FOOTER ============ */
@@ -920,7 +923,7 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   justify-content: center;
 }
-.callout h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 4px; }
+.callout h3, .callout h4 { font-size: 15.5px; font-weight: 700; margin-bottom: 4px; }
 .callout p { font-size: 14px; color: var(--text-muted); }
 .callout-guarantee { border-left-color: var(--green); background: linear-gradient(180deg, #ffffff, #fafdf0); }
 /* Klickbare Callout-Variante (Verweis-Box) */
@@ -1700,7 +1703,7 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   justify-content: center;
 }
-.contact-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.contact-card h3, .contact-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
 .contact-card p, .contact-card a { font-size: 14px; color: var(--text-muted); }
 .contact-card a:hover { color: var(--green-strong); }
 
@@ -1855,7 +1858,7 @@ a { text-decoration: none; color: inherit; }
 .footer-brand .footer-logo { margin-bottom: 16px; }
 .footer-brand p { font-size: 14px; color: var(--text-light-muted); max-width: 300px; margin-bottom: 18px; line-height: 1.6; }
 .footer-brand address { font-style: normal; font-size: 13.5px; color: var(--text-light); line-height: 1.75; }
-.footer-col h4 {
+.footer-col h4, .footer-col .footer-h {
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;

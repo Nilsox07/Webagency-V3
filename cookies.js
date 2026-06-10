@@ -222,7 +222,7 @@
     // Footer-rich (Startseite): Spalte „Rechtliches"
     var cols = document.querySelectorAll('.footer-col');
     Array.prototype.forEach.call(cols, function (col) {
-      var h = col.querySelector('h4');
+      var h = col.querySelector('h4, .footer-h');
       if (h && /rechtliches/i.test(h.textContent) && !col.querySelector('[data-cookie-settings]')) {
         var a = el('a', null, 'Cookie-Einstellungen');
         a.href = '#'; a.setAttribute('data-cookie-settings', '');
