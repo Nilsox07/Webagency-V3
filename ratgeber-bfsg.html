@@ -24,49 +24,111 @@
   <meta name="twitter:image" content="https://[DOMAIN]/[OG-IMAGE]" />
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://[DOMAIN]/#organization",
+      "name": "Sartu",
+      "url": "https://[DOMAIN]/",
+      "logo": "https://[DOMAIN]/assets/logo.png",
+      "email": "hallo@sartu.de",
+      "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+      "areaServed": "DE",
+      "sameAs": []
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Start",
+          "item": "https://[DOMAIN]/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Ratgeber",
+          "item": "https://[DOMAIN]/ratgeber"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "BFSG & Barrierefreiheit",
+          "item": "https://[DOMAIN]/ratgeber-bfsg"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist das BFSG?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Das Barrierefreiheitsstärkungsgesetz (BFSG) setzt eine EU-Richtlinie in deutsches Recht um und gilt seit dem 28. Juni 2025. Es verpflichtet bestimmte Unternehmen, ihre digitalen Produkte und Dienstleistungen für alle nutzbar, auch mit Behinderung (barrierefrei) anzubieten — darunter auch viele Websites mit Verkaufs- oder Buchungsfunktion."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Welche Websites sind vom BFSG betroffen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Betroffen sind vor allem Websites, über die Verbraucher digital Verträge abschließen können — also Onlineshops, Buchungs- und Reservierungssysteme oder Terminbuchungen mit Bezahlfunktion. Reine Informations-Websites ohne Verkaufs- oder Buchungsfunktion sind in der Regel nicht erfasst."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Sind kleine Unternehmen vom BFSG ausgenommen?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kleinstunternehmen, die Dienstleistungen anbieten, sind ausgenommen: weniger als 10 Mitarbeiter UND höchstens 2 Mio. € Jahresumsatz bzw. Bilanzsumme. Achtung: Diese Ausnahme gilt für Dienstleistungen — wer als Kleinstunternehmen physische Produkte verkauft, sollte den Einzelfall prüfen lassen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was bedeutet barrierefrei konkret?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Orientierung geben die Regeln für barrierefreie Webseiten: ausreichende Farbkontraste, Alternativtexte für Bilder, vollständige Bedienbarkeit per Tastatur, verständliche Sprache, sichtbarer Tastatur-Fokus und korrekte HTML-Struktur, damit Vorlese-Programme die Inhalte lesen können."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was passiert bei Verstößen gegen das BFSG?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Die Marktüberwachungsbehörden können Maßnahmen anordnen — bis hin zur Einschränkung des Angebots — und Bußgelder verhängen. Außerdem können Verbände Verstöße abmahnen. Die genaue Bewertung hängt vom Einzelfall ab; im Zweifel anwaltlich prüfen lassen."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Lohnt sich Barrierefreiheit auch ohne Pflicht?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Barrierefreie Websites erreichen mehr Menschen — z. B. Nutzer mit Sehschwäche oder motorischen Einschränkungen. Sie sind meist klarer strukturiert. Und die saubere Struktur, die Vorlese-Programme brauchen, hilft auch Suchmaschinen beim Verstehen der Seite."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "BFSG einfach erklärt: Muss deine Website barrierefrei sein?",
+      "description": "BFSG einfach erklärt: Das Barrierefreiheitsstärkungsgesetz gilt seit 28.06.2025. Wer betroffen ist, wer ausgenommen ist (Kleinstunternehmen!) und was barrierefrei konkret heißt.",
+      "datePublished": "2026-06-10",
+      "dateModified": "2026-06-10",
+      "author": {
         "@type": "Organization",
-        "@id": "https://[DOMAIN]/#organization",
-        "name": "Sartu",
-        "url": "https://[DOMAIN]/",
-        "logo": "https://[DOMAIN]/assets/logo.png",
-        "email": "hallo@sartu.de",
-        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
-        "areaServed": "DE",
-        "sameAs": []
+        "name": "Sartu"
       },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Ratgeber", "item": "https://[DOMAIN]/ratgeber" },
-          { "@type": "ListItem", "position": 3, "name": "BFSG & Barrierefreiheit", "item": "https://[DOMAIN]/ratgeber-bfsg" }
-        ]
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          { "@type": "Question", "name": "Was ist das BFSG?", "acceptedAnswer": { "@type": "Answer", "text": "Das Barrierefreiheitsstärkungsgesetz (BFSG) setzt den European Accessibility Act in deutsches Recht um und gilt seit dem 28. Juni 2025. Es verpflichtet bestimmte Unternehmen, ihre digitalen Produkte und Dienstleistungen für Verbraucher barrierefrei anzubieten — darunter auch viele Websites mit Verkaufs- oder Buchungsfunktion." } },
-          { "@type": "Question", "name": "Welche Websites sind vom BFSG betroffen?", "acceptedAnswer": { "@type": "Answer", "text": "Betroffen sind vor allem Websites, über die Verbraucher digital Verträge abschließen können — also Onlineshops, Buchungs- und Reservierungssysteme oder Terminbuchungen mit Bezahlfunktion. Reine Informations-Websites ohne Verkaufs- oder Buchungsfunktion sind in der Regel nicht erfasst." } },
-          { "@type": "Question", "name": "Sind kleine Unternehmen vom BFSG ausgenommen?", "acceptedAnswer": { "@type": "Answer", "text": "Kleinstunternehmen, die Dienstleistungen anbieten, sind ausgenommen: weniger als 10 Mitarbeiter UND höchstens 2 Mio. € Jahresumsatz bzw. Bilanzsumme. Achtung: Diese Ausnahme gilt für Dienstleistungen — wer als Kleinstunternehmen physische Produkte in den Verkehr bringt, sollte den Einzelfall prüfen lassen." } },
-          { "@type": "Question", "name": "Was bedeutet barrierefrei konkret?", "acceptedAnswer": { "@type": "Answer", "text": "Orientierung geben die WCAG-Richtlinien: ausreichende Farbkontraste, Alternativtexte für Bilder, vollständige Bedienbarkeit per Tastatur, verständliche Sprache, sichtbarer Tastatur-Fokus und korrekte semantische HTML-Struktur, damit Screenreader die Inhalte vorlesen können." } },
-          { "@type": "Question", "name": "Was passiert bei Verstößen gegen das BFSG?", "acceptedAnswer": { "@type": "Answer", "text": "Die Marktüberwachungsbehörden können Maßnahmen anordnen — bis hin zur Einschränkung des Angebots — und Bußgelder verhängen. Außerdem können Verbände Verstöße abmahnen. Die genaue Bewertung hängt vom Einzelfall ab; im Zweifel anwaltlich prüfen lassen." } },
-          { "@type": "Question", "name": "Lohnt sich Barrierefreiheit auch ohne Pflicht?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Barrierefreie Websites erreichen mehr Menschen (z. B. Nutzer mit Sehschwäche oder motorischen Einschränkungen), sind meist klarer strukturiert — und die saubere Semantik, die Screenreader brauchen, hilft auch Suchmaschinen beim Verstehen der Seite. Barrierefreiheit und SEO ziehen am selben Strang." } }
-        ]
-      },
-      {
-        "@type": "Article",
-        "headline": "BFSG einfach erklärt: Muss deine Website barrierefrei sein?",
-        "description": "BFSG einfach erklärt: Das Barrierefreiheitsstärkungsgesetz gilt seit 28.06.2025. Wer betroffen ist, wer ausgenommen ist (Kleinstunternehmen!) und was barrierefrei konkret heißt.",
-        "datePublished": "2026-06-10",
-        "dateModified": "2026-06-10",
-        "author": { "@type": "Organization", "name": "Sartu" },
-        "publisher": { "@id": "https://[DOMAIN]/#organization" }
+      "publisher": {
+        "@id": "https://[DOMAIN]/#organization"
       }
-    ]
-  }
+    }
+  ]
+}
   </script>
 </head>
 <body>
@@ -111,8 +173,8 @@
         <nav class="crumb" aria-label="Brotkrumen"><a href="/ratgeber">Ratgeber</a> · BFSG &amp; Barrierefreiheit</nav>
         <p class="eyebrow eyebrow-green">Ratgeber &amp; Wissen</p>
         <h1>BFSG einfach erklärt:<br /><span class="accent">Muss deine Website barrierefrei sein?</span></h1>
-        <p class=”answer-first”>Das Barrierefreiheitsstärkungsgesetz (<a href="/ratgeber#bfsg">BFSG</a>) gilt <strong>seit dem 28.&nbsp;Juni&nbsp;2025</strong>. Betroffen sind vor allem Unternehmen, die <strong>digitale Dienstleistungen oder Produkte an Verbraucher verkaufen</strong> — zum Beispiel Onlineshops oder Buchungssysteme. <strong>Kleinstunternehmen, die Dienstleistungen anbieten (&lt;&nbsp;10 Mitarbeiter und ≤&nbsp;2&nbsp;Mio.&nbsp;€ Jahresumsatz), sind ausgenommen.</strong> Reine Informations-Websites ohne Verkaufs- oder Buchungsfunktion sind in der Regel nicht erfasst.</p>
-        <p class=”page-lead”>Dieser Ratgeber erklärt in klaren Worten, wen das Gesetz wirklich trifft, was „barrierefrei” im Alltag bedeutet — und warum sich Barrierefreiheit oft auch ohne Pflicht lohnt.</p>
+        <p class="answer-first">Das Barrierefreiheitsstärkungsgesetz (<a href="/ratgeber#bfsg">BFSG</a>) gilt <strong>seit dem 28.&nbsp;Juni&nbsp;2025</strong>. Betroffen sind vor allem Unternehmen, die <strong>digitale Dienstleistungen oder Produkte an Verbraucher verkaufen</strong> — zum Beispiel Onlineshops oder Buchungssysteme. <strong>Kleinstunternehmen, die Dienstleistungen anbieten (&lt;&nbsp;10 Mitarbeiter und ≤&nbsp;2&nbsp;Mio.&nbsp;€ Jahresumsatz), sind ausgenommen.</strong> Reine Informations-Websites ohne Verkaufs- oder Buchungsfunktion sind in der Regel nicht erfasst.</p>
+        <p class="page-lead">Dieser Ratgeber erklärt in klaren Worten, wen das Gesetz wirklich trifft, was „barrierefrei“ im Alltag bedeutet — und warum sich Barrierefreiheit oft auch ohne Pflicht lohnt.</p>
         <p class="article-stand">Stand: Juni&nbsp;2026 · Lesezeit ca. 6&nbsp;Minuten · Allgemeine Informationen, keine Rechtsberatung</p>
         <nav class="page-toc" aria-label="Inhalt">
           <a href="#was-ist">Was ist das BFSG?</a>
@@ -134,7 +196,7 @@
           <p>Das <strong>Barrierefreiheitsstärkungsgesetz (BFSG)</strong> ist die deutsche Umsetzung einer EU-Richtlinie (European Accessibility Act). Es gilt seit dem <strong>28.&nbsp;Juni&nbsp;2025</strong>. Das Gesetz verpflichtet bestimmte Unternehmen, ihre Produkte und digitalen Dienstleistungen so zu gestalten, dass auch Menschen mit Behinderungen sie ohne fremde Hilfe nutzen können — für alle nutzbar, auch mit Behinderung (<a href="/ratgeber#barrierefreiheit">barrierefrei</a>).</p>
           <p>Das Neue daran: Erstmals trifft eine Barrierefrei-Pflicht in größerem Umfang die <strong>Privatwirtschaft</strong>. Vorher galten solche Pflichten in Deutschland im Wesentlichen nur für öffentliche Stellen. Für Websites bedeutet das: Bestimmte Angebote im Netz müssen barrierefrei bedienbar sein.</p>
 
-          <h2 id=”betroffen”>Wer ist betroffen — und wer ausgenommen?</h2>
+          <h2 id="betroffen">Wer ist betroffen — und wer ausgenommen?</h2>
           <p><strong>Betroffen</strong> sind Unternehmen, die bestimmte Produkte oder Dienstleistungen <strong>für Verbraucher</strong> anbieten. Beim Thema Website ist das wichtigste Beispiel der Online-Handel: Websites und Apps, über die Verbraucher <strong>digital Verträge abschließen</strong> können — zum Beispiel:</p>
           <ul>
             <li>Onlineshops mit Bestell- und Bezahlfunktion,</li>
@@ -148,7 +210,7 @@
           <p>In den meisten Fällen: <strong>nein</strong>. Eine klassische Firmenwebsite, die dein Angebot vorstellt, Referenzen zeigt und ein Kontaktformular hat, fällt in der Regel <strong>nicht</strong> unter das Gesetz — über sie wird kein Vertrag digital abgeschlossen. Solche reinen Informations-Websites sind vom Gesetz in der Regel nicht erfasst.</p>
           <p>Aufpassen musst du, sobald deine Website <strong>Verkaufs- oder Buchungsfunktionen</strong> bekommt. Ein Shop-Modul oder eine Online-Terminbuchung mit verbindlichem Abschluss kann die Einordnung ändern. Dann zählt wieder die Frage, ob du unter die Kleinstunternehmen-Ausnahme fällst. Planst du so eine Funktion (etwa beim <a href="/leistung-webdesign">Erstellen deiner Website</a>), lohnt es sich, Barrierefreiheit von Anfang an einzuplanen.</p>
 
-          <h2 id=”konkret”>Was bedeutet „barrierefrei” konkret?</h2>
+          <h2 id="konkret">Was bedeutet „barrierefrei“ konkret?</h2>
           <p>Der praktische Maßstab sind die Regeln für barrierefreie Webseiten — das sind international anerkannte Richtlinien. Die wichtigsten Grundlagen in der Praxis:</p>
           <ul>
             <li><strong>Kontraste:</strong> Text muss sich ausreichend vom Hintergrund abheben — kein hellgrauer Text auf weißem Hintergrund.</li>
@@ -158,7 +220,7 @@
             <li><strong>Saubere Struktur:</strong> korrekte Überschriften-Reihenfolge und technisch sauberer HTML-Code, damit Vorlese-Programme die Seite verstehen.</li>
             <li><strong>Formulare:</strong> beschriftete Felder und Fehlermeldungen, die erklären, was genau zu korrigieren ist.</li>
           </ul>
-          <p>Mehr dazu findest du in unserem <a href=”/ratgeber”>Webdesign-Ratgeber</a> — unter anderem die Einträge zu Barrierefreiheit und BFSG.</p>
+          <p>Mehr dazu findest du in unserem <a href="/ratgeber">Webdesign-Ratgeber</a> — unter anderem die Einträge zu Barrierefreiheit und BFSG.</p>
 
           <h2 id="verstoesse">Was passiert bei Verstößen?</h2>
           <p>Die Einhaltung überwachen die <strong>Marktüberwachungsbehörden</strong> der Länder. Sie können Nachbesserung verlangen und im Ernstfall das Angebot einschränken lassen. Das Gesetz sieht außerdem <strong>Bußgelder</strong> vor. Dazu kommt das praktische Risiko von <strong>Abmahnungen</strong> durch qualifizierte Verbände.</p>

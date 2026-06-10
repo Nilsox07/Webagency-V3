@@ -24,49 +24,111 @@
   <meta name="twitter:image" content="https://[DOMAIN]/[OG-IMAGE]" />
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://[DOMAIN]/#organization",
+      "name": "Sartu",
+      "url": "https://[DOMAIN]/",
+      "logo": "https://[DOMAIN]/assets/logo.png",
+      "email": "hallo@sartu.de",
+      "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+      "areaServed": "DE",
+      "sameAs": []
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Start",
+          "item": "https://[DOMAIN]/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Ratgeber",
+          "item": "https://[DOMAIN]/ratgeber"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "One-Pager oder mehrseitig?",
+          "item": "https://[DOMAIN]/ratgeber-onepager"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Was ist ein One-Pager?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Eine Einseiten-Website (One-Pager) besteht aus einer einzigen, langen Seite: Angebot, Über-mich, Referenzen und Kontakt folgen als Abschnitte untereinander. Die Navigation springt zu den Abschnitten statt auf Unterseiten."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Wann reicht ein One-Pager?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Wenn du EIN klares Angebot hast und schnell professionell online sein willst — typisch für Selbstständige, Handwerker und lokale Dienstleister. Bei Sartu kostet eine professionelle Einseiten-Website 1.290 € als Festpreis."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was ist die SEO-Grenze eines One-Pagers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Eine Web-Adresse kann bei Google in der Regel nur für EIN Hauptthema gut gefunden werden. Wer mehrere Leistungen einzeln gefunden werden will (z. B. „Badsanierung“ UND „Heizungsinstallation“), braucht pro Suchbegriff in der Regel eine eigene Unterseite — das kann eine Einseiten-Website nicht leisten."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Was kostet der Unterschied?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bei Sartu: Einseiten-Website (One-Pager), Basis: 1.290 €, bis 8 Seiten (Pro) 2.990 €, bis 20 Seiten (Platin) 5.990 € — jeweils Festpreis. Eine zusätzliche Seite über dem Paket-Kontingent kostet 199 €."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kann ich einen One-Pager später erweitern?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja. Eine sauber gebaute Einseiten-Website lässt sich um Unterseiten erweitern — bei Sartu z. B. für 199 € pro zusätzlicher Seite oder per Upgrade auf ein größeres Paket. Design und Inhalte bleiben dabei erhalten."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Ist ein One-Pager schlechter für Google?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nicht pauschal. Für EIN Thema plus Region kann eine gute Einseiten-Website ordentlich gefunden werden. Schlechter ist sie nur, wenn du mit mehreren unterschiedlichen Suchbegriffen gefunden werden willst — dafür braucht es eigene Seiten pro Thema."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "One-Pager oder mehrseitige Website — was passt zu dir?",
+      "description": "One-Pager oder mehrseitige Website? Der ehrliche Vergleich: Wann eine Seite reicht (ab 1.290 €), wann sich mehrere Seiten für Google lohnen — plus Entscheidungshilfe in 5 Fragen.",
+      "datePublished": "2026-06-10",
+      "dateModified": "2026-06-10",
+      "author": {
         "@type": "Organization",
-        "@id": "https://[DOMAIN]/#organization",
-        "name": "Sartu",
-        "url": "https://[DOMAIN]/",
-        "logo": "https://[DOMAIN]/assets/logo.png",
-        "email": "hallo@sartu.de",
-        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
-        "areaServed": "DE",
-        "sameAs": []
+        "name": "Sartu"
       },
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Ratgeber", "item": "https://[DOMAIN]/ratgeber" },
-          { "@type": "ListItem", "position": 3, "name": "One-Pager oder mehrseitig?", "item": "https://[DOMAIN]/ratgeber-onepager" }
-        ]
-      },
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
-          { "@type": "Question", "name": "Was ist ein One-Pager?", "acceptedAnswer": { "@type": "Answer", "text": "Ein One-Pager ist eine Website, die aus einer einzigen, länger scrollbaren Seite besteht: Angebot, Über-mich, Referenzen und Kontakt folgen als Sektionen untereinander. Die Navigation springt zu den Abschnitten statt auf Unterseiten." } },
-          { "@type": "Question", "name": "Wann reicht ein One-Pager?", "acceptedAnswer": { "@type": "Answer", "text": "Wenn du EIN klares Angebot hast und schnell professionell online sein willst — typisch für Selbstständige, Handwerker und lokale Dienstleister. Bei Sartu kostet ein professioneller One-Pager 1.290 € als Festpreis." } },
-          { "@type": "Question", "name": "Was ist die SEO-Grenze eines One-Pagers?", "acceptedAnswer": { "@type": "Answer", "text": "Eine URL kann bei Google in der Regel nur für EIN Hauptthema stark ranken. Wer mehrere Leistungen einzeln gefunden werden will (z. B. „Badsanierung“ UND „Heizungsinstallation“), braucht pro Suchbegriff in der Regel eine eigene Unterseite — das kann ein One-Pager nicht leisten." } },
-          { "@type": "Question", "name": "Was kostet der Unterschied?", "acceptedAnswer": { "@type": "Answer", "text": "Bei Sartu: One-Pager (Basis) 1.290 €, bis 8 Seiten (Pro) 2.990 €, bis 20 Seiten (Platin) 5.990 € — jeweils Festpreis. Eine zusätzliche Seite über dem Paket-Kontingent kostet 199 €." } },
-          { "@type": "Question", "name": "Kann ich einen One-Pager später erweitern?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Ein sauber gebauter One-Pager lässt sich um Unterseiten erweitern — bei Sartu z. B. für 199 € pro zusätzlicher Seite oder per Upgrade auf ein größeres Paket. Design und Inhalte bleiben dabei erhalten." } },
-          { "@type": "Question", "name": "Ist ein One-Pager schlechter für Google?", "acceptedAnswer": { "@type": "Answer", "text": "Nicht pauschal. Für EIN Thema plus Region kann ein guter One-Pager ordentlich ranken. Schlechter ist er nur, wenn du mit mehreren unterschiedlichen Suchbegriffen gefunden werden willst — dafür braucht es eigene Seiten pro Thema." } }
-        ]
-      },
-      {
-        "@type": "Article",
-        "headline": "One-Pager oder mehrseitige Website — was passt zu dir?",
-        "description": "One-Pager oder mehrseitige Website? Der ehrliche Vergleich: Wann eine Seite reicht (ab 1.290 €), wann sich mehrere Seiten für Google lohnen — plus Entscheidungshilfe in 5 Fragen.",
-        "datePublished": "2026-06-10",
-        "dateModified": "2026-06-10",
-        "author": { "@type": "Organization", "name": "Sartu" },
-        "publisher": { "@id": "https://[DOMAIN]/#organization" }
+      "publisher": {
+        "@id": "https://[DOMAIN]/#organization"
       }
-    ]
-  }
+    }
+  ]
+}
   </script>
 </head>
 <body>
@@ -134,7 +196,7 @@
           <p>Eine Einseiten-Website (One-Pager) ist eine Website, die aus <strong>einer einzigen, langen Seite</strong> besteht — du scrollst durch alles auf einmal. Alle wichtigen Inhalte — Angebot, Über-mich, Referenzen, Kontakt — folgen als Abschnitte untereinander. Die Navigation springt zu den Abschnitten, statt auf separate Unterseiten zu wechseln.</p>
           <p>Beim Sartu-Onepager (Basis-Paket, 1.290&nbsp;€) sind bis zu 6 solcher Abschnitte enthalten, dazu Optimierung für Handy und Tablet, ein Kontaktformular, Google-Grundlagen und das Datenschutz-Setup (<a href="/ratgeber#dsgvo">DSGVO</a>) — fertig in 7–14 Werktagen, nachdem du die Inhalte geliefert hast.</p>
 
-          <h2 id=”vorteile”>Vorteile &amp; Grenzen des One-Pagers</h2>
+          <h2 id="vorteile">Vorteile &amp; Grenzen des One-Pagers</h2>
           <p><strong>Die Vorteile:</strong></p>
           <ul>
             <li><strong>Schnell online:</strong> Weniger Seiten bedeutet weniger Inhalte, die du liefern musst — und kürzere Umsetzungszeit.</li>
@@ -142,17 +204,17 @@
             <li><strong>Klarer Fokus:</strong> Besucher werden ohne Umwege zu deinem Angebot und zur Kontaktaufnahme geführt — ideal, wenn Anfragen das Ziel sind.</li>
             <li><strong>Wenig Pflege:</strong> Eine Seite aktuell zu halten ist schneller als zehn.</li>
           </ul>
-          <p><strong>Die ehrliche Grenze — Google-Sichtbarkeit:</strong> Eine Web-Adresse kann bei Google in der Regel nur für <strong>ein Hauptthema</strong> gut gefunden werden. Eine Einseiten-Website hat genau eine solche Adresse. Bist du Malermeister und willst für „Maler + deine Stadt” gefunden werden: gut machbar. Willst du aber auch einzeln für „Fassadenanstrich”, „Tapezierarbeiten” und „Bodenbeläge” erscheinen, konkurrieren alle Themen auf derselben Seite — und keines davon gewinnt. Genau dann brauchst du eine mehrseitige Website.</p>
+          <p><strong>Die ehrliche Grenze — Google-Sichtbarkeit:</strong> Eine Web-Adresse kann bei Google in der Regel nur für <strong>ein Hauptthema</strong> gut gefunden werden. Eine Einseiten-Website hat genau eine solche Adresse. Bist du Malermeister und willst für „Maler + deine Stadt“ gefunden werden: gut machbar. Willst du aber auch einzeln für „Fassadenanstrich“, „Tapezierarbeiten“ und „Bodenbeläge“ erscheinen, konkurrieren alle Themen auf derselben Seite — und keines davon gewinnt. Genau dann brauchst du eine mehrseitige Website.</p>
 
-          <h2 id=”mehrseitig”>Wann brauchst du mehrere Seiten?</h2>
+          <h2 id="mehrseitig">Wann brauchst du mehrere Seiten?</h2>
           <p>Die Faustregel: <strong>Pro Suchbegriff, der dir Kunden bringt, eine eigene Seite.</strong> Mehrere Seiten lohnen sich, wenn mindestens einer dieser Punkte zutrifft:</p>
           <ul>
-            <li>Du hast <strong>mehrere Leistungen</strong>, nach denen Kunden getrennt suchen — zum Beispiel „Badsanierung” und „Heizungsinstallation”.</li>
+            <li>Du hast <strong>mehrere Leistungen</strong>, nach denen Kunden getrennt suchen — zum Beispiel „Badsanierung“ und „Heizungsinstallation“.</li>
             <li>Du bedienst <strong>verschiedene Kundengruppen</strong> mit unterschiedlichen Bedürfnissen — zum Beispiel Privat- und Geschäftskunden.</li>
             <li>Du willst mit <strong>Ratgeber-Artikeln</strong> Vertrauen und Sichtbarkeit aufbauen — jeder Artikel ist eine eigene Seite.</li>
             <li>Du brauchst eigene Seiten für <strong>Team, Karriere, Referenzen</strong> oder mehrere Standorte.</li>
           </ul>
-          <p>Wie Google-Optimierung auf jeder einzelnen Unterseite funktioniert, liest du auf der Seite <a href=”/leistung-webdesign”>Website erstellen lassen zum Festpreis</a>.</p>
+          <p>Wie Google-Optimierung auf jeder einzelnen Unterseite funktioniert, liest du auf der Seite <a href="/leistung-webdesign">Website erstellen lassen zum Festpreis</a>.</p>
 
           <h2 id="kosten">Was kostet der Unterschied?</h2>
           <p>Bei Sartu sind die Stufen klar definiert — alles Festpreise:</p>
@@ -191,12 +253,12 @@
           <p>Die wichtigsten Fragen zur Wahl zwischen einer Seite und vielen.</p>
         </div>
         <div class="faq-list">
-          <details class=”faq-item”><summary>Was ist ein One-Pager?</summary><div class=”faq-a”>Eine Einseiten-Website (One-Pager) besteht aus einer einzigen, langen Seite: Angebot, Über-mich, Referenzen und Kontakt folgen als Abschnitte untereinander. Die Navigation springt zu den Abschnitten statt auf Unterseiten.</div></details>
-          <details class=”faq-item”><summary>Wann reicht ein One-Pager?</summary><div class=”faq-a”>Wenn du EIN klares Angebot hast und schnell professionell online sein willst — typisch für Selbstständige, Handwerker und lokale Dienstleister. Bei Sartu kostet eine professionelle Einseiten-Website 1.290&nbsp;€ als Festpreis.</div></details>
-          <details class=”faq-item”><summary>Was ist die SEO-Grenze eines One-Pagers?</summary><div class=”faq-a”>Eine Web-Adresse kann bei Google in der Regel nur für EIN Hauptthema gut gefunden werden. Wer mehrere Leistungen einzeln gefunden werden will (z.&nbsp;B. „Badsanierung” UND „Heizungsinstallation”), braucht pro Suchbegriff in der Regel eine eigene Unterseite — das kann eine Einseiten-Website nicht leisten.</div></details>
-          <details class=”faq-item”><summary>Was kostet der Unterschied?</summary><div class=”faq-a”>Bei Sartu: Einseiten-Website (One-Pager), Basis: 1.290&nbsp;€, bis 8 Seiten (Pro) 2.990&nbsp;€, bis 20 Seiten (Platin) 5.990&nbsp;€ — jeweils Festpreis. Eine zusätzliche Seite über dem Paket-Kontingent kostet 199&nbsp;€.</div></details>
-          <details class=”faq-item”><summary>Kann ich einen One-Pager später erweitern?</summary><div class=”faq-a”>Ja. Eine sauber gebaute Einseiten-Website lässt sich um Unterseiten erweitern — bei Sartu z.&nbsp;B. für 199&nbsp;€ pro zusätzlicher Seite oder per Upgrade auf ein größeres Paket. Design und Inhalte bleiben dabei erhalten.</div></details>
-          <details class=”faq-item”><summary>Ist ein One-Pager schlechter für Google?</summary><div class=”faq-a”>Nicht pauschal. Für EIN Thema plus Region kann eine gute Einseiten-Website ordentlich gefunden werden. Schlechter ist sie nur, wenn du mit mehreren unterschiedlichen Suchbegriffen gefunden werden willst — dafür braucht es eigene Seiten pro Thema.</div></details>
+          <details class="faq-item"><summary>Was ist ein One-Pager?</summary><div class="faq-a">Eine Einseiten-Website (One-Pager) besteht aus einer einzigen, langen Seite: Angebot, Über-mich, Referenzen und Kontakt folgen als Abschnitte untereinander. Die Navigation springt zu den Abschnitten statt auf Unterseiten.</div></details>
+          <details class="faq-item"><summary>Wann reicht ein One-Pager?</summary><div class="faq-a">Wenn du EIN klares Angebot hast und schnell professionell online sein willst — typisch für Selbstständige, Handwerker und lokale Dienstleister. Bei Sartu kostet eine professionelle Einseiten-Website 1.290&nbsp;€ als Festpreis.</div></details>
+          <details class="faq-item"><summary>Was ist die SEO-Grenze eines One-Pagers?</summary><div class="faq-a">Eine Web-Adresse kann bei Google in der Regel nur für EIN Hauptthema gut gefunden werden. Wer mehrere Leistungen einzeln gefunden werden will (z.&nbsp;B. „Badsanierung“ UND „Heizungsinstallation“), braucht pro Suchbegriff in der Regel eine eigene Unterseite — das kann eine Einseiten-Website nicht leisten.</div></details>
+          <details class="faq-item"><summary>Was kostet der Unterschied?</summary><div class="faq-a">Bei Sartu: Einseiten-Website (One-Pager), Basis: 1.290&nbsp;€, bis 8 Seiten (Pro) 2.990&nbsp;€, bis 20 Seiten (Platin) 5.990&nbsp;€ — jeweils Festpreis. Eine zusätzliche Seite über dem Paket-Kontingent kostet 199&nbsp;€.</div></details>
+          <details class="faq-item"><summary>Kann ich einen One-Pager später erweitern?</summary><div class="faq-a">Ja. Eine sauber gebaute Einseiten-Website lässt sich um Unterseiten erweitern — bei Sartu z.&nbsp;B. für 199&nbsp;€ pro zusätzlicher Seite oder per Upgrade auf ein größeres Paket. Design und Inhalte bleiben dabei erhalten.</div></details>
+          <details class="faq-item"><summary>Ist ein One-Pager schlechter für Google?</summary><div class="faq-a">Nicht pauschal. Für EIN Thema plus Region kann eine gute Einseiten-Website ordentlich gefunden werden. Schlechter ist sie nur, wenn du mit mehreren unterschiedlichen Suchbegriffen gefunden werden willst — dafür braucht es eigene Seiten pro Thema.</div></details>
         </div>
       </div>
     </section>
