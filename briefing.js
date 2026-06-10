@@ -918,15 +918,31 @@
       }
 
       /* -- Add-ons (kurze Standardliste + „mehr anzeigen") -- */
+      // Preis-Anzeige eines Add-ons (inkl. Kombi „Einmalpreis + X €/Mon." wie KI-Chatbot)
+      function addonPriceText(a) {
+        if (a.type === 'percent') return '+' + a.pct + ' %';
+        if (typeof a.monthly === 'number') return priceLabel(a.price, { from: a.from }) + ' + ' + a.monthly + ' €/Mon.';
+        return priceLabel(a.price, { from: a.from }) + (a.type === 'month' ? '/Monat' : ' einmalig');
+      }
+      // Mengen-Stepper (geteilt von Listen-Card und Varianten-Karte)
+      function buildQtyRow(a, st) {
+        var q = el('div', 'lb-qty');
+        q.innerHTML = '<span class="lb-qty-label">Anzahl ' + a.qty.unit.replace(/^pro /, '') + ':</span>';
+        var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger');
+        var num = el('span', 'lb-qty-num', String(st.qty));
+        var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr');
+        var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(addonAmount(a, st)));
+        var sync = function () { num.textContent = String(st.qty); lineTotal.textContent = '= ' + fmtEUR(addonAmount(a, st)); renderPriceBar(); };
+        minus.addEventListener('click', function () { st.qty = Math.max(a.qty.min, (st.qty || a.qty.default) - 1); sync(); });
+        plus.addEventListener('click', function () { st.qty = Math.min(a.qty.max, (st.qty || a.qty.default) + 1); sync(); });
+        q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);
+        return q;
+      }
       function buildAddonCard(a, st) {
         var card = el('div', 'lb-addon');
         if (st.selected) card.classList.add('is-on');
 
-        var priceTxt = a.type === 'percent'
-          ? '+' + a.pct + ' %'
-          : priceLabel(a.price, { from: a.from }) + (a.type === 'month' ? '/Monat' : ' einmalig');
         var unit = a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '';
-
         var toggle = el('button', 'lb-addon-toggle'); toggle.type = 'button';
         toggle.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
         toggle.innerHTML =
@@ -935,41 +951,66 @@
             '<span class="lb-addon-name">' + a.name + '</span>' +
             '<span class="lb-addon-desc">' + (a.desc || '') + '</span>' +
           '</span>' +
-          '<span class="lb-addon-price">' + priceTxt + unit + '</span>';
+          '<span class="lb-addon-price">' + addonPriceText(a) + unit + '</span>';
         toggle.addEventListener('click', function () {
           st.selected = !st.selected;
-          // Stufen-Add-ons (gleiche group, z. B. SEO-Betreuung Lite/Pro/Premium):
-          // nur EINE Stufe gleichzeitig — neue Auswahl ersetzt die andere Stufe.
-          if (st.selected && a.group) {
-            PRICING.addons.forEach(function (o) {
-              if (o.group === a.group && o.id !== a.id && A.addons[o.id]) A.addons[o.id].selected = false;
-            });
-          }
           renderAddons(); renderPriceBar();
         });
         card.appendChild(toggle);
-
-        // Mengen-Stepper (nur wenn ausgewählt & Mengen-Add-on)
-        if (a.qty && st.selected) {
-          var q = el('div', 'lb-qty');
-          q.innerHTML = '<span class="lb-qty-label">Anzahl ' + a.qty.unit.replace(/^pro /, '') + ':</span>';
-          var minus = el('button', 'lb-qty-btn', '−'); minus.type = 'button'; minus.setAttribute('aria-label', 'weniger');
-          var num = el('span', 'lb-qty-num', String(st.qty));
-          var plus = el('button', 'lb-qty-btn', '+'); plus.type = 'button'; plus.setAttribute('aria-label', 'mehr');
-          var lineTotal = el('span', 'lb-qty-total', '= ' + fmtEUR(addonAmount(a, st)));
-          var sync = function () { num.textContent = String(st.qty); lineTotal.textContent = '= ' + fmtEUR(addonAmount(a, st)); renderPriceBar(); };
-          minus.addEventListener('click', function () { st.qty = Math.max(a.qty.min, (st.qty || a.qty.default) - 1); sync(); });
-          plus.addEventListener('click', function () { st.qty = Math.min(a.qty.max, (st.qty || a.qty.default) + 1); sync(); });
-          q.appendChild(minus); q.appendChild(num); q.appendChild(plus); q.appendChild(lineTotal);
-          card.appendChild(q);
-        }
+        if (a.qty && st.selected) card.appendChild(buildQtyRow(a, st));
         return card;
+      }
+      // Varianten-Gruppe (z. B. SEO-Betreuung Lite/Pro/Premium): Karten NEBENEINANDER
+      // wie bei Paket & Wartung — genau EINE Variante wählbar, erneut klicken = abwählen.
+      function buildTierGroup(groupId, members) {
+        var meta = (PRICING.addonGroups || {})[groupId] || {};
+        var wrap = el('div', 'lb-tiergroup');
+        wrap.innerHTML =
+          '<div class="lb-tiergroup-h"><span class="lb-tiergroup-name">' + (meta.label || groupId) + '</span>' +
+          '<span class="lb-tiergroup-hint">' + (meta.hint || 'eine Variante wählen') + '</span></div>';
+        var grid = el('div', 'lb-tiers');
+        members.forEach(function (a) {
+          var st = A.addons[a.id];
+          var b = el('button', 'lb-tier'); b.type = 'button';
+          b.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
+          b.innerHTML =
+            '<span class="lb-tier-name">' + (a.short || a.name) + '</span>' +
+            '<span class="lb-tier-price">' + addonPriceText(a) + (a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '') + '</span>' +
+            (a.desc ? '<span class="lb-tier-desc">' + a.desc + '</span>' : '');
+          if (st.selected) b.classList.add('is-on');
+          b.addEventListener('click', function () {
+            var wasSelected = st.selected;
+            members.forEach(function (o) { A.addons[o.id].selected = false; });
+            st.selected = !wasSelected;   // erneut klicken = abwählen, sonst exklusiv wählen
+            renderAddons(); renderPriceBar();
+          });
+          grid.appendChild(b);
+        });
+        wrap.appendChild(grid);
+        // Mengen-Stepper der gewählten Variante (z. B. Einzelseite × N)
+        var withQty = members.filter(function (o) { return o.qty && A.addons[o.id].selected; })[0];
+        if (withQty) wrap.appendChild(buildQtyRow(withQty, A.addons[withQty.id]));
+        return wrap;
       }
       function renderAddons() {
         addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Add-ons <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-addons');
         var hidden = 0;
+        var groupDone = {};
         PRICING.addons.forEach(function (a) {
+          // Varianten-Gruppen: einmal als Karten-Reihe rendern (sichtbar, wenn ein
+          // Mitglied common/gewählt ist oder die Liste aufgeklappt wurde)
+          if (a.group) {
+            if (groupDone[a.group]) return;
+            groupDone[a.group] = true;
+            var members = PRICING.addons.filter(function (o) { return o.group === a.group; });
+            var visible = addonsExpanded || members.some(function (o) {
+              return o.common || (A.addons[o.id] && A.addons[o.id].selected);
+            });
+            if (visible) grid.appendChild(buildTierGroup(a.group, members));
+            else hidden += members.length;
+            return;
+          }
           var st = A.addons[a.id];
           // Sichtbar: kurze Standardliste (common), ausgewählte/vorbefüllte oder wenn aufgeklappt
           if (a.common || st.selected || addonsExpanded) {
@@ -1166,6 +1207,8 @@
         var q = a.qty ? ' ×' + st.qty : '';
         var amt = addonAmount(a, st);
         var price = amt == null ? '–' : fmtEUR(amt) + (a.type === 'month' ? '/Mon.' : '');
+        // Kombi-Add-on (KI-Chatbot): Einmalpreis + monatliche Kosten gemeinsam ausweisen
+        if (typeof a.monthly === 'number') price += ' + ' + fmtEUR(a.monthly) + '/Mon.';
         out.push(a.name + q + ' (' + price + ')');
       }
     });
@@ -1234,6 +1277,7 @@
           qty: a.qty ? st.qty : 1,
           unitPrice: a.price, pct: a.pct || null,
           lineTotal: addonAmount(a, st),
+          monthly: typeof a.monthly === 'number' ? a.monthly : null, // Kombi-Add-on (z. B. KI-Chatbot)
         });
       }
     });

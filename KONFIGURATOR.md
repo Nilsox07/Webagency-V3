@@ -75,16 +75,16 @@ Pflicht-Wartung widersprachen).
 
 | ID | Name | Preis | Menge |
 |---|---|---|---|
-| `texte` | Texterstellung pro Seite | 120 € | 1–10 (pro Seite) |
-| `texte-paket` | Texte-Paket (5 Seiten) | 490 € | – |
-| `texte-paket10` | Texte-Paket (10 Seiten) | 890 € | – |
+| `texte` | Texterstellung pro Seite · Gruppe `texte` | 120 € | 1–10 (pro Seite) |
+| `texte-paket` | Texte-Paket (5 Seiten) · Gruppe `texte` | 490 € | – |
+| `texte-paket10` | Texte-Paket (10 Seiten) · Gruppe `texte` | 890 € | – |
 | `texte-seo` | SEO-Option für Texte | 30 € | 1–10 (pro Seite) |
 | `logo-lite` | Logo Lite · Gruppe `branding` | 490 € | – |
 | `branding-pro` | Branding Pro · Gruppe `branding` | 990 € | – |
 | `corporate` | Corporate Design · Gruppe `branding` | 1.890 € | – |
 | `terminbuchung` | Online-Terminbuchung | ab 290 € | – |
 | `google-profil` | Google-Profil-Setup | 290 € | – |
-| `chatbot` | KI-Chatbot (Einrichtung) | 490 € | – |
+| `chatbot` | KI-Chatbot (Kombi: Einrichtung + Betrieb) | 490 € + 49 €/Mon. | – |
 | `newsletter` | Newsletter-Anbindung | 290 € | – |
 | `analytics` | Analytics-/Tracking-Setup | 190 € | – |
 | `social-feed` | Bewertungs-/Social-Feed | ab 90 € | – |
@@ -97,7 +97,6 @@ Pflicht-Wartung widersprachen).
 
 | ID | Name | Preis / Monat |
 |---|---|---|
-| `chatbot-betrieb` | KI-Chatbot (Betrieb & Pflege) | 49 € |
 | `seo-lite` | SEO-Betreuung Lite · Gruppe `seo-betreuung` | 149 € |
 | `seo-pro` | SEO-Betreuung Pro · Gruppe `seo-betreuung` | 390 € |
 | `seo-premium` | SEO-Betreuung Premium · Gruppe `seo-betreuung` | 790 € |
@@ -107,8 +106,11 @@ Pflicht-Wartung widersprachen).
 - Alle Werte 1:1 aus der Aufpreisliste in `preise.html` bzw. den Stufen der Leistungsseiten.
 - `type`: `once` (einmalig) · `month` (monatlich) · `percent` (Prozent vom Paketpreis, z. B. Express).
 - `from: true` = „ab"-Preis; gerechnet wird mit der Untergrenze.
-- `group`: Stufen-Add-ons derselben Gruppe (z. B. SEO-Betreuung Lite/Pro/Premium) schließen sich
-  gegenseitig aus — die Auswahl einer Stufe wählt die andere automatisch ab (`briefing.js`).
+- `group`: Varianten-Add-ons derselben Gruppe (Texte, Branding, SEO-Betreuung, Profil-Pflege)
+  werden im Konfigurator als Karten NEBENEINANDER gerendert (wie Pakete & Wartung) und schließen
+  sich gegenseitig aus — erneutes Klicken wählt ab (`briefing.js → buildTierGroup`).
+- `monthly`: Kombi-Add-on — Einmalpreis + feste monatliche Kosten in EINER Option
+  (KI-Chatbot: 490 € einmalig + 49 €/Monat; `pricing-calc.js` bucht beides).
 - Enterprise-Karte zeigt `priceFrom` („ab 9.990 €") als reine Anzeige; die Live-Berechnung bleibt
   beim Enterprise-Abzweig („Individuelles Festpreis-Angebot").
 - „Weitere Arbeitszeit 99 €/Std." (preise.html) ist bewusst KEIN Add-on — Stundensatz, kein Paket.

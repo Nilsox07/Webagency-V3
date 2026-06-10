@@ -57,19 +57,24 @@
     maintenanceOrder: ['care-s', 'care-m', 'care-l'],
     mandatoryNote: 'Hosting & Pflege (Sartu Care) ist bei jeder Website Pflicht. Preise bei Jahreszahlung.',
 
-    /* ---- Add-ons / Funktionen (aus der Leistungsbeschreibung) ---- */
+    /* ---- Add-ons / Funktionen (aus der Leistungsbeschreibung) ----
+       group  = Varianten-Gruppe: wird im Konfigurator als Karten NEBENEINANDER
+                gerendert (wie Pakete/Wartung), nur EINE Variante gleichzeitig wählbar.
+       short  = Kurzname für die Variante-Karte (Zusammenfassung nutzt den vollen Namen).
+       monthly= Kombi-Add-on: zusätzlich zum Einmalpreis feste monatliche Kosten. */
     addons: [
       /* — Einmalig — */
-      { id: 'texte',        name: 'Texterstellung pro Seite', price: 120, type: 'once', common: true,
+      /* Texterstellung (Leistungsseite Texte): eine Variante wählen */
+      { id: 'texte',        name: 'Texterstellung pro Seite', short: 'Einzelseite', price: 120, type: 'once', common: true, group: 'texte',
         qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' }, desc: 'Professioneller Text je Seite, eine Korrekturrunde.' },
-      { id: 'texte-paket',  name: 'Texte-Paket (5 Seiten)', price: 490, type: 'once', common: true,
+      { id: 'texte-paket',  name: 'Texte-Paket (5 Seiten)', short: '5er-Paket', price: 490, type: 'once', common: true, group: 'texte',
         desc: 'Texte für 5 Seiten – ca. 98 €/Seite.' },
-      { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', price: 890, type: 'once',
+      { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', short: '10er-Paket', price: 890, type: 'once', group: 'texte',
         desc: 'Texte für 10 Seiten – ca. 89 €/Seite.' },
       { id: 'texte-seo',    name: 'SEO-Option für Texte', price: 30, type: 'once',
         qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' },
         desc: 'SEO-Optimierung deiner Texte – nur zusammen mit Texterstellung sinnvoll.' },
-      /* Branding-Stufen (Leistungsseite Logo): nur EINE Stufe gleichzeitig wählbar */
+      /* Branding-Stufen (Leistungsseite Logo): eine Stufe wählen */
       { id: 'logo-lite',    name: 'Logo Lite', price: 490, type: 'once', common: true, group: 'branding',
         desc: '3 Entwürfe, 2 Runden, Standardformate, Mini-Styleguide.' },
       { id: 'branding-pro', name: 'Branding Pro', price: 990, type: 'once', common: true, group: 'branding',
@@ -80,8 +85,9 @@
         desc: 'Einrichtung & Einbindung eines Buchungstools.' },
       { id: 'google-profil',name: 'Google-Profil-Setup', price: 290, type: 'once', common: true,
         desc: 'Einmalige Einrichtung & Optimierung des Profils.' },
-      { id: 'chatbot',      name: 'KI-Chatbot (Einrichtung)', price: 490, type: 'once',
-        desc: 'FAQ-Bot auf Basis deiner Website-Inhalte. Betrieb: siehe monatlich.' },
+      /* Kombi-Add-on: Einrichtung einmalig + Betrieb monatlich in EINER Option */
+      { id: 'chatbot',      name: 'KI-Chatbot', price: 490, type: 'once', monthly: 49,
+        desc: 'FAQ-Bot auf Basis deiner Website-Inhalte. Einrichtung 490 € einmalig + Betrieb & Pflege 49 €/Monat.' },
       { id: 'newsletter',   name: 'Newsletter-Anbindung', price: 290, type: 'once',
         desc: 'Anmeldeformular + Anbindung an dein Newsletter-Tool.' },
       { id: 'analytics',    name: 'Analytics-/Tracking-Setup', price: 190, type: 'once',
@@ -99,21 +105,27 @@
         desc: 'Priorisierte, schnellere Fertigstellung (+50 %, mind. 390 €).' },
 
       /* — Wiederkehrend (monatlich) — */
-      { id: 'chatbot-betrieb', name: 'KI-Chatbot (Betrieb & Pflege)', price: 49, type: 'month',
-        desc: 'Laufender Betrieb des Chatbots (zzgl. Einrichtung).' },
-      /* SEO-Betreuung als Retainer (Leistungsseite SEO): nur EINE Stufe gleichzeitig wählbar */
-      { id: 'seo-lite',     name: 'SEO-Betreuung Lite', price: 149, type: 'month', group: 'seo-betreuung',
+      /* SEO-Betreuung als Retainer (Leistungsseite SEO): eine Stufe wählen */
+      { id: 'seo-lite',     name: 'SEO-Betreuung Lite', short: 'Lite', price: 149, type: 'month', group: 'seo-betreuung',
         desc: 'Basis-Local-SEO, Profil-Grundpflege, Title/Meta der Kernseiten, Monatsreport.' },
-      { id: 'seo-pro',      name: 'SEO-Betreuung Pro', price: 390, type: 'month', group: 'seo-betreuung',
+      { id: 'seo-pro',      name: 'SEO-Betreuung Pro', short: 'Pro', price: 390, type: 'month', group: 'seo-betreuung',
         desc: 'Alles aus Lite + tiefe Keyword-Recherche, OnPage-SEO für alle Seiten, 2 Landingpages/Quartal, Strategie-Call.' },
-      { id: 'seo-premium',  name: 'SEO-Betreuung Premium', price: 790, type: 'month', group: 'seo-betreuung',
+      { id: 'seo-premium',  name: 'SEO-Betreuung Premium', short: 'Premium', price: 790, type: 'month', group: 'seo-betreuung',
         desc: 'Alles aus Pro + Content-Strategie, Backlink-Aufbau, KI-Suche-/GEO-Optimierung, monatlicher Call.' },
-      /* Google-Profil-Pflege (Leistungsseite Lokales SEO): nur EINE Stufe gleichzeitig wählbar */
-      { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', price: 79, type: 'month', group: 'profil-pflege',
+      /* Google-Profil-Pflege (Leistungsseite Lokales SEO): eine Stufe wählen */
+      { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', short: 'Basic', price: 79, type: 'month', group: 'profil-pflege',
         desc: 'Rezensionen beantworten, Kerninfos & Öffnungszeiten pflegen, Profil-Monitoring.' },
-      { id: 'profil-pro',   name: 'Google-Profil-Pflege Pro', price: 149, type: 'month', group: 'profil-pflege',
+      { id: 'profil-pro',   name: 'Google-Profil-Pflege Pro', short: 'Pro', price: 149, type: 'month', group: 'profil-pflege',
         desc: 'Alles aus Basic + regelmäßige Google Posts, neue Fotos, Q&A-Management, Monatsreport.' },
     ],
+
+    /* ---- Varianten-Gruppen: Überschrift + Hinweis für die Nebeneinander-Darstellung ---- */
+    addonGroups: {
+      'texte':         { label: 'Texterstellung',                  hint: 'eine Variante – erneut klicken zum Abwählen' },
+      'branding':      { label: 'Logo & Branding',                 hint: 'eine Stufe – erneut klicken zum Abwählen' },
+      'seo-betreuung': { label: 'SEO-Betreuung (monatlich)',       hint: 'eine Stufe – erneut klicken zum Abwählen' },
+      'profil-pflege': { label: 'Google-Profil-Pflege (monatlich)',hint: 'eine Stufe – erneut klicken zum Abwählen' },
+    },
 
     /* ---- Enterprise-Abzweig: Optionen für die strukturierte Anfrage ---- */
     enterpriseOptions: {

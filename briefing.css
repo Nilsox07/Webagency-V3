@@ -479,6 +479,33 @@
 .lb-qty-num { min-width: 24px; text-align: center; font-weight: 800; color: var(--white); }
 .lb-qty-total { font-size: 13px; font-weight: 700; color: var(--green); margin-left: 4px; }
 
+/* ---- Add-on-Varianten-Gruppen: Karten nebeneinander (wie Paket & Wartung) ---- */
+.lb-tiergroup {
+  border: 1.5px solid var(--border-dark); border-radius: 14px;
+  background: rgba(255,255,255,0.02); padding: 14px;
+}
+.lb-tiergroup-h {
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px;
+}
+.lb-tiergroup-name { font-size: 14px; font-weight: 800; color: var(--white); }
+.lb-tiergroup-hint { font-size: 12px; color: var(--text-light-muted); }
+.lb-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.lb-tier {
+  display: flex; flex-direction: column; gap: 4px; text-align: left;
+  font: inherit; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark);
+  border-radius: 12px; padding: 14px;
+  transition: border-color .15s ease, transform .12s ease, background .15s ease;
+}
+.lb-tier:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-1px); }
+.lb-tier.is-on { border-color: var(--green); background: rgba(174,240,0,0.1); }
+.lb-tier-name { font-size: 14.5px; font-weight: 700; color: var(--white); }
+.lb-tier.is-on .lb-tier-name::before { content: "✓ "; color: var(--green); font-weight: 800; }
+.lb-tier-price { font-size: 14px; font-weight: 800; color: var(--green); }
+.lb-tier-desc { font-size: 12px; line-height: 1.4; color: var(--text-light-muted); }
+.lb-tiergroup .lb-qty { padding: 12px 2px 0; }
+
 /* ---- Zahlungsstaffelung (Anzeige) ---- */
 .lb-cfg-pay { background: rgba(255,255,255,0.03); border: 1px solid var(--border-dark); border-radius: 14px; padding: 18px; }
 .lb-pay-steps { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -548,7 +575,7 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 /* ---- Mobil ---- */
 @media (max-width: 560px) {
   .lb-paths { grid-template-columns: 1fr; }
-  .lb-pkgs, .lb-warts { grid-template-columns: 1fr 1fr; }
+  .lb-pkgs, .lb-warts, .lb-tiers { grid-template-columns: 1fr 1fr; }
   .lb-pricebar-inner { flex-wrap: wrap; gap: 10px; padding: 10px 16px; }
   .lb-pricebar-toggle { order: 3; }
   .lb-pricebar-sums { width: 100%; order: 1; justify-content: space-between; gap: 12px; }
@@ -559,13 +586,13 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   .lb-addon-price { width: 100%; text-align: left; padding-left: 36px; }
 }
 @media (max-width: 380px) {
-  .lb-pkgs, .lb-warts { grid-template-columns: 1fr; }
+  .lb-pkgs, .lb-warts, .lb-tiers { grid-template-columns: 1fr; }
 }
 
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
-  .lb-path-card, .lb-pkg, .lb-wart { transition: none; }
-  .lb-path-card:hover, .lb-pkg:hover, .lb-wart:hover { transform: none; }
+  .lb-path-card, .lb-pkg, .lb-wart, .lb-tier { transition: none; }
+  .lb-path-card:hover, .lb-pkg:hover, .lb-wart:hover, .lb-tier:hover { transform: none; }
 }
 
 /* ============================================================

@@ -84,6 +84,11 @@
       } else {
         once += amount;
         lines.push({ group: 'once', label: label, amount: amount });
+        // Kombi-Add-on (z. B. KI-Chatbot): Einmalpreis + feste monatliche Kosten in EINER Option
+        if (typeof a.monthly === 'number') {
+          monthly += a.monthly;
+          lines.push({ group: 'monthly', label: a.name + ' (Betrieb)', amount: a.monthly });
+        }
       }
     });
 
