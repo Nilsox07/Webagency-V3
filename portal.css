@@ -157,6 +157,16 @@ a:hover { text-decoration: underline; }
 
 pre.json { background: #060d18; border: 1px solid var(--border); border-radius: 12px; padding: 14px; overflow: auto; font-size: 12.5px; color: #cfe0f5; max-height: 320px; }
 
+/* Anfragen-Detailansicht (admin.html) */
+.det-h { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--lime-strong); margin: 18px 0 8px; font-weight: 800; }
+.det-list { margin: 4px 0 0 18px; font-size: 14px; color: var(--white); }
+.det-list li { margin-bottom: 4px; }
+.det-sums { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.det-sum { flex: 1; min-width: 150px; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.det-sum span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 4px; }
+.det-sum strong { font-size: 20px; font-weight: 800; color: var(--white); }
+.det-sum-mo strong { color: var(--lime); }
+
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .row-end { justify-content: flex-end; }
 .spread { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }

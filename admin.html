@@ -66,6 +66,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="portal-config.js?v=2"></script>
+  <!-- OPT-Listen (Branchen/Ziele/Umfang/… → Labels) für die Anfragen-Detailansicht -->
+  <script src="briefing-schema.js?v=4"></script>
   <script>
   (function () {
     'use strict';
@@ -174,40 +176,148 @@
       document.getElementById('aConvert').addEventListener('click', function () { openConvert(b); });
     }
 
-    function renderBriefing(p) {
-      if (!p || !Object.keys(p).length) return '<p class="muted" style="margin-top:12px;">Kein strukturiertes Payload.</p>';
-      var k = p.kontakt || {}, br = p.briefing || {}, cfg = p.konfiguration || {};
-      var rows = [];
-      rows.push(['Kontakt', [k.name, k.email, k.telefon].filter(Boolean).join(' · ')]);
-      rows.push(['Pfad', p.pfad === 'B' ? 'Lumi-Beratung' : 'Direkt-Konfigurator']);
-      if (p.pfad === 'B') {
-        rows.push(['Branche', br.branche]);
-        rows.push(['Ziele', arr(br.ziele)]);
-        rows.push(['Umfang', br.umfang]);
-        rows.push(['Funktionen', arr(br.features)]);
-        rows.push(['Stil / Farben', [br.stil, br.hauptfarbe, br.nebenfarbe].filter(Boolean).join(' · ')]);
-        rows.push(['Material', arr(br.material)]);
-        rows.push(['Zeitrahmen', br.zeitrahmen]);
-        rows.push(['Empfehlung', br.paket_empfohlen]);
-      }
-      if (cfg.modus === 'enterprise') {
-        rows.push(['Konfiguration', 'Enterprise — individuelles Angebot']);
-        if (cfg.anforderungen) rows.push(['Anforderungen', JSON.stringify(cfg.anforderungen)]);
-      } else if (cfg.paket) {
-        rows.push(['Paket', (cfg.paket_name || cfg.paket) + (cfg.paket_preis != null ? ' · ' + fmtEUR(cfg.paket_preis) : '')]);
-        rows.push(['Wartung', cfg.wartung_name || cfg.wartung]);
-        if (cfg.extra_seiten) rows.push(['Extraseiten', cfg.extra_seiten]);
-        if (cfg.addons && cfg.addons.length) rows.push(['Add-ons', cfg.addons.map(function (a) { return a.name + (a.qty > 1 ? ' ×' + a.qty : ''); }).join(', ')]);
-        rows.push(['Summe einmalig', cfg.summe_einmalig != null ? fmtEUR(cfg.summe_einmalig) : '–']);
-        rows.push(['Summe monatlich', cfg.summe_monatlich != null ? fmtEUR(cfg.summe_monatlich) : '–']);
-      }
-      var html = '<div class="kv" style="margin-top:14px;">';
-      rows.forEach(function (r) { if (r[1]) html += '<div class="k">' + esc(r[0]) + '</div><div class="v">' + esc(r[1]) + '</div>'; });
-      html += '</div>';
-      html += '<details style="margin-top:14px;"><summary class="muted" style="cursor:pointer;">Rohdaten (JSON)</summary><pre class="json">' + esc(JSON.stringify(p, null, 2)) + '</pre></details>';
-      return html;
+    // ---- value→Label-Übersetzung ----
+    // Primärquelle: die OPT-Listen aus briefing-schema.js (gleiche Labels wie im Lumi-Flow).
+    var OPT = (window.SARTU_BRIEFING_SCHEMA && window.SARTU_BRIEFING_SCHEMA.options) || {};
+    // Enterprise-Werte stehen in pricing.js — hier kompakt gespiegelt (Fallback-Mapping).
+    var ENT = {
+      sonderfunktionen: { shop: 'Shop / Bezahlung', login: 'Login / Mitgliederbereich', buchung: 'Buchungssystem', schnittstelle: 'Schnittstelle / CRM / API', mehrsprachig: 'Mehrsprachigkeit', portal: 'Portal / Community' },
+      seitenzahl: { bis20: 'bis 20 Seiten', '20-50': '20–50 Seiten', '50plus': '50+ Seiten', unklar: 'Weiß ich noch nicht' },
+      shopGroesse: { bis50: 'bis 50 Produkte', '50-500': '50–500 Produkte', '500plus': '500+ Produkte', unklar: 'Weiß ich noch nicht' },
+      zeithorizont: { asap: 'So schnell wie möglich', '1-3m': 'In 1–3 Monaten', '3-6m': 'In 3–6 Monaten', flex: 'Flexibel' }
+    };
+    function labelFor(slot, val) {
+      if (val == null || val === '') return '';
+      var list = OPT[slot] || [];
+      for (var i = 0; i < list.length; i++) if (list[i].value === val) return list[i].label;
+      return String(val); // Fallback: roher Code, falls kein Label existiert
     }
-    function arr(a) { return Array.isArray(a) ? a.join(', ') : (a || ''); }
+    function labelsFor(slot, vals) {
+      if (!Array.isArray(vals)) return vals ? labelFor(slot, vals) : '';
+      return vals.map(function (v) { return labelFor(slot, v); }).filter(Boolean).join(', ');
+    }
+    function entLabel(group, val) {
+      if (val == null || val === '') return '';
+      var m = ENT[group]; return (m && m[val]) || String(val);
+    }
+
+    function renderBriefing(p) {
+      if (!p || typeof p !== 'object') return '<p class="muted" style="margin-top:12px;">Kein strukturiertes Payload.</p>';
+      var k = p.kontakt || {}, br = p.briefing || {}, cfg = p.konfiguration || {};
+      var out = '';
+
+      // Sektion nur ausgeben, wenn mindestens ein Wert vorhanden ist; leere Felder entfallen.
+      function section(title, rows) {
+        var vis = rows.filter(function (r) { return r[1] != null && r[1] !== ''; });
+        if (!vis.length) return '';
+        var h = (title ? '<h3 class="det-h">' + esc(title) + '</h3>' : '') + '<div class="kv">';
+        vis.forEach(function (r) { h += '<div class="k">' + esc(r[0]) + '</div><div class="v">' + r[1] + '</div>'; });
+        return h + '</div>';
+      }
+      function val(v) { return (v == null || v === '') ? '' : esc(String(v)); }
+
+      // KONTAKT
+      out += section('Kontakt', [
+        ['Name', val(k.name)],
+        ['E-Mail', val(k.email)],
+        ['Telefon', val(k.telefon)],
+        ['Datenschutz', k.dsgvo ? 'zugestimmt' : '']
+      ]);
+
+      // PFAD
+      out += section('Pfad', [
+        ['Weg', p.pfad === 'B' ? 'Lumi-Beratung (geführt)' : (p.pfad === 'A' ? 'Direkt-Konfigurator' : val(p.pfad))],
+        ['Eingegangen', p.createdAt ? esc(fmtDate(p.createdAt)) : '']
+      ]);
+
+      // BRIEFING (nur Pfad B)
+      if (p.pfad === 'B' && br && Object.keys(br).length) {
+        var branche = labelFor('branche', br.branche);
+        branche = branche ? esc(branche) : '';
+        if (branche && br.branche === 'sonstiges' && br.branche_sonstiges) branche += ' („' + esc(br.branche_sonstiges) + '")';
+        var umfang = labelFor('umfang', br.umfang);
+        if (umfang && br.umfang !== 'onepager' && Array.isArray(br.seiten) && br.seiten.length) umfang += ' · ' + labelsFor('seiten', br.seiten);
+        umfang = umfang ? esc(umfang) : '';
+        var farb = [];
+        if (br.hauptfarbe) farb.push('Haupt: ' + labelFor('farben', br.hauptfarbe));
+        if (br.nebenfarbe) farb.push('Neben: ' + labelFor('farben', br.nebenfarbe));
+        if (br.markenfarben_hex) farb.push('HEX: ' + br.markenfarben_hex);
+        var up = br.uploads || {}, upd = [];
+        if (up.logo && up.logo.length) upd.push(up.logo.length + ' Logo-Datei(en)');
+        if (up.fotos && up.fotos.length) upd.push(up.fotos.length + ' Foto(s)');
+        if (up.texte && up.texte.length) upd.push(up.texte.length + ' Text-Datei(en)');
+        if (up.texte_notiz) upd.push('Notiz: ' + up.texte_notiz);
+        if (up.website_link) upd.push('Website: ' + up.website_link);
+        out += section('Briefing', [
+          ['Branche', branche],
+          ['Ziele', esc(labelsFor('ziele', br.ziele))],
+          ['Umfang', umfang],
+          ['Funktionen', esc(labelsFor('features', br.features))],
+          ['Stil', esc(labelFor('stil', br.stil))],
+          ['Farben', farb.length ? esc(farb.join(' · ')) : ''],
+          ['Material', (Array.isArray(br.material) && br.material.length) ? esc(labelsFor('material', br.material)) : ''],
+          ['Uploads / Hinweise', upd.length ? esc(upd.join(' · ')) : ''],
+          ['Zeitrahmen', esc(labelFor('zeitrahmen', br.zeitrahmen))],
+          ['Empfehlung von Lumi', br.paket_empfohlen ? esc(cap(br.paket_empfohlen)) : '']
+        ]);
+      }
+
+      // KONFIGURATION
+      if (cfg && cfg.modus === 'enterprise') {
+        var anf = cfg.anforderungen || {};
+        out += '<h3 class="det-h">Konfiguration · Enterprise</h3>' +
+               '<p class="muted" style="margin:-2px 0 8px;">Individuelles Festpreis-Angebot</p>';
+        out += section('', [
+          ['Sonderfunktionen', (Array.isArray(anf.sonderfunktionen) && anf.sonderfunktionen.length) ? esc(anf.sonderfunktionen.map(function (v) { return entLabel('sonderfunktionen', v); }).join(', ')) : ''],
+          ['Seitenzahl', esc(entLabel('seitenzahl', anf.seitenzahl))],
+          ['Shop-Größe', esc(entLabel('shopGroesse', anf.shopGroesse))],
+          ['Sprachen', val(anf.sprachen)],
+          ['Schnittstellen', val(anf.schnittstellen)],
+          ['Zeithorizont', esc(entLabel('zeithorizont', anf.zeithorizont))],
+          ['Notiz', val(anf.notiz)]
+        ]);
+      } else if (cfg && (cfg.paket || cfg.paket_name)) {
+        var seiten = '';
+        if (cfg.inklusiv_seiten != null) {
+          seiten = cfg.inklusiv_seiten + ' inkl.';
+          if (cfg.extra_seiten) seiten += ' + ' + cfg.extra_seiten + ' extra' + (cfg.extra_seiten_preis ? ' (' + fmtEUR(cfg.extra_seiten_preis) + ')' : '');
+        }
+        var crows = [
+          ['Paket', esc((cfg.paket_name || cap(cfg.paket)) + (cfg.paket_preis != null ? ' · ' + fmtEUR(cfg.paket_preis) : ''))],
+          ['Seiten', esc(seiten)],
+          ['Wartung', esc((cfg.wartung_name || cfg.wartung || '') + (cfg.wartung_preis != null ? ' · ' + fmtEUR(cfg.wartung_preis) + '/Mon.' : ''))]
+        ];
+        if (Array.isArray(cfg.addons) && cfg.addons.length) {
+          var items = cfg.addons.map(function (a) {
+            var nm = esc(a.name || a.id || 'Add-on');
+            var q = (a.qty && a.qty > 1) ? ' ×' + a.qty : '';
+            var lt = (a.lineTotal != null) ? ' — ' + fmtEUR(a.lineTotal) : '';
+            var mo = (a.monthly != null) ? ' + ' + fmtEUR(a.monthly) + '/Mon.' : '';
+            return '<li>' + nm + q + lt + mo + '</li>';
+          }).join('');
+          crows.push(['Add-ons', '<ul class="det-list">' + items + '</ul>']);
+        }
+        out += section('Konfiguration', crows);
+        // Summen hervorgehoben
+        out += '<div class="det-sums">' +
+          '<div class="det-sum"><span>Summe einmalig</span><strong>' + (cfg.summe_einmalig != null ? esc(fmtEUR(cfg.summe_einmalig)) : '—') + '</strong></div>' +
+          '<div class="det-sum det-sum-mo"><span>Summe monatlich</span><strong>' + (cfg.summe_monatlich != null ? esc(fmtEUR(cfg.summe_monatlich)) : '—') + '</strong></div>' +
+          '</div>';
+      }
+
+      // ZAHLUNGSSTAFFELUNG
+      var stf = cfg && cfg.zahlungsstaffelung;
+      if (Array.isArray(stf) && stf.length) {
+        var li = stf.map(function (s) {
+          return '<li><strong>' + esc(String(s.pct != null ? s.pct : '?')) + '&nbsp;%</strong> · ' + esc(s.when || '') + '</li>';
+        }).join('');
+        out += '<h3 class="det-h">Zahlungsstaffelung</h3><ul class="det-list">' + li + '</ul>';
+      }
+
+      // Rohdaten zur Sicherheit
+      out += '<details style="margin-top:16px;"><summary class="muted" style="cursor:pointer;">Rohdaten (JSON)</summary><pre class="json">' + esc(JSON.stringify(p, null, 2)) + '</pre></details>';
+      return out;
+    }
 
     /* ---- In Projekt umwandeln ---- */
     function openConvert(b) {
