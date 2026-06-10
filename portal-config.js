@@ -8,8 +8,8 @@
    ============================================================ */
 (function () {
   'use strict';
-  var SUPABASE_URL = '[SUPABASE_URL]';
-  var SUPABASE_ANON_KEY = '[SUPABASE_ANON_KEY]';
+  var SUPABASE_URL = 'https://uoinusdxnrvntqnafnsk.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvaW51c2R4bnJ2bnRxbmFmbnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNzUyMjIsImV4cCI6MjA5NjY1MTIyMn0.NCTWr8qsz5LOzkMKlq4uWw9cJk-4Q7VKjhBR_xVZrtY';
 
   var isPlaceholder = function (v) { return !v || /^\[.*\]$/.test(v); };
   window.SARTU_PORTAL_CONFIGURED = !isPlaceholder(SUPABASE_URL) && !isPlaceholder(SUPABASE_ANON_KEY);

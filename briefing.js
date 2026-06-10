@@ -36,8 +36,8 @@
     useLLM: false,                                   // EINEN LLM-Call (nur Pfad B) aktivieren
     llmEndpoint: '[LLM_BRIEFING_ENDPOINT]',
     formEndpoint: '[FORMSPREE_ODER_RESEND_ENDPOINT]',
-    supabaseUrl: '[SUPABASE_URL]',
-    supabaseKey: '[SUPABASE_ANON_KEY]',
+    supabaseUrl: 'https://uoinusdxnrvntqnafnsk.supabase.co',
+    supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvaW51c2R4bnJ2bnRxbmFmbnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNzUyMjIsImV4cCI6MjA5NjY1MTIyMn0.NCTWr8qsz5LOzkMKlq4uWw9cJk-4Q7VKjhBR_xVZrtY',
     notifyEmail: '[SARTU-EMAIL]',
     datenschutzUrl: 'datenschutz.html',
   };
