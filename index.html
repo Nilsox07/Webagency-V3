@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Auth-Backstop: Landet ein Magic-Link-Token auf der Startseite (Supabase Site URL),
+       wird es 1:1 (Query + Hash) an die Callback-Seite weitergereicht, die die Session aufnimmt. -->
+  <script>
+  (function () {
+    var q = window.location.search, h = window.location.hash;
+    if (/[?&](code|access_token|refresh_token|error|error_code)=/.test(q) || /[#&](access_token|refresh_token|error|error_code)=/.test(h)) {
+      window.location.replace(window.location.origin + '/auth-callback.html' + q + h);
+    }
+  })();
+  </script>
   <meta name="description" content="Sartu — Wir erstellen Webseiten, die Kunden gewinnen. Maßgeschneiderte Websites für Unternehmen, die mehr Sichtbarkeit, Vertrauen und Anfragen wollen." />
   <title>Sartu — Wir erstellen Webseiten, die Kunden gewinnen.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />

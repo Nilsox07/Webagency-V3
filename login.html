@@ -86,9 +86,14 @@
       if (!currentEmail) return;
       sendBtn.disabled = true; sendBtn.innerHTML = '<span class="spinner"></span> Senden…';
       // shouldCreateUser:false → Konten legt NUR der Admin an (kein Self-Signup!)
+      // emailRedirectTo → der Magic-Link landet auf der Callback-Seite, die das Token
+      // verarbeitet, die Session speichert und nach Rolle weiterleitet.
       window.sb.auth.signInWithOtp({
         email: currentEmail,
-        options: { shouldCreateUser: false }
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: window.location.origin + '/auth-callback.html'
+        }
       }).then(function (r) {
         sendBtn.disabled = false; sendBtn.textContent = 'Login-Link anfordern';
         if (r.error) { showErr(deutsch(r.error.message)); return; }

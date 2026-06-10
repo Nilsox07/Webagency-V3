@@ -9,6 +9,7 @@ Allow: /
 Disallow: /login.html
 Disallow: /portal.html
 Disallow: /admin.html
+Disallow: /auth-callback.html
 
 # KI-/Answer-Engine-Crawler ausdrücklich erlauben (GEO)
 User-agent: GPTBot

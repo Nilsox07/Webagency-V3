@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Anmeldung … · Sartu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal.css?v=2" />
+</head>
+<body>
+  <div class="pt-wrap">
+    <div class="auth-box">
+      <div class="card" style="text-align:center;">
+        <p class="eyebrow">Kundenportal</p>
+        <h1 id="title">Anmeldung wird abgeschlossen …</h1>
+        <p class="muted" id="sub" style="margin-top:8px;"><span class="spinner"></span> Einen Moment, wir richten deine Sitzung ein.</p>
+        <p class="notice notice-err hidden" id="err" style="margin-top:16px;"></p>
+        <p style="margin-top:16px;"><a href="login.html" class="hidden" id="backLink">Zurück zum Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- supabase-js + Client mit detectSessionInUrl:true (portal-config.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="portal-config.js?v=2"></script>
+  <script>
+  (function () {
+    'use strict';
+    var err = document.getElementById('err');
+    var backLink = document.getElementById('backLink');
+
+    function fail(msg) {
+      document.getElementById('title').textContent = 'Anmeldung fehlgeschlagen';
+      document.getElementById('sub').classList.add('hidden');
+      err.textContent = msg || 'Die Sitzung konnte nicht hergestellt werden. Bitte fordere einen neuen Login-Link an.';
+      err.classList.remove('hidden');
+      backLink.classList.remove('hidden');
+    }
+
+    if (!window.sb) {
+      fail('Portal ist nicht konfiguriert (Supabase-Keys fehlen).');
+      return;
+    }
+    // Falls Supabase einen Fehler im Link mitgibt (#error=… / ?error=…)
+    var hay = window.location.hash + ' ' + window.location.search;
+    if (/error=|error_code=/.test(hay)) {
+      var m = /error_description=([^&]+)/.exec(hay);
+      fail(m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : 'Der Login-Link ist ungültig oder abgelaufen.');
+      return;
+    }
+
+    var done = false;
+    function route(session) {
+      if (done || !session) return;
+      done = true;
+      // Adresszeile vom Token säubern (supabase-js entfernt den Hash i. d. R. selbst)
+      try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
+      // Weiche: Admin → admin.html, sonst → portal.html
+      window.sb.rpc('is_admin').then(function (r) {
+        window.location.replace(r.data === true ? 'admin.html' : 'portal.html');
+      }).catch(function () {
+        window.location.replace('portal.html');
+      });
+    }
+
+    // detectSessionInUrl verarbeitet das Token asynchron → auf SIGNED_IN warten.
+    window.sb.auth.onAuthStateChange(function (_event, session) { if (session) route(session); });
+    // Falls die Session schon steht (z. B. bereits eingeloggt), direkt weiter.
+    window.sb.auth.getSession().then(function (r) { if (r.data && r.data.session) route(r.data.session); });
+
+    // Sicherheitsnetz: nach 8 s ohne Session → Fehlermeldung.
+    setTimeout(function () {
+      if (done) return;
+      window.sb.auth.getSession().then(function (r) {
+        if (r.data && r.data.session) route(r.data.session);
+        else fail();
+      });
+    }, 8000);
+  })();
+  </script>
+</body>
+</html>

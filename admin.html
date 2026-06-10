@@ -71,6 +71,23 @@
     'use strict';
     if (!window.sb) { window.location.href = 'login.html'; return; }
     var sb = window.sb;
+
+    // Wartet auf eine Session (kein vorschneller Redirect) — verhindert Race Condition.
+    function requireSession(onOk) {
+      var settled = false;
+      function ok(s) { if (settled || !s) return; settled = true; onOk(s); }
+      function nope() { if (settled) return; settled = true; window.location.href = 'login.html'; }
+      var sub = sb.auth.onAuthStateChange(function (_e, s) { if (s) ok(s); });
+      sb.auth.getSession().then(function (r) {
+        if (r.data && r.data.session) ok(r.data.session);
+        else setTimeout(function () {
+          sb.auth.getSession().then(function (r2) {
+            if (sub && sub.data && sub.data.subscription) sub.data.subscription.unsubscribe();
+            if (r2.data && r2.data.session) ok(r2.data.session); else nope();
+          });
+        }, 1200);
+      });
+    }
     var PHASES = ['angebot_bestaetigt','inhalte_liefern','design_laeuft','korrektur_1','korrektur_2','korrektur_3','korrektur_4','finalisierung','live'];
     var PHASE_LABEL = { angebot_bestaetigt:'Angebot bestätigt', inhalte_liefern:'Inhalte liefern', design_laeuft:'Design läuft', korrektur_1:'Korrektur 1', korrektur_2:'Korrektur 2', korrektur_3:'Korrektur 3', korrektur_4:'Korrektur 4', finalisierung:'Finalisierung', live:'Live' };
     var STATUS = ['neu','in_bearbeitung','umgewandelt','abgelehnt'];
@@ -92,8 +109,7 @@
     });
 
     // ---- Admin-Gate (UX; echte Absicherung = RLS) ----
-    sb.auth.getSession().then(function (res) {
-      if (!res.data || !res.data.session) { window.location.href = 'login.html'; return; }
+    requireSession(function () {
       sb.rpc('is_admin').then(function (r) {
         document.getElementById('gate').classList.add('hidden');
         if (r.data !== true) {
