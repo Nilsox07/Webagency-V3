@@ -27,34 +27,182 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Wartung, Hosting & Betrieb",
         "serviceType": "Website-Wartung und Hosting",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Laufender Betrieb deiner Website: Hosting in Deutschland, SSL-Zertifikat, automatische Backups, Updates, Sicherheit, Uptime-Monitoring und Support.",
-        "offers": { "@type": "Offer", "price": "49", "priceCurrency": "EUR", "description": "ab 49 € pro Monat bei jährlicher Vorauszahlung" },
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Sartu Care — Wartungsstufen", "itemListElement": [{"@type": "Offer", "name": "Care S", "price": "49", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Care S", "description": "Hosting in Deutschland + SSL, tägliche externe Backups (30 Tage), Sicherheits-Updates, Uptime-Monitoring im 5-Minuten-Takt."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "49", "priceCurrency": "EUR", "unitCode": "MON"}}, {"@type": "Offer", "name": "Care M", "price": "99", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Care M", "description": "Alles aus Care S + Auto-Update der Rechtstexte (eRecht24), 30 Min. Änderungen/Monat, Erstreaktion innerhalb 1 Werktag."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "99", "priceCurrency": "EUR", "unitCode": "MON"}}, {"@type": "Offer", "name": "Care L", "price": "249", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Care L", "description": "Alles aus Care M + 90 Min. Änderungen/Monat, Staging-Tests vor Live-Schaltung, Quartals-Check der Core Web Vitals."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "249", "priceCurrency": "EUR", "unitCode": "MON"}}]}
+        "offers": {
+          "@type": "Offer",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "minPrice": "49",
+            "priceCurrency": "EUR",
+            "unitCode": "MON"
+          }
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Sartu Care — Wartungsstufen",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Care S",
+              "price": "49",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Care S",
+                "description": "Hosting in Deutschland + SSL, tägliche externe Backups (30 Tage), Sicherheits-Updates, Uptime-Monitoring im 5-Minuten-Takt."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "49",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Care M",
+              "price": "99",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Care M",
+                "description": "Alles aus Care S + Auto-Update der Rechtstexte (eRecht24), 30 Min. Änderungen/Monat, Erstreaktion innerhalb 1 Werktag."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "99",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Care L",
+              "price": "249",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Care L",
+                "description": "Alles aus Care M + 90 Min. Änderungen/Monat, Staging-Tests vor Live-Schaltung, Quartals-Check der Core Web Vitals."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "249",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            }
+          ]
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "Wartung", "item": "https://[DOMAIN]/leistung-wartung" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Wartung",
+            "item": "https://[DOMAIN]/leistung-wartung"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Was kostet die Wartung?", "acceptedAnswer": { "@type": "Answer", "text": "Hosting & Pflege (Sartu Care) ist Pflicht und startet bei 49 € pro Monat (Care S, bei jährlicher Vorauszahlung). Care M kostet 99 €, Care L 249 € pro Monat." } },
-          { "@type": "Question", "name": "Brauche ich zwingend ein Wartungspaket?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Sartu Care ist bei jeder Website Pflicht — sie sichert Hosting, Sicherheit, Updates und Backups. Care S startet bei 49 €/Monat (bei Jahreszahlung)." } },
-          { "@type": "Question", "name": "Wo wird meine Website gehostet?", "acceptedAnswer": { "@type": "Answer", "text": "In Deutschland, DSGVO-konform und mit SSL-Verschlüsselung." } },
-          { "@type": "Question", "name": "Was ist in der Wartung enthalten?", "acceptedAnswer": { "@type": "Answer", "text": "Hosting in Deutschland, SSL-Zertifikat, automatische Backups sowie Updates und Sicherheit. In höheren Paketen zusätzlich Telefon-Support, Uptime-Monitoring und ein Kontingent für Änderungen." } },
-          { "@type": "Question", "name": "Sind Änderungen inklusive?", "acceptedAnswer": { "@type": "Answer", "text": "In Care M sind 30 Minuten, in Care L 90 Minuten Änderungen pro Monat enthalten. Mehraufwand kostet 99 € pro Stunde im 5-Minuten-Takt." } },
-          { "@type": "Question", "name": "Gibt es eine Mindestlaufzeit?", "acceptedAnswer": { "@type": "Answer", "text": "Ja, 12 Monate. Danach ist das Wartungspaket monatlich kündbar." } },
-          { "@type": "Question", "name": "Was passiert bei einem Sicherheitsproblem?", "acceptedAnswer": { "@type": "Answer", "text": "Durch regelmäßige Updates und Backups beugen wir vor. Sollte doch etwas passieren, lässt sich der letzte saubere Stand schnell wiederherstellen." } },
-          { "@type": "Question", "name": "Kann ich später das Wartungspaket wechseln?", "acceptedAnswer": { "@type": "Answer", "text": "Ja, du kannst jederzeit auf ein größeres Paket wechseln oder dein Änderungs-Kontingent als Add-on erweitern." } }
+          {
+            "@type": "Question",
+            "name": "Was kostet die Wartung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hosting & Pflege (Sartu Care) ist Pflicht und startet bei 49 € pro Monat (Care S, bei jährlicher Vorauszahlung). Care M kostet 99 €, Care L 249 € pro Monat."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich zwingend ein Wartungspaket?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Sartu Care ist bei jeder Website Pflicht — sie sichert Hosting, Sicherheit, Updates und Backups. Care S startet bei 49 €/Monat (bei Jahreszahlung)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wo wird meine Website gehostet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In Deutschland, DSGVO-konform und mit SSL-Verschlüsselung."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist in der Wartung enthalten?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Hosting in Deutschland, SSL-Zertifikat, automatische Backups sowie Updates und Sicherheit. In höheren Paketen zusätzlich Telefon-Support, Uptime-Monitoring und ein Kontingent für Änderungen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Sind Änderungen inklusive?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In Care M sind 30 Minuten, in Care L 90 Minuten Änderungen pro Monat enthalten. Mehraufwand kostet 99 € pro Stunde im 5-Minuten-Takt."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gibt es eine Mindestlaufzeit?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja, 12 Monate. Danach ist das Wartungspaket monatlich kündbar."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was passiert bei einem Sicherheitsproblem?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Durch regelmäßige Updates und Backups beugen wir vor. Sollte doch etwas passieren, lässt sich der letzte saubere Stand schnell wiederherstellen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kann ich später das Wartungspaket wechseln?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja, du kannst jederzeit auf ein größeres Paket wechseln oder dein Änderungs-Kontingent als Add-on erweitern."
+            }
+          }
         ]
       }
     ]

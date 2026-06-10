@@ -27,33 +27,182 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Suchmaschinenoptimierung (SEO)",
         "serviceType": "Suchmaschinenoptimierung",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Onpage- und technische Suchmaschinenoptimierung: Keyword-Strategie, saubere Seitenstruktur, optimierte Title-Tags und Meta-Descriptions, schnelle Ladezeiten und strukturierte Daten.",
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "SEO-Betreuung (Retainer, 3 Monate Mindestlaufzeit)", "itemListElement": [{"@type": "Offer", "name": "SEO Lite", "price": "149", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "SEO Lite", "description": "Bis 5 Kernseiten (Title/Meta), Keyword-Tracking bis 10, Profil-Grundpflege, Monatsreport."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "149", "priceCurrency": "EUR", "unitCode": "MON"}}, {"@type": "Offer", "name": "SEO Pro", "price": "390", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "SEO Pro", "description": "Alles aus Lite + OnPage-SEO aller Seiten, tiefe Keyword-Recherche, 2 Landingpages/Quartal, Keyword-Tracking bis 30."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "390", "priceCurrency": "EUR", "unitCode": "MON"}}, {"@type": "Offer", "name": "SEO Premium", "price": "790", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "SEO Premium", "description": "Alles aus Pro + Content-Strategie, bis 2 Backlinks/Monat, KI-Suche-/GEO-Optimierung, Keyword-Tracking bis 50."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "790", "priceCurrency": "EUR", "unitCode": "MON"}}]}
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "SEO-Betreuung (Retainer, 3 Monate Mindestlaufzeit)",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "SEO Lite",
+              "price": "149",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "SEO Lite",
+                "description": "Bis 5 Kernseiten (Title/Meta), Keyword-Tracking bis 10, Profil-Grundpflege, Monatsreport."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "149",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "SEO Pro",
+              "price": "390",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "SEO Pro",
+                "description": "Alles aus Lite + OnPage-SEO aller Seiten, tiefe Keyword-Recherche, 2 Landingpages/Quartal, Keyword-Tracking bis 30."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "390",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "SEO Premium",
+              "price": "790",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "SEO Premium",
+                "description": "Alles aus Pro + Content-Strategie, bis 2 Backlinks/Monat, KI-Suche-/GEO-Optimierung, Keyword-Tracking bis 50."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "790",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            }
+          ]
+        },
+        "offers": {
+          "@type": "Offer",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "minPrice": "149",
+            "priceCurrency": "EUR",
+            "unitCode": "MON"
+          }
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "SEO", "item": "https://[DOMAIN]/leistung-seo" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "SEO",
+            "item": "https://[DOMAIN]/leistung-seo"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Ist SEO bei einer neuen Website schon dabei?", "acceptedAnswer": { "@type": "Answer", "text": "Basis-SEO (Title-Tags, Meta-Descriptions, Sitemap) ist bei jeder Website enthalten. Ab dem Pro-Paket kommt umfassendes Onpage-SEO hinzu." } },
-          { "@type": "Question", "name": "Was ist der Unterschied zwischen Onpage- und technischem SEO?", "acceptedAnswer": { "@type": "Answer", "text": "Onpage-SEO betrifft Inhalte und Struktur (Überschriften, Texte, interne Verlinkung), technisches SEO die Basis wie Ladezeit, Indexierbarkeit und strukturierte Daten. Wir kümmern uns um beides." } },
-          { "@type": "Question", "name": "Wie schnell sehe ich Ergebnisse?", "acceptedAnswer": { "@type": "Answer", "text": "SEO wirkt mittelfristig. Erste Verbesserungen sind oft nach einigen Wochen sichtbar, nachhaltige Rankings brauchen meist einige Monate. Wir machen keine unrealistischen Versprechen." } },
-          { "@type": "Question", "name": "Garantiert ihr Platz 1 bei Google?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Seriöse Anbieter garantieren keine festen Rankings, weil niemand Googles Algorithmus kontrolliert. Wir schaffen die bestmöglichen Voraussetzungen mit sauberer, regelkonformer Arbeit." } },
-          { "@type": "Question", "name": "Wie findet ihr die richtigen Keywords?", "acceptedAnswer": { "@type": "Answer", "text": "Wir starten bei den Fragen und Begriffen, die deine Kunden tatsächlich googeln, und leiten daraus relevante Keywords pro Seite ab." } },
-          { "@type": "Question", "name": "Was sind Core Web Vitals?", "acceptedAnswer": { "@type": "Answer", "text": "Googles Kennzahlen für Ladezeit, Reaktionsfähigkeit und visuelle Stabilität. Wir optimieren darauf, weil sie Ranking und Nutzererlebnis beeinflussen." } },
-          { "@type": "Question", "name": "Braucht jede Seite SEO?", "acceptedAnswer": { "@type": "Answer", "text": "Wenn du über Google gefunden werden willst: ja. Wie umfangreich es sein sollte, hängt von deinen Zielen und deinem Wettbewerb ab." } },
-          { "@type": "Question", "name": "Was kostet SEO bei Sartu?", "acceptedAnswer": { "@type": "Answer", "text": "Onpage-SEO ist ab dem Pro-Paket im Festpreis enthalten. Lokales SEO ist ab Platin inklusive; laufende SEO-Betreuung als Retainer ab 149 €/Monat." } }
+          {
+            "@type": "Question",
+            "name": "Ist SEO bei einer neuen Website schon dabei?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Basis-SEO (Title-Tags, Meta-Descriptions, Sitemap) ist bei jeder Website enthalten. Ab dem Pro-Paket kommt umfassendes Onpage-SEO hinzu."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist der Unterschied zwischen Onpage- und technischem SEO?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Onpage-SEO betrifft Inhalte und Struktur (Überschriften, Texte, interne Verlinkung), technisches SEO die Basis wie Ladezeit, Indexierbarkeit und strukturierte Daten. Wir kümmern uns um beides."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie schnell sehe ich Ergebnisse?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SEO wirkt mittelfristig. Erste Verbesserungen sind oft nach einigen Wochen sichtbar, nachhaltige Rankings brauchen meist einige Monate. Wir machen keine unrealistischen Versprechen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Garantiert ihr Platz 1 bei Google?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Seriöse Anbieter garantieren keine festen Rankings, weil niemand Googles Algorithmus kontrolliert. Wir schaffen die bestmöglichen Voraussetzungen mit sauberer, regelkonformer Arbeit."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie findet ihr die richtigen Keywords?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wir starten bei den Fragen und Begriffen, die deine Kunden tatsächlich googeln, und leiten daraus relevante Keywords pro Seite ab."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was sind Core Web Vitals?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Googles Kennzahlen für Ladezeit, Reaktionsfähigkeit und visuelle Stabilität. Wir optimieren darauf, weil sie Ranking und Nutzererlebnis beeinflussen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Braucht jede Seite SEO?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wenn du über Google gefunden werden willst: ja. Wie umfangreich es sein sollte, hängt von deinen Zielen und deinem Wettbewerb ab."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was kostet SEO bei Sartu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Onpage-SEO ist ab dem Pro-Paket im Festpreis enthalten. Lokales SEO ist ab Platin inklusive; laufende SEO-Betreuung als Retainer ab 149 €/Monat."
+            }
+          }
         ]
       }
     ]

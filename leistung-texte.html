@@ -27,34 +27,171 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Texterstellung & Content",
         "serviceType": "Webtexte und Content-Erstellung",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Überzeugende Website-Texte, die verkaufen und für Suchmaschinen optimiert sind — verständlich geschrieben und auf die Zielgruppe zugeschnitten.",
-        "offers": { "@type": "Offer", "price": "120", "priceCurrency": "EUR", "description": "ab 120 € pro Seite" },
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Texterstellung", "itemListElement": [{"@type": "Offer", "name": "Einzelseite", "price": "120", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Einzelseite", "description": "300–500 Wörter, 2 Korrekturschleifen, Meta-Title + -Description."}}, {"@type": "Offer", "name": "Texte-Paket 5 Seiten", "price": "490", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Texte-Paket 5 Seiten", "description": "5 Seiten Text, ca. 98 €/Seite."}}, {"@type": "Offer", "name": "Texte-Paket 10 Seiten", "price": "890", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Texte-Paket 10 Seiten", "description": "10 Seiten Text, ca. 89 €/Seite."}}, {"@type": "Offer", "name": "SEO-Option", "price": "30", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "SEO-Option", "description": "Keyword-Recherche (1 Haupt- + bis 3 Neben-Keywords) und gezielte Platzierung, +30 € pro Seite."}}]}
+        "offers": {
+          "@type": "Offer",
+          "price": "120",
+          "priceCurrency": "EUR"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Texterstellung",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Einzelseite",
+              "price": "120",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Einzelseite",
+                "description": "300–500 Wörter, 2 Korrekturschleifen, Meta-Title + -Description."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Texte-Paket 5 Seiten",
+              "price": "490",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Texte-Paket 5 Seiten",
+                "description": "5 Seiten Text, ca. 98 €/Seite."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Texte-Paket 10 Seiten",
+              "price": "890",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Texte-Paket 10 Seiten",
+                "description": "10 Seiten Text, ca. 89 €/Seite."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "SEO-Option",
+              "price": "30",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "SEO-Option",
+                "description": "Keyword-Recherche (1 Haupt- + bis 3 Neben-Keywords) und gezielte Platzierung, +30 € pro Seite."
+              }
+            }
+          ]
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "Texterstellung", "item": "https://[DOMAIN]/leistung-texte" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Texterstellung",
+            "item": "https://[DOMAIN]/leistung-texte"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Was kostet die Texterstellung?", "acceptedAnswer": { "@type": "Answer", "text": "Texte kosten ab 120 € pro Seite. Für ein Komplettpaket mit fünf Seiten zahlst du 490 €." } },
-          { "@type": "Question", "name": "Muss ich meine Texte selbst schreiben?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Du kannst die Texte selbst liefern oder die Erstellung komplett an uns abgeben. Viele Kunden starten mit Stichpunkten, den Rest übernehmen wir." } },
-          { "@type": "Question", "name": "Sind die Texte suchmaschinenoptimiert?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Wir schreiben für Menschen und berücksichtigen dabei relevante Keywords, eine klare Struktur und passende Überschriften." } },
-          { "@type": "Question", "name": "Woher kennt ihr meinen Tonfall?", "acceptedAnswer": { "@type": "Answer", "text": "Wir stimmen die Markenstimme im Briefing mit dir ab und orientieren uns an deiner Branche, deinen Kunden und deinen Beispielen." } },
-          { "@type": "Question", "name": "Bekomme ich Korrekturmöglichkeiten?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Die Texte durchlaufen die im Paket vereinbarten Korrekturrunden, damit sie wirklich zu dir passen." } },
-          { "@type": "Question", "name": "Schreibt ihr auch Blogartikel?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Wir richten auf Wunsch einen Blog- oder News-Bereich ein und erstellen passende Inhalte, die Sichtbarkeit und Vertrauen aufbauen." } },
-          { "@type": "Question", "name": "Nutzt ihr KI zum Schreiben?", "acceptedAnswer": { "@type": "Answer", "text": "Wir nutzen moderne Werkzeuge als Unterstützung, aber jeder Text wird redaktionell geprüft und auf deine Marke abgestimmt. Du bekommst keinen generischen Massentext." } },
-          { "@type": "Question", "name": "Wem gehören die Texte?", "acceptedAnswer": { "@type": "Answer", "text": "Mit der Bezahlung gehen die Nutzungsrechte an den erstellten Texten an dich über." } }
+          {
+            "@type": "Question",
+            "name": "Was kostet die Texterstellung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Texte kosten ab 120 € pro Seite. Für ein Komplettpaket mit fünf Seiten zahlst du 490 €."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Muss ich meine Texte selbst schreiben?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Du kannst die Texte selbst liefern oder die Erstellung komplett an uns abgeben. Viele Kunden starten mit Stichpunkten, den Rest übernehmen wir."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Sind die Texte suchmaschinenoptimiert?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Wir schreiben für Menschen und berücksichtigen dabei relevante Keywords, eine klare Struktur und passende Überschriften."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Woher kennt ihr meinen Tonfall?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wir stimmen die Markenstimme im Briefing mit dir ab und orientieren uns an deiner Branche, deinen Kunden und deinen Beispielen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bekomme ich Korrekturmöglichkeiten?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Die Texte durchlaufen die im Paket vereinbarten Korrekturrunden, damit sie wirklich zu dir passen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Schreibt ihr auch Blogartikel?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Wir richten auf Wunsch einen Blog- oder News-Bereich ein und erstellen passende Inhalte, die Sichtbarkeit und Vertrauen aufbauen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Nutzt ihr KI zum Schreiben?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wir nutzen moderne Werkzeuge als Unterstützung, aber jeder Text wird redaktionell geprüft und auf deine Marke abgestimmt. Du bekommst keinen generischen Massentext."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wem gehören die Texte?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Mit der Bezahlung gehen die Nutzungsrechte an den erstellten Texten an dich über."
+            }
+          }
         ]
       }
     ]

@@ -27,35 +27,196 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Ratgeber", "item": "https://[DOMAIN]/ratgeber" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Ratgeber",
+            "item": "https://[DOMAIN]/ratgeber"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Wofür ist dieser Ratgeber gedacht?", "acceptedAnswer": { "@type": "Answer", "text": "Er nimmt dir die Angst vor Fachsprache. Wenn dir im Gespräch oder Angebot ein Begriff begegnet, kannst du ihn hier in einfachen Worten nachschlagen." } },
-          { "@type": "Question", "name": "Muss ich all diese Begriffe kennen, um mit Sartu zu arbeiten?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Wir übersetzen Technik in Klartext. Der Ratgeber ist ein Angebot für alle, die tiefer verstehen wollen — Pflicht ist nichts davon." } },
-          { "@type": "Question", "name": "Brauche ich SEO überhaupt?", "acceptedAnswer": { "@type": "Answer", "text": "Wenn du über Google gefunden werden möchtest: ja. Schon Basis-SEO (Titel, Beschreibungen, Sitemap) macht einen Unterschied. Wie viel sinnvoll ist, hängt von deinen Zielen ab." } },
-          { "@type": "Question", "name": "Was ist wichtiger — schönes Design oder schnelle Ladezeit?", "acceptedAnswer": { "@type": "Answer", "text": "Beides gehört zusammen. Ein schönes Design, das langsam lädt, verliert Besucher. Wir optimieren Design und Geschwindigkeit gemeinsam." } },
-          { "@type": "Question", "name": "Wie finde ich die richtigen Keywords?", "acceptedAnswer": { "@type": "Answer", "text": "Wir starten bei den Fragen, die deine Kunden tatsächlich googeln, und leiten daraus passende Keywords ab. Das musst du nicht selbst machen." } },
-          { "@type": "Question", "name": "Was kostet eine Domain?", "acceptedAnswer": { "@type": "Answer", "text": "Eine .de-Domain liegt meist bei wenigen Euro pro Jahr. Die Einrichtung bzw. den Umzug übernehmen wir für dich." } },
-          { "@type": "Question", "name": "Brauche ich ein CMS?", "acceptedAnswer": { "@type": "Answer", "text": "Nur, wenn du Inhalte regelmäßig selbst pflegen willst. Viele kleinere Websites laufen schneller und sicherer ohne klassisches CMS — wir beraten dich ehrlich." } },
-          { "@type": "Question", "name": "Wie schnell sollte meine Website laden?", "acceptedAnswer": { "@type": "Answer", "text": "Als Richtwert unter 2 Sekunden. Wir optimieren auf Googles Core Web Vitals, damit deine Seite auch mobil flott ist." } },
-          { "@type": "Question", "name": "Was ist der Unterschied zwischen UX und UI?", "acceptedAnswer": { "@type": "Answer", "text": "UI ist das, was man sieht (Oberfläche), UX ist, wie es sich anfühlt, die Seite zu nutzen. Gutes Design braucht beides." } },
-          { "@type": "Question", "name": "Warum ist Mobil-Optimierung so wichtig?", "acceptedAnswer": { "@type": "Answer", "text": "Die meisten Besucher kommen heute übers Smartphone, und Google bewertet Seiten primär mobil. Jede Sartu-Website ist deshalb vollständig responsive." } },
-          { "@type": "Question", "name": "Was bringt ein Google Business Profile?", "acceptedAnswer": { "@type": "Answer", "text": "Sehr viel für lokale Betriebe: Es sorgt dafür, dass du in Google Maps und der lokalen Suche auftauchst. Die Einrichtung bieten wir als Add-on an." } },
-          { "@type": "Question", "name": "Wie viele Keywords sollte eine Seite haben?", "acceptedAnswer": { "@type": "Answer", "text": "Lieber wenige, passende als viele beliebige. Pro Seite konzentrieren wir uns auf ein klares Thema mit ein bis zwei Hauptkeywords." } },
-          { "@type": "Question", "name": "Was ist eine gute Conversion-Rate?", "acceptedAnswer": { "@type": "Answer", "text": "Das ist stark branchenabhängig. Wichtiger als ein Vergleichswert ist, deine eigene Rate über die Zeit zu verbessern — mit klaren CTAs und gutem Aufbau." } },
-          { "@type": "Question", "name": "Brauche ich ein Cookie-Banner?", "acceptedAnswer": { "@type": "Answer", "text": "Sobald nicht zwingend notwendige Cookies (z. B. Tracking) zum Einsatz kommen, ja. Bei rein funktionalen Seiten kann es entfallen. Wir richten es bei Bedarf DSGVO-konform ein." } },
-          { "@type": "Question", "name": "Was ist der Unterschied zwischen Website und Landingpage?", "acceptedAnswer": { "@type": "Answer", "text": "Eine Website hat mehrere Seiten und Ziele, eine Landingpage ist eine fokussierte Einzelseite mit genau einem Ziel — ideal für Kampagnen." } },
-          { "@type": "Question", "name": "Wie wichtig sind Backlinks?", "acceptedAnswer": { "@type": "Answer", "text": "Sie stärken langfristig deine Glaubwürdigkeit bei Google. Für lokale Betriebe sind sie aber meist weniger entscheidend als gutes Onpage- und lokales SEO." } },
-          { "@type": "Question", "name": "Was bedeutet „DSGVO-konform\" konkret?", "acceptedAnswer": { "@type": "Answer", "text": "Dass personenbezogene Daten rechtssicher verarbeitet werden: SSL, sauberes Cookie-Handling, Datenschutzerklärung und EU-Hosting. Wir liefern das technische Setup — die Rechtsberatung selbst nicht." } },
-          { "@type": "Question", "name": "Sollte ich ein Analyse-Tool nutzen?", "acceptedAnswer": { "@type": "Answer", "text": "Ein datenschutzkonformes Tracking hilft, deine Website zu verbessern. Wir richten Analytics auf Wunsch DSGVO-konform ein." } },
-          { "@type": "Question", "name": "Wie oft sollte ich meine Website aktualisieren?", "acceptedAnswer": { "@type": "Answer", "text": "Technisch laufend (Updates & Sicherheit übernehmen wir in der Wartung). Inhaltlich immer dann, wenn sich an deinem Angebot etwas ändert." } },
-          { "@type": "Question", "name": "Erklärt ihr mir Fachbegriffe auch persönlich?", "acceptedAnswer": { "@type": "Answer", "text": "Klar. Wenn etwas unklar ist, erklären wir es dir verständlich — oft als kurzes Video. Schreib uns einfach." } }
+          {
+            "@type": "Question",
+            "name": "Wofür ist dieser Ratgeber gedacht?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Er nimmt dir die Angst vor Fachsprache. Wenn dir im Gespräch oder Angebot ein Begriff begegnet, kannst du ihn hier in einfachen Worten nachschlagen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Muss ich all diese Begriffe kennen, um mit Sartu zu arbeiten?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Wir übersetzen Technik in Klartext. Der Ratgeber ist ein Angebot für alle, die tiefer verstehen wollen — Pflicht ist nichts davon."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich SEO überhaupt?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wenn du über Google gefunden werden möchtest: ja. Schon Basis-SEO (Titel, Beschreibungen, Sitemap) macht einen Unterschied. Wie viel sinnvoll ist, hängt von deinen Zielen ab."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist wichtiger — schönes Design oder schnelle Ladezeit?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Beides gehört zusammen. Ein schönes Design, das langsam lädt, verliert Besucher. Wir optimieren Design und Geschwindigkeit gemeinsam."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie finde ich die richtigen Keywords?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wir starten bei den Fragen, die deine Kunden tatsächlich googeln, und leiten daraus passende Keywords ab. Das musst du nicht selbst machen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was kostet eine Domain?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Eine .de-Domain liegt meist bei wenigen Euro pro Jahr. Die Einrichtung bzw. den Umzug übernehmen wir für dich."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich ein CMS?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nur, wenn du Inhalte regelmäßig selbst pflegen willst. Viele kleinere Websites laufen schneller und sicherer ohne klassisches CMS — wir beraten dich ehrlich."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie schnell sollte meine Website laden?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Als Richtwert unter 2 Sekunden. Wir optimieren auf Googles Core Web Vitals, damit deine Seite auch mobil flott ist."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist der Unterschied zwischen UX und UI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "UI ist das, was man sieht (Oberfläche), UX ist, wie es sich anfühlt, die Seite zu nutzen. Gutes Design braucht beides."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Warum ist Mobil-Optimierung so wichtig?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Die meisten Besucher kommen heute übers Smartphone, und Google bewertet Seiten primär mobil. Jede Sartu-Website ist deshalb vollständig responsive."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was bringt ein Google Business Profile?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sehr viel für lokale Betriebe: Es sorgt dafür, dass du in Google Maps und der lokalen Suche auftauchst. Die Einrichtung bieten wir als Add-on an."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie viele Keywords sollte eine Seite haben?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Lieber wenige, passende als viele beliebige. Pro Seite konzentrieren wir uns auf ein klares Thema mit ein bis zwei Hauptkeywords."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist eine gute Conversion-Rate?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Das ist stark branchenabhängig. Wichtiger als ein Vergleichswert ist, deine eigene Rate über die Zeit zu verbessern — mit klaren CTAs und gutem Aufbau."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich ein Cookie-Banner?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sobald nicht zwingend notwendige Cookies (z. B. Tracking) zum Einsatz kommen, ja. Bei rein funktionalen Seiten kann es entfallen. Wir richten es bei Bedarf DSGVO-konform ein."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist der Unterschied zwischen Website und Landingpage?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Eine Website hat mehrere Seiten und Ziele, eine Landingpage ist eine fokussierte Einzelseite mit genau einem Ziel — ideal für Kampagnen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie wichtig sind Backlinks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sie stärken langfristig deine Glaubwürdigkeit bei Google. Für lokale Betriebe sind sie aber meist weniger entscheidend als gutes Onpage- und lokales SEO."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was bedeutet „DSGVO-konform\" konkret?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Dass personenbezogene Daten rechtssicher verarbeitet werden: SSL, sauberes Cookie-Handling, Datenschutzerklärung und EU-Hosting. Wir liefern das technische Setup — die Rechtsberatung selbst nicht."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Sollte ich ein Analyse-Tool nutzen?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ein datenschutzkonformes Tracking hilft, deine Website zu verbessern. Wir richten Analytics auf Wunsch DSGVO-konform ein."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie oft sollte ich meine Website aktualisieren?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Technisch laufend (Updates & Sicherheit übernehmen wir in der Wartung). Inhaltlich immer dann, wenn sich an deinem Angebot etwas ändert."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Erklärt ihr mir Fachbegriffe auch persönlich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Klar. Wenn etwas unklar ist, erklären wir es dir verständlich — oft als kurzes Video. Schreib uns einfach."
+            }
+          }
         ]
       }
     ]

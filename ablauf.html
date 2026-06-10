@@ -27,38 +27,150 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "HowTo",
         "name": "So läuft dein Webdesign-Projekt bei Sartu",
         "description": "In 7 asynchronen Schritten von der ersten Idee zur fertigen, live geschalteten Website — ohne Termine und ohne Verkaufsdruck.",
         "totalTime": "P7D",
         "step": [
-          { "@type": "HowToStep", "position": 1, "name": "Briefing in 2 Minuten", "text": "Lumi, unser KI-Assistent, führt dich durch ein kurzes Gespräch und fragt gezielt nach, wenn etwas unklar ist." },
-          { "@type": "HowToStep", "position": 2, "name": "Sofort-Vorschau", "text": "Direkt nach dem Briefing siehst du 2 bis 3 Stil-Richtungen als ersten Aufschlag." },
-          { "@type": "HowToStep", "position": 3, "name": "Paket wählen & Angebot anfordern", "text": "Du wählst dein Paket und forderst unverbindlich dein Festpreis-Angebot an — ohne Termin, ohne Verkaufsdruck. Wir bestätigen dir alles schriftlich, bevor es losgeht." },
-          { "@type": "HowToStep", "position": 4, "name": "Umsetzung mit Live-Status", "text": "Wir bauen deine Website, den Fortschritt verfolgst du jederzeit transparent." },
-          { "@type": "HowToStep", "position": 5, "name": "Feedback per Klick", "text": "Kommentiere direkt am Entwurf, genau an der Stelle, die du anders möchtest." },
-          { "@type": "HowToStep", "position": 6, "name": "Klare Korrekturrunden", "text": "Feste Anzahl Runden pro Paket, eine Runde ist ein vollständiges Set Feedback." },
-          { "@type": "HowToStep", "position": 7, "name": "Freigabe & Go-live in 7 Tagen", "text": "Ein Klick zur Abnahme, dann geht deine Website online, sicher gehostet in Deutschland." }
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Briefing in 2 Minuten",
+            "text": "Lumi, unser KI-Assistent, führt dich durch ein kurzes Gespräch und fragt gezielt nach, wenn etwas unklar ist."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Sofort-Vorschau",
+            "text": "Direkt nach dem Briefing siehst du 2 bis 3 Stil-Richtungen als ersten Aufschlag."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Paket wählen & Angebot anfordern",
+            "text": "Du wählst dein Paket und forderst unverbindlich dein Festpreis-Angebot an — ohne Termin, ohne Verkaufsdruck. Wir bestätigen dir alles schriftlich, bevor es losgeht."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Umsetzung mit Live-Status",
+            "text": "Wir bauen deine Website, den Fortschritt verfolgst du jederzeit transparent."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 5,
+            "name": "Feedback per Klick",
+            "text": "Kommentiere direkt am Entwurf, genau an der Stelle, die du anders möchtest."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 6,
+            "name": "Klare Korrekturrunden",
+            "text": "Feste Anzahl Runden pro Paket, eine Runde ist ein vollständiges Set Feedback."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 7,
+            "name": "Freigabe & Go-live in 7 Tagen",
+            "text": "Ein Klick zur Abnahme, dann geht deine Website online, sicher gehostet in Deutschland."
+          }
         ]
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Ablauf", "item": "https://[DOMAIN]/ablauf" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Ablauf",
+            "item": "https://[DOMAIN]/ablauf"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Muss ich für ein Projekt zu einem Termin erscheinen?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Der gesamte Ablauf ist asynchron: Du entscheidest selbst, wann du dran bist. Pflichttermine oder Calls gibt es nicht." } },
-          { "@type": "Question", "name": "Wie starte ich?", "acceptedAnswer": { "@type": "Answer", "text": "Am einfachsten über das 2-Minuten-Briefing mit Lumi. Alternativ kannst du unverbindlich einen kostenlosen Website-Check anfordern." } },
-          { "@type": "Question", "name": "Was ist die Sofort-Vorschau?", "acceptedAnswer": { "@type": "Answer", "text": "Direkt nach dem Briefing erzeugen wir 2 bis 3 Stil-Richtungen, damit du sofort ein Gefühl für das spätere Ergebnis bekommst. Sie ist ein erster Aufschlag, kein fertiges Design." } },
-          { "@type": "Question", "name": "Wie gebe ich Feedback?", "acceptedAnswer": { "@type": "Answer", "text": "Du kommentierst direkt am Entwurf, per Klick genau an der Stelle, die du anders möchtest. Kein Meeting, keine langen E-Mails." } },
-          { "@type": "Question", "name": "Wie viele Korrekturrunden habe ich?", "acceptedAnswer": { "@type": "Answer", "text": "Das hängt vom Paket ab: Basis 2 Runden, Pro 3 Runden, Platin 4 Runden. Eine Runde ist ein vollständiges Set Feedback." } },
-          { "@type": "Question", "name": "Wie lange dauert es bis zum Go-live?", "acceptedAnswer": { "@type": "Answer", "text": "Sobald uns alle Inhalte vorliegen, ist deine Website in der Regel in 7 Tagen online." } },
-          { "@type": "Question", "name": "Bleibt der Kontakt wirklich komplett digital?", "acceptedAnswer": { "@type": "Answer", "text": "Standard ist asynchron und ohne Calls. Persönlich bleiben wir trotzdem: per Video-Update und mit einer echten Ansprechperson, wenn es darauf ankommt." } },
-          { "@type": "Question", "name": "Was passiert nach dem Go-live?", "acceptedAnswer": { "@type": "Answer", "text": "Auf Wunsch übernehmen wir Wartung und Betrieb: Hosting in Deutschland, Updates, Backups und Support, damit deine Website dauerhaft sicher läuft." } }
+          {
+            "@type": "Question",
+            "name": "Muss ich für ein Projekt zu einem Termin erscheinen?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Der gesamte Ablauf ist asynchron: Du entscheidest selbst, wann du dran bist. Pflichttermine oder Calls gibt es nicht."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie starte ich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Am einfachsten über das 2-Minuten-Briefing mit Lumi. Alternativ kannst du unverbindlich einen kostenlosen Website-Check anfordern."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist die Sofort-Vorschau?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Direkt nach dem Briefing erzeugen wir 2 bis 3 Stil-Richtungen, damit du sofort ein Gefühl für das spätere Ergebnis bekommst. Sie ist ein erster Aufschlag, kein fertiges Design."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie gebe ich Feedback?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Du kommentierst direkt am Entwurf, per Klick genau an der Stelle, die du anders möchtest. Kein Meeting, keine langen E-Mails."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie viele Korrekturrunden habe ich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Das hängt vom Paket ab: Basis 2 Runden, Pro 3 Runden, Platin 4 Runden. Eine Runde ist ein vollständiges Set Feedback."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie lange dauert es bis zum Go-live?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sobald uns alle Inhalte vorliegen, ist deine Website in der Regel in 7 Tagen online."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bleibt der Kontakt wirklich komplett digital?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Standard ist asynchron und ohne Calls. Persönlich bleiben wir trotzdem: per Video-Update und mit einer echten Ansprechperson, wenn es darauf ankommt."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was passiert nach dem Go-live?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Auf Wunsch übernehmen wir Wartung und Betrieb: Hosting in Deutschland, Updates, Backups und Support, damit deine Website dauerhaft sicher läuft."
+            }
+          }
         ]
       }
     ]

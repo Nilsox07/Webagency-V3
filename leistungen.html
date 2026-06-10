@@ -27,32 +27,73 @@
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "ProfessionalService",
+        "@type": "Organization",
         "@id": "https://[DOMAIN]/#organization",
         "name": "Sartu",
-        "description": "Webdesign-Agentur für moderne, schnelle und suchmaschinenoptimierte Websites — kontaktlos, transparent und DSGVO-konform aus Deutschland.",
         "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
         "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
         "areaServed": "DE",
-        "knowsAbout": ["Webdesign", "Suchmaschinenoptimierung", "Lokales SEO", "Website-Wartung", "Texterstellung", "Logo-Design"]
+        "sameAs": []
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          }
         ]
       },
       {
         "@type": "ItemList",
         "name": "Leistungen von Sartu",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Webdesign & Website-Erstellung", "url": "https://[DOMAIN]/leistung-webdesign" },
-          { "@type": "ListItem", "position": 2, "name": "Suchmaschinenoptimierung (SEO)", "url": "https://[DOMAIN]/leistung-seo" },
-          { "@type": "ListItem", "position": 3, "name": "Lokales SEO & Google-Profil", "url": "https://[DOMAIN]/leistung-lokales-seo" },
-          { "@type": "ListItem", "position": 4, "name": "Wartung, Hosting & Betrieb", "url": "https://[DOMAIN]/leistung-wartung" },
-          { "@type": "ListItem", "position": 5, "name": "Texterstellung & Content", "url": "https://[DOMAIN]/leistung-texte" },
-          { "@type": "ListItem", "position": 6, "name": "Logo & Branding", "url": "https://[DOMAIN]/leistung-logo" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Webdesign & Website-Erstellung",
+            "url": "https://[DOMAIN]/leistung-webdesign"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Suchmaschinenoptimierung (SEO)",
+            "url": "https://[DOMAIN]/leistung-seo"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Lokales SEO & Google-Profil",
+            "url": "https://[DOMAIN]/leistung-lokales-seo"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Wartung, Hosting & Betrieb",
+            "url": "https://[DOMAIN]/leistung-wartung"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Texterstellung & Content",
+            "url": "https://[DOMAIN]/leistung-texte"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "Logo & Branding",
+            "url": "https://[DOMAIN]/leistung-logo"
+          }
         ]
       }
     ]

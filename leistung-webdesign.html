@@ -27,34 +27,174 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Webdesign & Website-Erstellung",
         "serviceType": "Webdesign",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Erstellung moderner, schneller und responsiver Websites — vom Onepager bis zur 20-seitigen Firmenwebsite. Individuelles Design, conversion-orientiert und DSGVO-konform.",
-        "offers": { "@type": "Offer", "price": "1290", "priceCurrency": "EUR" },
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Website-Pakete", "itemListElement": [{"@type": "Offer", "name": "Basis", "price": "1290", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Basis", "description": "Onepager mit bis zu 6 Sektionen, Kontaktformular, Basis-SEO, DSGVO-Setup, 2 Korrekturrunden."}}, {"@type": "Offer", "name": "Pro", "price": "2990", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Pro", "description": "Bis zu 8 Unterseiten, OnPage-SEO für alle Seiten, bis 30 Bilder, 3 Korrekturrunden."}}, {"@type": "Offer", "name": "Platin", "price": "5990", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Platin", "description": "Bis zu 20 Unterseiten, einmaliges Local-SEO-Setup, Core Web Vitals (LCP < 2,5 s), 4 Korrekturrunden."}}, {"@type": "Offer", "name": "Enterprise", "price": "9990", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Enterprise", "description": "Individueller Umfang per Pflichtenheft, Sonderprogrammierung/Integrationen."}}]}
+        "offers": {
+          "@type": "Offer",
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "minPrice": "1290",
+            "priceCurrency": "EUR"
+          }
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Website-Pakete",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Basis",
+              "price": "1290",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Basis",
+                "description": "Onepager mit bis zu 6 Sektionen, Kontaktformular, Basis-SEO, DSGVO-Setup, 2 Korrekturrunden."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Pro",
+              "price": "2990",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Pro",
+                "description": "Bis zu 8 Unterseiten, OnPage-SEO für alle Seiten, bis 30 Bilder, 3 Korrekturrunden."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Platin",
+              "price": "5990",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Platin",
+                "description": "Bis zu 20 Unterseiten, einmaliges Local-SEO-Setup, Core Web Vitals (LCP < 2,5 s), 4 Korrekturrunden."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise",
+              "price": "9990",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Enterprise",
+                "description": "Individueller Umfang per Pflichtenheft, Sonderprogrammierung/Integrationen."
+              }
+            }
+          ]
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "Webdesign", "item": "https://[DOMAIN]/leistung-webdesign" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Webdesign",
+            "item": "https://[DOMAIN]/leistung-webdesign"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Was kostet eine Website bei Sartu?", "acceptedAnswer": { "@type": "Answer", "text": "Die Website-Erstellung startet bei 1.290 € für einen Onepager (Basis). Mehrseitige Websites gibt es ab 2.990 € (Pro) bis 5.990 € (Platin). Alle Preise sind feste Festpreise." } },
-          { "@type": "Question", "name": "Wie lange dauert die Erstellung?", "acceptedAnswer": { "@type": "Answer", "text": "Sobald uns alle Inhalte vorliegen, ist deine Website in der Regel in 7–14 Werktagen online (Onepager schneller). Bei größeren Projekten planen wir den Zeitraum individuell." } },
-          { "@type": "Question", "name": "Ist die Website für Handys optimiert?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Jede Website wird vollständig responsive umgesetzt und auf Smartphone, Tablet und Desktop getestet." } },
-          { "@type": "Question", "name": "Bekomme ich ein individuelles Design oder eine Vorlage?", "acceptedAnswer": { "@type": "Answer", "text": "Ab dem Pro-Paket erhältst du ein individuelles Layout statt einer Vorlage, abgestimmt auf deine Marke und Ziele." } },
-          { "@type": "Question", "name": "Muss ich die Texte selbst liefern?", "acceptedAnswer": { "@type": "Answer", "text": "Du kannst, musst aber nicht. Auf Wunsch übernehmen wir die Texterstellung pro Seite oder als Komplettpaket." } },
-          { "@type": "Question", "name": "Wird meine Website schnell laden?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Wir optimieren ab dem Pro-Paket auf Core Web Vitals mit Ladezeiten unter 2 Sekunden." } },
-          { "@type": "Question", "name": "Kann ich später Änderungen vornehmen lassen?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Mit einem Wartungspaket sind monatliche Änderungen inklusive, darüber hinaus rechnen wir transparent nach Aufwand ab." } },
-          { "@type": "Question", "name": "Gehört mir die fertige Website?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Inhalte und Domain gehören dir. Wir kümmern uns um Technik und Betrieb, solange du ein Wartungspaket nutzt." } }
+          {
+            "@type": "Question",
+            "name": "Was kostet eine Website bei Sartu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Die Website-Erstellung startet bei 1.290 € für einen Onepager (Basis). Mehrseitige Websites gibt es ab 2.990 € (Pro) bis 5.990 € (Platin). Alle Preise sind feste Festpreise."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie lange dauert die Erstellung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sobald uns alle Inhalte vorliegen, ist deine Website in der Regel in 7–14 Werktagen online (Onepager schneller). Bei größeren Projekten planen wir den Zeitraum individuell."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Ist die Website für Handys optimiert?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Jede Website wird vollständig responsive umgesetzt und auf Smartphone, Tablet und Desktop getestet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bekomme ich ein individuelles Design oder eine Vorlage?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ab dem Pro-Paket erhältst du ein individuelles Layout statt einer Vorlage, abgestimmt auf deine Marke und Ziele."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Muss ich die Texte selbst liefern?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Du kannst, musst aber nicht. Auf Wunsch übernehmen wir die Texterstellung pro Seite oder als Komplettpaket."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wird meine Website schnell laden?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Wir optimieren ab dem Pro-Paket auf Core Web Vitals mit Ladezeiten unter 2 Sekunden."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kann ich später Änderungen vornehmen lassen?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Mit einem Wartungspaket sind monatliche Änderungen inklusive, darüber hinaus rechnen wir transparent nach Aufwand ab."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gehört mir die fertige Website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Inhalte und Domain gehören dir. Wir kümmern uns um Technik und Betrieb, solange du ein Wartungspaket nutzt."
+            }
+          }
         ]
       }
     ]

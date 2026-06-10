@@ -27,33 +27,176 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Lokales SEO & Google-Unternehmensprofil",
         "serviceType": "Lokale Suchmaschinenoptimierung",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Optimierung für Suchanfragen mit Ortsbezug: Einrichtung und Pflege des Google-Unternehmensprofils, NAP-Konsistenz, lokale Keywords, lokales Schema-Markup und Bewertungs-Monitoring.",
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Lokales SEO & Google-Profil", "itemListElement": [{"@type": "Offer", "name": "Google-Profil-Setup", "price": "290", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Google-Profil-Setup", "description": "Einrichtung + Verifizierung, Hauptkategorie + bis 9 Zusatzkategorien, Beschreibung (bis 750 Z.), bis 10 Fotos, NAP-Konsistenz-Check."}}, {"@type": "Offer", "name": "Profil-Pflege Basic", "price": "79", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Profil-Pflege Basic", "description": "Alle Rezensionen (Erstreaktion ≤ 2 Werktage), Öffnungszeiten & Infos aktuell, Profil-Monitoring."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "79", "priceCurrency": "EUR", "unitCode": "MON"}}, {"@type": "Offer", "name": "Profil-Pflege Pro", "price": "149", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Profil-Pflege Pro", "description": "Alles aus Basic + 2–4 Google-Posts/Monat, bis 4 Fotos, Q&A-Management, Monatsreport."}, "priceSpecification": {"@type": "UnitPriceSpecification", "price": "149", "priceCurrency": "EUR", "unitCode": "MON"}}]}
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Lokales SEO & Google-Profil",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Google-Profil-Setup",
+              "price": "290",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Google-Profil-Setup",
+                "description": "Einrichtung + Verifizierung, Hauptkategorie + bis 9 Zusatzkategorien, Beschreibung (bis 750 Z.), bis 10 Fotos, NAP-Konsistenz-Check."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Profil-Pflege Basic",
+              "price": "79",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Profil-Pflege Basic",
+                "description": "Alle Rezensionen (Erstreaktion ≤ 2 Werktage), Öffnungszeiten & Infos aktuell, Profil-Monitoring."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "79",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Profil-Pflege Pro",
+              "price": "149",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Profil-Pflege Pro",
+                "description": "Alles aus Basic + 2–4 Google-Posts/Monat, bis 4 Fotos, Q&A-Management, Monatsreport."
+              },
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "149",
+                "priceCurrency": "EUR",
+                "unitCode": "MON"
+              }
+            }
+          ]
+        },
+        "offers": {
+          "@type": "Offer",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "minPrice": "79",
+            "priceCurrency": "EUR",
+            "unitCode": "MON"
+          }
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "Lokales SEO", "item": "https://[DOMAIN]/leistung-lokales-seo" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Lokales SEO",
+            "item": "https://[DOMAIN]/leistung-lokales-seo"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Was ist lokales SEO?", "acceptedAnswer": { "@type": "Answer", "text": "Lokales SEO optimiert deine Sichtbarkeit für Suchanfragen mit Ortsbezug, etwa 'Maler in deiner Stadt', und sorgt dafür, dass du in der lokalen Suche und in Google Maps auftauchst." } },
-          { "@type": "Question", "name": "Für wen lohnt sich lokales SEO?", "acceptedAnswer": { "@type": "Answer", "text": "Vor allem für Betriebe mit regionalem Einzugsgebiet: Handwerker, Praxen, Kanzleien, Gastronomie und lokale Dienstleister." } },
-          { "@type": "Question", "name": "Was ist ein Google-Unternehmensprofil?", "acceptedAnswer": { "@type": "Answer", "text": "Der kostenlose Google-Eintrag, der bei lokaler Suche und in Maps mit Öffnungszeiten, Adresse, Fotos und Bewertungen erscheint. Wir richten ihn ein und pflegen ihn auf Wunsch." } },
-          { "@type": "Question", "name": "Was bedeutet NAP-Konsistenz?", "acceptedAnswer": { "@type": "Answer", "text": "NAP steht für Name, Adresse, Telefonnummer. Diese Angaben müssen überall einheitlich sein, weil Google Inkonsistenzen als Unsicherheitssignal wertet." } },
-          { "@type": "Question", "name": "Wie wichtig sind Bewertungen?", "acceptedAnswer": { "@type": "Answer", "text": "Sehr wichtig: Anzahl, Aktualität und Bewertung beeinflussen sowohl dein lokales Ranking als auch das Vertrauen potenzieller Kunden." } },
-          { "@type": "Question", "name": "Ist lokales SEO in den Paketen enthalten?", "acceptedAnswer": { "@type": "Answer", "text": "Im Platin-Paket ist lokales SEO inklusive. Andernfalls ist es als laufende Google-Profil-Pflege ab 79 €/Monat buchbar; die einmalige Profil-Einrichtung kostet 290 €." } },
-          { "@type": "Question", "name": "Übernehmt ihr die laufende Pflege?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Die Google-Profil-Pflege umfasst Rezensionen-Antworten, aktuelle Kerninfos und Monitoring; in der Pro-Stufe zusätzlich Posts, Fotos und Q&amp;A." } },
-          { "@type": "Question", "name": "Brauche ich dafür eine Website?", "acceptedAnswer": { "@type": "Answer", "text": "Eine Website verstärkt die Wirkung deutlich, weil lokale Keywords und lokales Schema-Markup zusammenspielen. Das Google-Profil können wir aber auch eigenständig einrichten." } }
+          {
+            "@type": "Question",
+            "name": "Was ist lokales SEO?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Lokales SEO optimiert deine Sichtbarkeit für Suchanfragen mit Ortsbezug, etwa 'Maler in deiner Stadt', und sorgt dafür, dass du in der lokalen Suche und in Google Maps auftauchst."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Für wen lohnt sich lokales SEO?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Vor allem für Betriebe mit regionalem Einzugsgebiet: Handwerker, Praxen, Kanzleien, Gastronomie und lokale Dienstleister."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist ein Google-Unternehmensprofil?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Der kostenlose Google-Eintrag, der bei lokaler Suche und in Maps mit Öffnungszeiten, Adresse, Fotos und Bewertungen erscheint. Wir richten ihn ein und pflegen ihn auf Wunsch."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was bedeutet NAP-Konsistenz?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "NAP steht für Name, Adresse, Telefonnummer. Diese Angaben müssen überall einheitlich sein, weil Google Inkonsistenzen als Unsicherheitssignal wertet."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie wichtig sind Bewertungen?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sehr wichtig: Anzahl, Aktualität und Bewertung beeinflussen sowohl dein lokales Ranking als auch das Vertrauen potenzieller Kunden."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Ist lokales SEO in den Paketen enthalten?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Im Platin-Paket ist lokales SEO inklusive. Andernfalls ist es als laufende Google-Profil-Pflege ab 79 €/Monat buchbar; die einmalige Profil-Einrichtung kostet 290 €."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Übernehmt ihr die laufende Pflege?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Die Google-Profil-Pflege umfasst Rezensionen-Antworten, aktuelle Kerninfos und Monitoring; in der Pro-Stufe zusätzlich Posts, Fotos und Q&amp;A."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich dafür eine Website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Eine Website verstärkt die Wirkung deutlich, weil lokale Keywords und lokales Schema-Markup zusammenspielen. Das Google-Profil können wir aber auch eigenständig einrichten."
+            }
+          }
         ]
       }
     ]

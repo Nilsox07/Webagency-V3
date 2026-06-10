@@ -27,36 +27,204 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Preise", "item": "https://[DOMAIN]/preise" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Preise",
+            "item": "https://[DOMAIN]/preise"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Sind die angegebenen Preise Endpreise?", "acceptedAnswer": { "@type": "Answer", "text": "Die Paketpreise sind feste Netto-Festpreise. Als Kleinunternehmer bzw. je nach Steuerstatus kann zzgl. Umsatzsteuer anfallen — das weisen wir im Angebot transparent aus." } },
-          { "@type": "Question", "name": "Was kostet die günstigste Website?", "acceptedAnswer": { "@type": "Answer", "text": "Das Basis-Paket (Onepager) startet bei 1.290 € einmalig. Es enthält alles, was du brauchst, um professionell online zu sein." } },
-          { "@type": "Question", "name": "Worin unterscheiden sich Basis, Pro und Platin?", "acceptedAnswer": { "@type": "Answer", "text": "Vor allem im Umfang: Basis ist ein Onepager, Pro umfasst bis 8 Unterseiten mit individuellem Layout, Platin bis 20 Seiten inklusive lokalem SEO und Blog-Bereich." } },
-          { "@type": "Question", "name": "Welches Paket passt zu mir?", "acceptedAnswer": { "@type": "Answer", "text": "Faustregel: Onepager für den schnellen Start, Pro für KMU mit echtem Inhalt, Platin für etablierte Firmen. Im Briefing mit Lumi bekommst du am Ende eine konkrete Empfehlung." } },
-          { "@type": "Question", "name": "Was ist im Festpreis alles enthalten?", "acceptedAnswer": { "@type": "Answer", "text": "Design, Umsetzung, Mobil-Optimierung, Basis-SEO, SSL, DSGVO-Setup, Hosting-Einrichtung und die im Paket genannten Korrekturrunden. Keine versteckten Posten." } },
-          { "@type": "Question", "name": "Fallen nach dem Kauf weitere Kosten an?", "acceptedAnswer": { "@type": "Answer", "text": "Nur, wenn du Wartung & Betrieb möchtest (ab 49 €/Monat bei Jahreszahlung) oder Add-ons buchst. Die Website-Erstellung selbst ist mit dem Festpreis abgegolten." } },
-          { "@type": "Question", "name": "Brauche ich zwingend ein Wartungspaket?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Hosting & Pflege (Sartu Care) ist bei jeder Website Pflicht — sie sichert sicheren Betrieb, Updates und Backups. Care S startet bei 49 €/Monat (bei jährlicher Vorauszahlung)." } },
-          { "@type": "Question", "name": "Gelten die Care-Preise pro Monat?", "acceptedAnswer": { "@type": "Answer", "text": "Die genannten Care-Preise (Care S 49 €, Care M 99 €, Care L 249 €) gelten bei jährlicher Vorauszahlung." } },
-          { "@type": "Question", "name": "Was bedeutet „inkl. Änderungen pro Monat\"?", "acceptedAnswer": { "@type": "Answer", "text": "In Care M und Care L sind monatlich 30 bzw. 90 Minuten Änderungen enthalten. Ungenutzte Zeit verfällt am Monatsende." } },
-          { "@type": "Question", "name": "Was passiert, wenn ich mehr Änderungen brauche?", "acceptedAnswer": { "@type": "Answer", "text": "Mehraufwand über das Kontingent hinaus rechnen wir mit 99 €/Std im 5-Minuten-Takt ab — oder du wechselst auf eine höhere Care-Stufe." } },
-          { "@type": "Question", "name": "Gibt es eine Mindestlaufzeit bei der Wartung?", "acceptedAnswer": { "@type": "Answer", "text": "Ja, 12 Monate. Danach ist das Wartungspaket monatlich kündbar." } },
-          { "@type": "Question", "name": "Kann ich später das Paket wechseln oder erweitern?", "acceptedAnswer": { "@type": "Answer", "text": "Klar. Zusätzliche Unterseiten (199 € pro Seite) oder weitere Sprachen lassen sich jederzeit als Add-on nachrüsten." } },
-          { "@type": "Question", "name": "Was kostet eine zusätzliche Unterseite?", "acceptedAnswer": { "@type": "Answer", "text": "199 € pro Seite. Brauchst du gleich mehrere, kalkulieren wir das gerne als Paket." } },
-          { "@type": "Question", "name": "Bietet ihr auch Texterstellung an?", "acceptedAnswer": { "@type": "Answer", "text": "Ja: 120 € pro Seite oder 490 € für ein Komplettpaket mit 5 Seiten. So musst du nicht selbst texten." } },
-          { "@type": "Question", "name": "Wie funktioniert der Express-Zuschlag?", "acceptedAnswer": { "@type": "Answer", "text": "Wenn du die Lieferung priorisiert haben möchtest, kommt ein Express-Zuschlag von +50 % auf den Paketpreis hinzu (mindestens 390 €). Die Inhalte müssen dafür vollständig vorliegen." } },
-          { "@type": "Question", "name": "Wie bezahle ich?", "acceptedAnswer": { "@type": "Answer", "text": "Per Rechnung, verteilt auf Projekt-Meilensteine: Basis 50 % bei Auftrag / 50 % bei Go-live (oder 100 % vorab mit Skonto). Pro und Platin 40 % bei Auftrag / 30 % bei Designfreigabe / 30 % bei Go-live. Enterprise 30/30/20/20 über vier Meilensteine. Wartungspakete werden monatlich oder jährlich im Voraus abgerechnet. Die konkreten Modalitäten stehen verbindlich in deinem Angebot." } },
-          { "@type": "Question", "name": "Wie greift die Garantie?", "acceptedAnswer": { "@type": "Answer", "text": "Die Zufriedenheits-Garantie bezieht sich ausschließlich auf die erste Design-Vorschau: Überzeugt sie dich nicht, bekommst du deine Anzahlung zurück. Sie gilt nicht für bereits live gestellte oder von dir freigegebene Leistungen." } },
-          { "@type": "Question", "name": "Gibt es ein Widerrufsrecht?", "acceptedAnswer": { "@type": "Answer", "text": "Als Verbraucher hast du grundsätzlich ein 14-tägiges Widerrufsrecht. Bei vorzeitigem Start der Arbeiten verzichtest du auf Wunsch ausdrücklich darauf — das bestätigen wir transparent im Bestellprozess." } },
-          { "@type": "Question", "name": "Erstellt ihr auch große Onlineshops?", "acceptedAnswer": { "@type": "Answer", "text": "Nein, komplexe E-Commerce-Systeme gehören bewusst nicht zu unserem Angebot. Produktpräsentation mit Anfrage- oder Bestellformular setzen wir aber gerne um." } },
-          { "@type": "Question", "name": "Werden reine Websites in Deutschland gefördert?", "acceptedAnswer": { "@type": "Answer", "text": "Reine Website-Erstellung wird 2026 praktisch nicht direkt bezuschusst — wir machen dazu keine Pauschalversprechen. Vorgelagerte Beratung (z. B. über BAFA) kann in Einzelfällen möglich sein." } },
-          { "@type": "Question", "name": "Wie bekomme ich ein konkretes Angebot?", "acceptedAnswer": { "@type": "Answer", "text": "Am einfachsten über das Briefing mit Lumi oder einen kostenlosen Check. Schreib uns — du bekommst einen Festpreis, bevor wir starten." } }
+          {
+            "@type": "Question",
+            "name": "Sind die angegebenen Preise Endpreise?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Die Paketpreise sind feste Netto-Festpreise. Als Kleinunternehmer bzw. je nach Steuerstatus kann zzgl. Umsatzsteuer anfallen — das weisen wir im Angebot transparent aus."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was kostet die günstigste Website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Das Basis-Paket (Onepager) startet bei 1.290 € einmalig. Es enthält alles, was du brauchst, um professionell online zu sein."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Worin unterscheiden sich Basis, Pro und Platin?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Vor allem im Umfang: Basis ist ein Onepager, Pro umfasst bis 8 Unterseiten mit individuellem Layout, Platin bis 20 Seiten inklusive lokalem SEO und Blog-Bereich."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Welches Paket passt zu mir?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Faustregel: Onepager für den schnellen Start, Pro für KMU mit echtem Inhalt, Platin für etablierte Firmen. Im Briefing mit Lumi bekommst du am Ende eine konkrete Empfehlung."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist im Festpreis alles enthalten?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Design, Umsetzung, Mobil-Optimierung, Basis-SEO, SSL, DSGVO-Setup, Hosting-Einrichtung und die im Paket genannten Korrekturrunden. Keine versteckten Posten."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Fallen nach dem Kauf weitere Kosten an?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nur, wenn du Wartung & Betrieb möchtest (ab 49 €/Monat bei Jahreszahlung) oder Add-ons buchst. Die Website-Erstellung selbst ist mit dem Festpreis abgegolten."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Brauche ich zwingend ein Wartungspaket?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Hosting & Pflege (Sartu Care) ist bei jeder Website Pflicht — sie sichert sicheren Betrieb, Updates und Backups. Care S startet bei 49 €/Monat (bei jährlicher Vorauszahlung)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gelten die Care-Preise pro Monat?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Die genannten Care-Preise (Care S 49 €, Care M 99 €, Care L 249 €) gelten bei jährlicher Vorauszahlung."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was bedeutet „inkl. Änderungen pro Monat\"?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In Care M und Care L sind monatlich 30 bzw. 90 Minuten Änderungen enthalten. Ungenutzte Zeit verfällt am Monatsende."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was passiert, wenn ich mehr Änderungen brauche?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Mehraufwand über das Kontingent hinaus rechnen wir mit 99 €/Std im 5-Minuten-Takt ab — oder du wechselst auf eine höhere Care-Stufe."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gibt es eine Mindestlaufzeit bei der Wartung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja, 12 Monate. Danach ist das Wartungspaket monatlich kündbar."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kann ich später das Paket wechseln oder erweitern?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Klar. Zusätzliche Unterseiten (199 € pro Seite) oder weitere Sprachen lassen sich jederzeit als Add-on nachrüsten."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was kostet eine zusätzliche Unterseite?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "199 € pro Seite. Brauchst du gleich mehrere, kalkulieren wir das gerne als Paket."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bietet ihr auch Texterstellung an?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja: 120 € pro Seite oder 490 € für ein Komplettpaket mit 5 Seiten. So musst du nicht selbst texten."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie funktioniert der Express-Zuschlag?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Wenn du die Lieferung priorisiert haben möchtest, kommt ein Express-Zuschlag von +50 % auf den Paketpreis hinzu (mindestens 390 €). Die Inhalte müssen dafür vollständig vorliegen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie bezahle ich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Per Rechnung, verteilt auf Projekt-Meilensteine: Basis 50 % bei Auftrag / 50 % bei Go-live (oder 100 % vorab mit Skonto). Pro und Platin 40 % bei Auftrag / 30 % bei Designfreigabe / 30 % bei Go-live. Enterprise 30/30/20/20 über vier Meilensteine. Wartungspakete werden monatlich oder jährlich im Voraus abgerechnet. Die konkreten Modalitäten stehen verbindlich in deinem Angebot."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie greift die Garantie?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Die Zufriedenheits-Garantie bezieht sich ausschließlich auf die erste Design-Vorschau: Überzeugt sie dich nicht, bekommst du deine Anzahlung zurück. Sie gilt nicht für bereits live gestellte oder von dir freigegebene Leistungen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gibt es ein Widerrufsrecht?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Als Verbraucher hast du grundsätzlich ein 14-tägiges Widerrufsrecht. Bei vorzeitigem Start der Arbeiten verzichtest du auf Wunsch ausdrücklich darauf — das bestätigen wir transparent im Bestellprozess."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Erstellt ihr auch große Onlineshops?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein, komplexe E-Commerce-Systeme gehören bewusst nicht zu unserem Angebot. Produktpräsentation mit Anfrage- oder Bestellformular setzen wir aber gerne um."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Werden reine Websites in Deutschland gefördert?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Reine Website-Erstellung wird 2026 praktisch nicht direkt bezuschusst — wir machen dazu keine Pauschalversprechen. Vorgelagerte Beratung (z. B. über BAFA) kann in Einzelfällen möglich sein."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie bekomme ich ein konkretes Angebot?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Am einfachsten über das Briefing mit Lumi oder einen kostenlosen Check. Schreib uns — du bekommst einen Festpreis, bevor wir starten."
+            }
+          }
         ]
       }
     ]

@@ -27,23 +27,105 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Ratgeber", "item": "https://[DOMAIN]/ratgeber" },
-          { "@type": "ListItem", "position": 3, "name": "Förderung für Websites", "item": "https://[DOMAIN]/ratgeber-foerderung" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Ratgeber",
+            "item": "https://[DOMAIN]/ratgeber"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Förderung für Websites",
+            "item": "https://[DOMAIN]/ratgeber-foerderung"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Werden Websites in Deutschland staatlich gefördert?", "acceptedAnswer": { "@type": "Answer", "text": "Es gibt kein bundesweit einheitliches Zuschussprogramm speziell für Websites. Förderung ist überwiegend Ländersache: Je nach Bundesland und Vorhaben kann eine Förderung möglich sein, ein Rechtsanspruch besteht jedoch nicht. Über die Bewilligung entscheidet allein die jeweilige Förderstelle." } },
-          { "@type": "Question", "name": "Wird eine einfache Firmen-Website gefördert?", "acceptedAnswer": { "@type": "Answer", "text": "Meist nicht. Reine Image- oder Visitenkarten-Websites gelten in vielen Programmen nicht als förderfähig. Gefördert werden in der Regel Vorhaben mit echtem Funktions- oder Prozessmehrwert, etwa ein Online-Shop mit Warenwirtschafts-Anbindung, ein Buchungs- oder Terminsystem oder ein Kundenportal." } },
-          { "@type": "Question", "name": "Was ist der häufigste Fehler bei der Förderung?", "acceptedAnswer": { "@type": "Answer", "text": "Ein verbindlicher Auftrag vor der Antragstellung. Bei den meisten Programmen gilt: Antrag vor Auftrag. Wer vorher mündlich beauftragt, einen Vertrag schließt oder eine Rechnung bezahlt, hat den Maßnahmenbeginn ausgelöst — das führt regelmäßig zur Ablehnung." } },
-          { "@type": "Question", "name": "Übernimmt Sartu die Förderberatung oder den Antrag?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Sartu ist Umsetzer, nicht Förderberater. Wir stellen ein detailliertes Angebot mit Leistungsbeschreibung und Kostenaufstellung bereit, das einem Förderantrag beigelegt werden kann, und respektieren den Ablauf Antrag vor Auftrag. Wir leisten keine Förderberatung, stellen keine Anträge im Namen von Kundinnen und Kunden und geben keine Bewilligungsversprechen." } },
-          { "@type": "Question", "name": "Wo finde ich aktuelle Förderprogramme?", "acceptedAnswer": { "@type": "Answer", "text": "In der offiziellen Förderdatenbank des Bundes (foerderdatenbank.de) sowie bei der Förderbank deines eigenen Bundeslandes. Programme, Bedingungen und Budgets ändern sich laufend und können ausgeschöpft sein — bitte prüfe den Status immer direkt bei der offiziellen Stelle, bevor du etwas beauftragst." } },
-          { "@type": "Question", "name": "Gibt es einen Rechtsanspruch auf Förderung?", "acceptedAnswer": { "@type": "Answer", "text": "Nein. Auf Förderung besteht grundsätzlich kein Rechtsanspruch. Die Entscheidung liegt im Ermessen der Förderstelle und hängt von den jeweiligen Programmbedingungen, dem verfügbaren Budget und deinem konkreten Vorhaben ab." } }
+          {
+            "@type": "Question",
+            "name": "Werden Websites in Deutschland staatlich gefördert?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Es gibt kein bundesweit einheitliches Zuschussprogramm speziell für Websites. Förderung ist überwiegend Ländersache: Je nach Bundesland und Vorhaben kann eine Förderung möglich sein, ein Rechtsanspruch besteht jedoch nicht. Über die Bewilligung entscheidet allein die jeweilige Förderstelle."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wird eine einfache Firmen-Website gefördert?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Meist nicht. Reine Image- oder Visitenkarten-Websites gelten in vielen Programmen nicht als förderfähig. Gefördert werden in der Regel Vorhaben mit echtem Funktions- oder Prozessmehrwert, etwa ein Online-Shop mit Warenwirtschafts-Anbindung, ein Buchungs- oder Terminsystem oder ein Kundenportal."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist der häufigste Fehler bei der Förderung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ein verbindlicher Auftrag vor der Antragstellung. Bei den meisten Programmen gilt: Antrag vor Auftrag. Wer vorher mündlich beauftragt, einen Vertrag schließt oder eine Rechnung bezahlt, hat den Maßnahmenbeginn ausgelöst — das führt regelmäßig zur Ablehnung."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Übernimmt Sartu die Förderberatung oder den Antrag?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Sartu ist Umsetzer, nicht Förderberater. Wir stellen ein detailliertes Angebot mit Leistungsbeschreibung und Kostenaufstellung bereit, das einem Förderantrag beigelegt werden kann, und respektieren den Ablauf Antrag vor Auftrag. Wir leisten keine Förderberatung, stellen keine Anträge im Namen von Kundinnen und Kunden und geben keine Bewilligungsversprechen."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wo finde ich aktuelle Förderprogramme?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In der offiziellen Förderdatenbank des Bundes (foerderdatenbank.de) sowie bei der Förderbank deines eigenen Bundeslandes. Programme, Bedingungen und Budgets ändern sich laufend und können ausgeschöpft sein — bitte prüfe den Status immer direkt bei der offiziellen Stelle, bevor du etwas beauftragst."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gibt es einen Rechtsanspruch auf Förderung?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nein. Auf Förderung besteht grundsätzlich kein Rechtsanspruch. Die Entscheidung liegt im Ermessen der Förderstelle und hängt von den jeweiligen Programmbedingungen, dem verfügbaren Budget und deinem konkreten Vorhaben ab."
+            }
+          }
         ]
+      },
+      {
+        "@type": "Article",
+        "headline": "Förderung für Websites & Digitalisierung — was geht, was nicht",
+        "description": "Werden Websites gefördert? Förderprogramme für Website & Digitalisierung im Überblick: Ländersache, Funktionsmehrwert, Antrag vor Auftrag. Jetzt lesen.",
+        "datePublished": "2026-06-10",
+        "dateModified": "2026-06-10",
+        "author": {
+          "@type": "Organization",
+          "name": "Sartu"
+        },
+        "publisher": {
+          "@id": "https://[DOMAIN]/#organization"
+        }
       }
     ]
   }

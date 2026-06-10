@@ -27,34 +27,163 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://[DOMAIN]/#organization",
+        "name": "Sartu",
+        "url": "https://[DOMAIN]/",
+        "logo": "https://[DOMAIN]/assets/logo.png",
+        "email": "hallo@sartu.de",
+        "description": "Webdesign-Agentur für Festpreis-Websites: Webdesign, SEO, lokales SEO, Wartung & Hosting in Deutschland — kontaktlos, transparent, DSGVO-konform.",
+        "areaServed": "DE",
+        "sameAs": []
+      },
+      {
         "@type": "Service",
         "name": "Logo & Branding",
         "serviceType": "Logo-Design und Markengestaltung",
-        "provider": { "@type": "ProfessionalService", "name": "Sartu", "url": "https://[DOMAIN]/", "email": "hallo@sartu.de" },
+        "provider": {
+          "@id": "https://[DOMAIN]/#organization"
+        },
         "areaServed": "DE",
         "description": "Professionelles Logo-Design und stimmiges Erscheinungsbild: Logo Lite oder Branding Pro inklusive Dateiformaten, Farb- und Schriftwelt.",
-        "offers": { "@type": "Offer", "price": "490", "priceCurrency": "EUR", "description": "Logo Lite ab 490 €, Branding Pro ab 990 €" },
-        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Logo & Branding", "itemListElement": [{"@type": "Offer", "name": "Logo Lite", "price": "490", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Logo Lite", "description": "3 Entwürfe, 2 Korrekturrunden, alle Datei­formate (SVG/EPS/PDF/PNG), Mini-Styleguide, volle Nutzungsrechte."}}, {"@type": "Offer", "name": "Branding Pro", "price": "990", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Branding Pro", "description": "Individuelles Logo (3 Entwürfe, 3 Runden), Visitenkarte, Briefpapier, E-Mail-Signatur, Styleguide."}}, {"@type": "Offer", "name": "Corporate Design", "price": "1890", "priceCurrency": "EUR", "itemOffered": {"@type": "Service", "name": "Corporate Design", "description": "Designsystem, komplette Geschäftsausstattung, bis 5 Social-Media-Templates, Styleguide (15+ Seiten)."}}]}
+        "offers": {
+          "@type": "Offer",
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "minPrice": "490",
+            "priceCurrency": "EUR"
+          }
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Logo & Branding",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "name": "Logo Lite",
+              "price": "490",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Logo Lite",
+                "description": "3 Entwürfe, 2 Korrekturrunden, alle Datei­formate (SVG/EPS/PDF/PNG), Mini-Styleguide, volle Nutzungsrechte."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Branding Pro",
+              "price": "990",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Branding Pro",
+                "description": "Individuelles Logo (3 Entwürfe, 3 Runden), Visitenkarte, Briefpapier, E-Mail-Signatur, Styleguide."
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Corporate Design",
+              "price": "1890",
+              "priceCurrency": "EUR",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Corporate Design",
+                "description": "Designsystem, komplette Geschäftsausstattung, bis 5 Social-Media-Templates, Styleguide (15+ Seiten)."
+              }
+            }
+          ]
+        }
       },
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://[DOMAIN]/" },
-          { "@type": "ListItem", "position": 2, "name": "Leistungen", "item": "https://[DOMAIN]/leistungen" },
-          { "@type": "ListItem", "position": 3, "name": "Logo & Branding", "item": "https://[DOMAIN]/leistung-logo" }
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Start",
+            "item": "https://[DOMAIN]/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Leistungen",
+            "item": "https://[DOMAIN]/leistungen"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Logo & Branding",
+            "item": "https://[DOMAIN]/leistung-logo"
+          }
         ]
       },
       {
         "@type": "FAQPage",
         "mainEntity": [
-          { "@type": "Question", "name": "Was kostet ein Logo?", "acceptedAnswer": { "@type": "Answer", "text": "Logo Lite kostet ab 490 € und umfasst dein Logo in 3 Entwürfen, 2 Korrekturrunden, alle Standard-Dateiformate und einen Mini-Styleguide. Branding Pro ab 990 € geht weiter: zusätzlich Visitenkarten-Template, digitales Briefpapier, E-Mail-Signatur und einen vollständigen Styleguide." } },
-          { "@type": "Question", "name": "Was ist der Unterschied zwischen Logo Lite und Branding Pro?", "acceptedAnswer": { "@type": "Answer", "text": "Logo Lite umfasst dein Logo in 3 Entwürfen mit 2 Korrekturrunden, allen Standard-Dateiformaten und einem Mini-Styleguide. Branding Pro geht weiter: zusätzlich Visitenkarten-Template, digitales Briefpapier, E-Mail-Signatur und einen vollständigen Styleguide — also ein stimmiges Gesamtbild statt nur des Logos." } },
-          { "@type": "Question", "name": "Welche Dateien bekomme ich?", "acceptedAnswer": { "@type": "Answer", "text": "Du erhältst dein Logo in den gängigen Formaten für Web und Druck, inklusive Varianten für helle und dunkle Hintergründe." } },
-          { "@type": "Question", "name": "Bekomme ich auch Farben und Schriften dazu?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Zu deinem Logo definieren wir eine passende Farb- und Schriftwelt, damit dein Auftritt überall einheitlich wirkt." } },
-          { "@type": "Question", "name": "Wie viele Entwürfe bekomme ich?", "acceptedAnswer": { "@type": "Answer", "text": "Du erhältst mehrere Richtungen zur Auswahl und feilst die favorisierte Variante in den vereinbarten Korrekturrunden mit uns aus." } },
-          { "@type": "Question", "name": "Gehört mir das Logo?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Mit der Bezahlung erhältst du die Nutzungsrechte am erstellten Logo." } },
-          { "@type": "Question", "name": "Passt das Logo zu meiner Website?", "acceptedAnswer": { "@type": "Answer", "text": "Genau dafür ist es gedacht. Wenn wir auch deine Website bauen, stimmen wir Logo, Farben und Design von Anfang an aufeinander ab." } },
-          { "@type": "Question", "name": "Kann ich nur ein Logo bestellen, ohne Website?", "acceptedAnswer": { "@type": "Answer", "text": "Ja. Logo und Branding kannst du auch unabhängig von einer Website beauftragen." } }
+          {
+            "@type": "Question",
+            "name": "Was kostet ein Logo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Logo Lite kostet ab 490 € und umfasst dein Logo in 3 Entwürfen, 2 Korrekturrunden, alle Standard-Dateiformate und einen Mini-Styleguide. Branding Pro ab 990 € geht weiter: zusätzlich Visitenkarten-Template, digitales Briefpapier, E-Mail-Signatur und einen vollständigen Styleguide."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was ist der Unterschied zwischen Logo Lite und Branding Pro?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Logo Lite umfasst dein Logo in 3 Entwürfen mit 2 Korrekturrunden, allen Standard-Dateiformaten und einem Mini-Styleguide. Branding Pro geht weiter: zusätzlich Visitenkarten-Template, digitales Briefpapier, E-Mail-Signatur und einen vollständigen Styleguide — also ein stimmiges Gesamtbild statt nur des Logos."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Welche Dateien bekomme ich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Du erhältst dein Logo in den gängigen Formaten für Web und Druck, inklusive Varianten für helle und dunkle Hintergründe."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bekomme ich auch Farben und Schriften dazu?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Zu deinem Logo definieren wir eine passende Farb- und Schriftwelt, damit dein Auftritt überall einheitlich wirkt."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie viele Entwürfe bekomme ich?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Du erhältst mehrere Richtungen zur Auswahl und feilst die favorisierte Variante in den vereinbarten Korrekturrunden mit uns aus."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Gehört mir das Logo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Mit der Bezahlung erhältst du die Nutzungsrechte am erstellten Logo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Passt das Logo zu meiner Website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Genau dafür ist es gedacht. Wenn wir auch deine Website bauen, stimmen wir Logo, Farben und Design von Anfang an aufeinander ab."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kann ich nur ein Logo bestellen, ohne Website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Ja. Logo und Branding kannst du auch unabhängig von einer Website beauftragen."
+            }
+          }
         ]
       }
     ]
