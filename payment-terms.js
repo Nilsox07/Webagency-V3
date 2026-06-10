@@ -13,8 +13,8 @@
 
   var PRO_PLATIN = [
     { pct: 40, when: 'bei Auftrag' },
-    { pct: 30, when: 'bei Designfreigabe' },
-    { pct: 30, when: 'bei Go-live' },
+    { pct: 30, when: 'wenn du das Design freigibst' },
+    { pct: 30, when: 'wenn deine Website online geht' },
   ];
 
   return {
@@ -25,15 +25,15 @@
     terms: {
       basis: [
         { pct: 50, when: 'bei Auftrag' },
-        { pct: 50, when: 'bei Go-live' },
+        { pct: 50, when: 'wenn deine Website online geht' },
       ],
       pro: PRO_PLATIN,
       platin: PRO_PLATIN,
       enterprise: [
         { pct: 30, when: 'bei Auftrag' },
-        { pct: 30, when: 'bei Designfreigabe' },
-        { pct: 20, when: 'bei Fertigstellung' },
-        { pct: 20, when: 'bei Go-live' },
+        { pct: 30, when: 'wenn du das Design freigibst' },
+        { pct: 20, when: 'wenn alles fertig ist' },
+        { pct: 20, when: 'wenn deine Website online geht' },
       ],
     },
 

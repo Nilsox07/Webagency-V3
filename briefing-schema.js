@@ -53,7 +53,7 @@
         { value: 'start',      label: 'Startseite' },
         { value: 'ueber',      label: 'Über uns' },
         { value: 'leistungen', label: 'Leistungen / Angebote' },
-        { value: 'referenzen', label: 'Referenzen / Portfolio' },
+        { value: 'referenzen', label: 'Referenzen / Arbeitsproben' },
         { value: 'team',       label: 'Team' },
         { value: 'kontakt',    label: 'Kontakt' },
         { value: 'blog',       label: 'Blog / News' },
@@ -69,11 +69,11 @@
         { value: 'terminbuchung',   label: 'Online-Terminbuchung' },
         { value: 'shop',            label: 'Shop / Bezahlung' },
         { value: 'blog',            label: 'Blog / News' },
-        { value: 'galerie',         label: 'Bildergalerie' },
-        { value: 'mehrsprachig',    label: 'Mehrsprachig' },
+        { value: 'galerie',         label: 'Bildergalerie für deine Arbeiten/Projekte' },
+        { value: 'mehrsprachig',    label: 'Mehrere Sprachen (z. B. Deutsch + Englisch)' },
         { value: 'newsletter',      label: 'Newsletter' },
-        { value: 'social',          label: 'Social-Media-Einbindung' },
-        { value: 'login',           label: 'Kundenbereich / Login' },
+        { value: 'social',          label: 'Verlinkung zu Social Media (Instagram, Facebook …)' },
+        { value: 'login',           label: 'Geschützter Bereich mit Anmeldung' },
         { value: 'beraten',         label: 'Weiß nicht / beraten lassen' },
       ],
 
@@ -83,7 +83,7 @@
         { value: 'verspielt', label: 'Verspielt & bunt',       flavor: 'mood-verspielt' },
         { value: 'bold',      label: 'Bold & modern',          flavor: 'mood-bold' },
         { value: 'warm',      label: 'Warm & natürlich',       flavor: 'mood-warm' },
-        { value: 'corporate', label: 'Corporate & seriös',     flavor: 'mood-corporate' },
+        { value: 'corporate', label: 'Geschäftlich & seriös',   flavor: 'mood-corporate' },
       ],
 
       // Farbauswahl im Design-Schritt: laienverständlich, Haupt- + Nebenfarbe
@@ -106,7 +106,7 @@
 
       material: [ // Multi-Select
         { value: 'logo',    label: 'Logo' },
-        { value: 'ci',      label: 'Markenfarben / CI' },
+        { value: 'ci',      label: 'Markenfarben & Schriftart' },
         { value: 'texte',   label: 'Texte' },
         { value: 'fotos',   label: 'Eigene Fotos' },
         { value: 'website', label: 'Bestehende Website' },

@@ -346,7 +346,7 @@
     var t = totals();
     sums.innerHTML =
       '<div class="lb-sum"><span>Einmalig</span><strong></strong></div>' +
-      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflicht</span><strong></strong></div>';
+      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflege &amp; Speicherplatz</span><strong></strong></div>';
     sums.children[0].querySelector('strong').textContent = fmtEUR(t.once);
     sums.children[1].querySelector('strong').textContent = fmtEUR(t.monthly) + '/Mon.';
     if (priceDetailOpen) renderPriceDetail();
@@ -478,8 +478,8 @@
       var a = el('button', 'lb-path-card');
       a.type = 'button';
       a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">⚙️</span>' +
-        '<span class="lb-path-title">Ja, ich konfiguriere direkt</span>' +
-        '<span class="lb-path-sub">Paket wählen, Add-ons dazu, Preis sofort sehen.</span>';
+        '<span class="lb-path-title">Ja, ich stelle mir alles selbst zusammen</span>' +
+        '<span class="lb-path-sub">Paket wählen, Extras dazu, Preis sofort sehen.</span>';
       a.addEventListener('click', function () { A.pfad = 'A'; goTo('configurator'); });
 
       var b = el('button', 'lb-path-card');
@@ -726,9 +726,9 @@
             hint: 'Für Shop, Portal, Mehrsprachigkeit oder Sonderfunktionen sammle ich kurz deine Anforderungen — ohne Fixpreis. Du kannst jederzeit zu einem kleineren Paket wechseln.' }
         : (A.pfad === 'B'
           ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-              hint: 'Paket, Pflicht-Wartung und passende Add-ons sind vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
+              hint: 'Paket, die Pflicht-Pflege und passende Extras sind vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
           : { q: 'Stell dir dein Paket zusammen.',
-              hint: 'Wähle Paket und Add-ons — Hosting & Wartung ist Pflicht und schon gesetzt. Der Preis unten rechnet live mit.' });
+              hint: 'Wähle Paket und Extras — Hosting & Pflege ist Pflicht und schon gesetzt. Der Preis unten rechnet live mit.' });
       var h = lumiSays(intro.q, intro.hint);
 
       // Zurück-Link oben
@@ -802,7 +802,7 @@
 
       /* -- Hosting & Wartung (PFLICHT, nur Upgrade über den Paket-Floor) -- */
       function renderWartung() {
-        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Hosting &amp; Wartung <span class="lb-cfg-opt">(Pflicht – im Paket enthalten)</span></h3>';
+        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Hosting &amp; Pflege <span class="lb-cfg-opt">(Pflicht – im Paket enthalten)</span></h3>';
         var floor = pkgFloor(A.paket_gewaehlt);
         var floorIdx = maintIndex(floor);
         var grid = el('div', 'lb-warts');
@@ -993,7 +993,7 @@
         return wrap;
       }
       function renderAddons() {
-        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Add-ons <span class="lb-cfg-opt">(optional)</span></h3>';
+        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-addons');
         var hidden = 0;
         var groupDone = {};
@@ -1023,7 +1023,7 @@
         if (hidden > 0 || addonsExpanded) {
           var more = el('button', 'lb-addon-more');
           more.type = 'button';
-          more.textContent = addonsExpanded ? 'Weniger Add-ons anzeigen' : 'Alle Add-ons anzeigen (+' + hidden + ')';
+          more.textContent = addonsExpanded ? 'Weniger Extras anzeigen' : 'Alle Extras anzeigen (+' + hidden + ')';
           more.addEventListener('click', function () { addonsExpanded = !addonsExpanded; renderAddons(); });
           addSec.appendChild(more);
         }
@@ -1036,7 +1036,7 @@
           return '<li><span class="lb-pay-pct">' + s.pct + '&nbsp;%</span><span class="lb-pay-when">' + s.when + '</span></li>';
         }).join('');
         paySec.innerHTML =
-          '<h3 class="lb-cfg-h">Zahlung in Meilensteinen <span class="lb-cfg-opt">(Übersicht, keine Zahlung)</span></h3>' +
+          '<h3 class="lb-cfg-h">Zahlung in Schritten <span class="lb-cfg-opt">(Übersicht, keine Zahlung)</span></h3>' +
           '<ol class="lb-pay-steps">' + steps + '</ol>' +
           '<p class="lb-pay-guarantee">🛡️ ' + PAY.guarantee + '</p>';
       }
@@ -1091,7 +1091,7 @@
         e.preventDefault(); sync();
         var problems = [];
         if (!A.kontakt.name) problems.push('Bitte gib deinen Namen an.');
-        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(A.kontakt.email)) problems.push('Bitte gib eine gültige E-Mail an.');
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(A.kontakt.email)) problems.push('Bitte gib eine gültige E-Mail-Adresse ein (z. B. name@firma.de).');
         if (!A.kontakt.dsgvo) problems.push('Bitte bestätige die Datenschutzerklärung.');
         if (problems.length) { err.hidden = false; err.textContent = problems[0]; return; }
         err.hidden = true; submitBriefing();
@@ -1255,8 +1255,8 @@
       rows.push({ k: 'Paket', v: p.name + ' · ' + priceLabel(p.price, { from: p.from }), screen: 'configurator' });
       var inc = p.includedPages || 0, tot = inc + (A.extraPages || 0);
       rows.push({ k: 'Seiten', v: tot + ' (' + inc + ' inkl.' + ((A.extraPages || 0) > 0 ? ' + ' + A.extraPages + ' extra' : '') + ')', screen: 'configurator' });
-      rows.push({ k: 'Hosting & Wartung', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (Pflicht)', screen: 'configurator' });
-      rows.push({ k: 'Add-ons', v: selectedAddonsText() || 'keine', screen: 'configurator' });
+      rows.push({ k: 'Hosting & Pflege', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (Pflicht)', screen: 'configurator' });
+      rows.push({ k: 'Extras', v: selectedAddonsText() || 'keine', screen: 'configurator' });
       rows.push({ k: 'Einmalig', v: fmtEUR(t.once) + ' netto', screen: null });
       rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto (Pflicht)', screen: null });
     }
