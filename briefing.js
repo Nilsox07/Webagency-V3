@@ -185,23 +185,7 @@
     return wrap;
   }
 
-  function fileField(labelText, key, conf) {
-    conf = conf || {};
-    var lbl = el('label', 'lb-field lb-upload');
-    var head = '<span class="lb-field-label">' + labelText + ' <em>(optional)</em></span>';
-    if (conf.hint) head += '<span class="lb-upload-hint">' + conf.hint + '</span>';
-    lbl.innerHTML = head;
-    var inp = el('input'); inp.type = 'file'; if (conf.multiple) inp.multiple = true;
-    var chosen = el('span', 'lb-upload-files');
-    var existing = A.uploads[key] || [];
-    if (existing.length) chosen.textContent = existing.map(function (f) { return f.name; }).join(', ');
-    inp.addEventListener('change', function (e) {
-      A.uploads[key] = Array.prototype.map.call(e.target.files, function (f) { return { name: f.name, size: f.size, type: f.type }; });
-      chosen.textContent = A.uploads[key].map(function (f) { return f.name; }).join(', ');
-    });
-    lbl.appendChild(inp); lbl.appendChild(chosen);
-    return lbl;
-  }
+  // (Datei-Uploads bewusst entfernt, bis Storage existiert — siehe Material-Schritt.)
 
   /* ============================================================
      NAVIGATION (namensbasiert + History-Stack für Verzweigung)
