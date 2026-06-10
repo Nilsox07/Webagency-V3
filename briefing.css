@@ -680,23 +680,15 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 .cmock-cap { font-size: 12.5px; font-weight: 600; color: var(--text-light); margin-bottom: 8px; }
 .cmock-cap span { font-weight: 400; color: var(--text-light-muted); }
 
-/* Brauser-Rahmen mit heller Beispielseite */
+/* Browser-Rahmen mit heller Beispielseite */
 .cmock-browser {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.6);
-  max-width: 460px;
+  background: #ffffff; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px;
+  overflow: hidden; box-shadow: 0 18px 40px -24px rgba(0,0,0,0.6); max-width: 460px;
 }
-.cmock-bar {
-  display: flex; align-items: center; gap: 6px;
-  padding: 9px 12px; background: #eef2f6; border-bottom: 1px solid #e2e8f0;
-}
+.cmock-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: #eef2f6; border-bottom: 1px solid #e2e8f0; }
 .cmock-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
 .cmock-url { flex: 1; height: 8px; border-radius: 5px; background: #e2e8f0; margin-left: 6px; }
-
-.cmock-page { padding: 14px; background: #ffffff; }
+.cmock-page { padding: 16px; background: #ffffff; }
 
 /* Kopfzeile */
 .cmock-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -704,111 +696,103 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 .cmock-navlinks { display: flex; gap: 7px; }
 .cmock-navlinks i { width: 18px; height: 6px; border-radius: 3px; background: var(--cmock-neutral); display: block; }
 
-/* Hero */
+/* Hero — mit ECHTEM Text (Headline in Hauptfarbe, CTA in Akzentfarbe) */
 .cmock-hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px; align-items: center; margin-bottom: 14px; }
-.cmock-copy { display: flex; flex-direction: column; gap: 8px; }
-.cmock-title { height: 14px; width: 72%; border-radius: 5px; background: var(--haupt); }
-.cmock-line { height: 8px; width: 100%; border-radius: 4px; background: var(--cmock-neutral); }
+.cmock-copy { display: flex; flex-direction: column; gap: 9px; align-items: flex-start; }
+.cmock-title {
+  font-size: 14px; font-weight: 800; line-height: 1.15; color: var(--haupt);
+  width: 100%; letter-spacing: -0.01em;
+}
+.cmock-line { height: 7px; width: 100%; border-radius: 4px; background: var(--cmock-neutral); }
 .cmock-line.cmock-short { width: 58%; }
-.cmock-btn { margin-top: 4px; width: 88px; height: 26px; border-radius: 8px; background: var(--neben); }
-.cmock-media { min-height: 84px; border-radius: 10px; background: linear-gradient(135deg, var(--haupt), var(--neben)); }
+.cmock-btn {
+  display: inline-flex; align-items: center; justify-content: center; align-self: flex-start;
+  padding: 8px 15px; border-radius: 8px; background: var(--neben);
+  color: #ffffff; font-size: 11.5px; font-weight: 700; white-space: nowrap; line-height: 1;
+}
+.cmock-media { min-height: 92px; border-radius: 10px; background: linear-gradient(135deg, var(--haupt), var(--neben)); }
 
-/* Karten */
+/* Karten + Footer */
 .cmock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .cmock-card { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--cmock-neutral); border-radius: 10px; }
-.cmock-ico { width: 18px; height: 18px; border-radius: 6px; background: var(--haupt); }
+.cmock-ico { width: 18px; height: 18px; border-radius: 6px; background: var(--neben); }
 .cmock-cl { height: 6px; width: 100%; border-radius: 3px; background: var(--cmock-neutral); }
 .cmock-cl.cmock-short { width: 60%; }
+.cmock-foot { margin-top: 12px; height: 16px; border-radius: 6px; background: #eef2f6; }
 
-/* Sanfte Farbüberblendung */
-.cmock-logo, .cmock-title, .cmock-ico, .cmock-btn, .cmock-media { transition: background .25s ease; }
+/* Sanfte Überblendung */
+.cmock-logo, .cmock-title, .cmock-ico, .cmock-btn, .cmock-media { transition: background .25s ease, color .25s ease; }
 
-/* Sehr helle Farben → dezenter 1px-Rahmen, damit sie nicht verschwinden */
+/* KONTRAST-AUTOMATIK: helle Farbe (Luminanz > 0.6) → dunkler Text statt weiß */
+.cmock.is-haupt-light .cmock-title { color: #16233f; }
+.cmock.is-neben-light .cmock-btn { color: #16233f; }
 .cmock.is-haupt-light .cmock-logo,
-.cmock.is-haupt-light .cmock-title,
-.cmock.is-haupt-light .cmock-ico { box-shadow: inset 0 0 0 1px #cbd5e1; }
-.cmock.is-neben-light .cmock-btn { box-shadow: inset 0 0 0 1px #cbd5e1; }
-.cmock.is-haupt-light .cmock-media,
-.cmock.is-neben-light .cmock-media { box-shadow: inset 0 0 0 1px #cbd5e1; }
+.cmock.is-haupt-light .cmock-ico,
+.cmock.is-neben-light .cmock-btn { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12); }
+.cmock.is-haupt-light .cmock-media, .cmock.is-neben-light .cmock-media { box-shadow: inset 0 0 0 1px #cbd5e1; }
 
-/* ---- Stil-Layout-Anpassung: auf den ersten Blick klar unterscheidbar ----
-   Bleibt bewusst abstrakt: nur wenige farbige Elemente
-   (Logo/Titel/Icon = Hauptfarbe, Button = Nebenfarbe, Media = Verlauf),
-   Rest neutralgrau. Verändert werden Weißraum, Proportionen, Rundungen. */
-
-/* Minimalistisch & clean: viel Weißraum, dünne Linien, KEIN Verlauf, kleiner schmaler Button */
-.cmock[data-stil="minimal"] .cmock-page { padding: 26px; }
+/* ---- Stil-Charakter: deutlich unterscheidbar (Weißraum, Schrift, Form, CTA) ---- */
+/* Minimalistisch: viel Weißraum, schlanke Schrift, flacher kleiner CTA */
+.cmock[data-stil="minimal"] .cmock-page { padding: 28px; }
 .cmock[data-stil="minimal"] .cmock-hero { gap: 24px; }
-.cmock[data-stil="minimal"] .cmock-title { height: 9px; width: 50%; }
+.cmock[data-stil="minimal"] .cmock-title { font-size: 12px; font-weight: 600; letter-spacing: 0.01em; }
 .cmock[data-stil="minimal"] .cmock-line { height: 5px; }
-.cmock[data-stil="minimal"] .cmock-btn { width: 52px; height: 18px; border-radius: 4px; }
-.cmock[data-stil="minimal"] .cmock-media { background: #eef2f6; min-height: 66px; } /* flach, kein Verlauf */
-.cmock[data-stil="minimal"] .cmock-navlinks i { height: 4px; }
+.cmock[data-stil="minimal"] .cmock-btn { padding: 6px 11px; font-size: 10px; font-weight: 600; border-radius: 4px; }
+.cmock[data-stil="minimal"] .cmock-media { background: #eef2f6; min-height: 70px; }
 .cmock[data-stil="minimal"] .cmock-cards { gap: 18px; }
-.cmock[data-stil="minimal"] .cmock-card { border-color: #eef2f6; padding: 12px; }
-.cmock[data-stil="minimal"] .cmock-ico { width: 14px; height: 14px; }
+.cmock[data-stil="minimal"] .cmock-card { border-color: #eef2f6; }
 
-/* Bold & modern: große fette Titel-Linie, dicke Elemente, großer Button, starker Verlauf */
-.cmock[data-stil="bold"] .cmock-page { padding: 12px; }
-.cmock[data-stil="bold"] .cmock-title { height: 28px; width: 90%; border-radius: 6px; }
-.cmock[data-stil="bold"] .cmock-line { height: 11px; }
-.cmock[data-stil="bold"] .cmock-btn { width: 124px; height: 36px; border-radius: 8px; }
-.cmock[data-stil="bold"] .cmock-media { min-height: 108px; }
-.cmock[data-stil="bold"] .cmock-logo { width: 58px; height: 18px; }
-.cmock[data-stil="bold"] .cmock-navlinks i { height: 8px; width: 22px; }
-.cmock[data-stil="bold"] .cmock-ico { width: 26px; height: 26px; }
+/* Bold & modern: große, fette VERSAL-Headline, eckiger großer CTA */
+.cmock[data-stil="bold"] .cmock-page { padding: 14px; }
+.cmock[data-stil="bold"] .cmock-title { font-size: 19px; font-weight: 900; text-transform: uppercase; line-height: 1.05; }
+.cmock[data-stil="bold"] .cmock-btn { padding: 11px 20px; font-size: 12.5px; font-weight: 800; border-radius: 3px; }
+.cmock[data-stil="bold"] .cmock-media { min-height: 112px; }
+.cmock[data-stil="bold"] .cmock-ico { width: 24px; height: 24px; }
 
-/* Elegant & edel: zentriert, schmale Spalten, feine Linien, kleinere/gedämpfte Media */
-.cmock[data-stil="elegant"] .cmock-page { padding: 24px 32px; }
+/* Elegant & edel: zentriert, Serifen-Headline, runde CTA-Pille */
+.cmock[data-stil="elegant"] .cmock-page { padding: 24px 30px; }
 .cmock[data-stil="elegant"] .cmock-hero { grid-template-columns: 1fr; }
-.cmock[data-stil="elegant"] .cmock-copy { align-items: center; gap: 11px; }
+.cmock[data-stil="elegant"] .cmock-copy { align-items: center; text-align: center; gap: 11px; }
 .cmock[data-stil="elegant"] .cmock-copy > * { margin-left: auto; margin-right: auto; }
-.cmock[data-stil="elegant"] .cmock-title { width: 44%; height: 8px; }
+.cmock[data-stil="elegant"] .cmock-title { font-family: Georgia, "Times New Roman", serif; font-weight: 600; font-size: 15px; letter-spacing: 0.01em; }
 .cmock[data-stil="elegant"] .cmock-line { height: 4px; }
-.cmock[data-stil="elegant"] .cmock-btn { width: 78px; height: 22px; border-radius: 2px; }
-.cmock[data-stil="elegant"] .cmock-media { min-height: 44px; opacity: .8; max-width: 60%; margin: 0 auto; }
-.cmock[data-stil="elegant"] .cmock-cards { gap: 16px; }
+.cmock[data-stil="elegant"] .cmock-btn { border-radius: 999px; padding: 8px 18px; font-weight: 600; }
+.cmock[data-stil="elegant"] .cmock-media { min-height: 56px; opacity: .85; max-width: 70%; margin: 0 auto; }
 
-/* Verspielt & bunt: sehr runde Ecken, großer bunter Verlaufsblock, runder großer Button */
+/* Verspielt & bunt: stark gerundet, leicht gedrehter Pillen-CTA */
 .cmock[data-stil="verspielt"] .cmock-browser,
 .cmock[data-stil="verspielt"] .cmock-media,
 .cmock[data-stil="verspielt"] .cmock-card { border-radius: 18px; }
-.cmock[data-stil="verspielt"] .cmock-media { min-height: 116px; }
-.cmock[data-stil="verspielt"] .cmock-btn { width: 66px; height: 34px; border-radius: 999px; } /* runder Pillen-Button */
+.cmock[data-stil="verspielt"] .cmock-media { min-height: 118px; }
+.cmock[data-stil="verspielt"] .cmock-btn { border-radius: 999px; padding: 9px 18px; transform: rotate(-2.5deg); }
 .cmock[data-stil="verspielt"] .cmock-logo { width: 30px; border-radius: 999px; }
 .cmock[data-stil="verspielt"] .cmock-ico { border-radius: 50%; }
-.cmock[data-stil="verspielt"] .cmock-title { border-radius: 999px; }
 
-/* Warm & natürlich: weiche/runde Formen, größere Abstände */
+/* Warm & natürlich: weiche, runde Formen, mehr Abstand */
 .cmock[data-stil="warm"] .cmock-browser,
 .cmock[data-stil="warm"] .cmock-media,
 .cmock[data-stil="warm"] .cmock-card,
 .cmock[data-stil="warm"] .cmock-btn { border-radius: 14px; }
-.cmock[data-stil="warm"] .cmock-page { padding: 20px; }
+.cmock[data-stil="warm"] .cmock-page { padding: 22px; }
 .cmock[data-stil="warm"] .cmock-hero { gap: 18px; }
 .cmock[data-stil="warm"] .cmock-copy { gap: 12px; }
-.cmock[data-stil="warm"] .cmock-cards { gap: 14px; }
 .cmock[data-stil="warm"] .cmock-ico { border-radius: 50%; }
-.cmock[data-stil="warm"] .cmock-media { min-height: 90px; }
+.cmock[data-stil="warm"] .cmock-media { min-height: 94px; }
 
-/* Corporate & seriös: strenges Raster, gerade Kanten, gleichmäßige Karten */
-.cmock[data-stil="corporate"] .cmock-browser { border-radius: 4px; }
+/* Corporate & seriös: strenge Kanten, klares Raster */
+.cmock[data-stil="corporate"] .cmock-browser,
 .cmock[data-stil="corporate"] .cmock-media,
 .cmock[data-stil="corporate"] .cmock-card,
 .cmock[data-stil="corporate"] .cmock-btn,
-.cmock[data-stil="corporate"] .cmock-logo,
-.cmock[data-stil="corporate"] .cmock-title,
-.cmock[data-stil="corporate"] .cmock-ico { border-radius: 2px; }
-.cmock[data-stil="corporate"] .cmock-page { padding: 14px; }
+.cmock[data-stil="corporate"] .cmock-logo { border-radius: 2px; }
+.cmock[data-stil="corporate"] .cmock-title { text-transform: uppercase; letter-spacing: 0.02em; font-size: 13px; }
 .cmock[data-stil="corporate"] .cmock-hero { gap: 12px; align-items: stretch; }
-.cmock[data-stil="corporate"] .cmock-btn { width: 96px; height: 24px; }
+.cmock[data-stil="corporate"] .cmock-btn { padding: 9px 16px; border-radius: 2px; }
 .cmock[data-stil="corporate"] .cmock-cards { gap: 8px; }
-.cmock[data-stil="corporate"] .cmock-card { border-color: #cbd5e1; padding: 10px; }
-.cmock[data-stil="corporate"] .cmock-media { min-height: 80px; }
+.cmock[data-stil="corporate"] .cmock-card { border-color: #cbd5e1; }
 
 /* Reduced motion */
-.cmock-reduce .cmock-logo, .cmock-reduce .cmock-title, .cmock-reduce .cmock-ico,
-.cmock-reduce .cmock-btn, .cmock-reduce .cmock-media { transition: none; }
+.cmock-reduce .cmock-title, .cmock-reduce .cmock-btn, .cmock-reduce .cmock-media { transition: none; }
 @media (prefers-reduced-motion: reduce) {
   .cmock-logo, .cmock-title, .cmock-ico, .cmock-btn, .cmock-media { transition: none; }
 }
@@ -852,4 +836,70 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   margin-top: 8px; padding: 11px 14px; border-radius: 12px;
   background: rgba(255,255,255,0.04); border: 1px dashed var(--border-dark);
   color: var(--text-light-muted); font-size: 13px; line-height: 1.5;
+}
+
+/* ============================================================
+   LUMI-UMBAU · Block 4 — benannte Farb-Presets + eigener Farbwähler
+   ============================================================ */
+.lb-colortiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: 8px; }
+.lb-colortile {
+  display: flex; align-items: center; gap: 9px; text-align: left;
+  font: inherit; padding: 9px 11px; min-height: 46px; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark); border-radius: 12px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.lb-colortile:hover { border-color: rgba(255,255,255,0.3); }
+.lb-colordot { width: 22px; height: 22px; border-radius: 7px; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18); }
+.lb-colormeta { display: flex; flex-direction: column; line-height: 1.18; min-width: 0; }
+.lb-colormeta strong { font-size: 13px; font-weight: 700; color: var(--text-light); }
+.lb-colormeta small { font-size: 11px; color: var(--text-light-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-colortile.is-on { border-color: var(--green); background: rgba(174,240,0,0.1); }
+.lb-colortile.is-on .lb-colormeta strong { color: var(--white); }
+.lb-colortile-custom { border-style: dashed; }
+/* „Eigene Farbe wählen" + Panel */
+.lb-colorcustom-toggle {
+  margin-top: 9px; background: none; border: 1px dashed var(--border-dark); color: var(--text-light);
+  border-radius: 10px; padding: 9px 14px; font: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; min-height: 44px;
+}
+.lb-colorcustom-toggle.is-open { border-style: solid; border-color: var(--green); }
+.lb-colorpanel { margin-top: 10px; padding: 13px; border: 1px solid var(--border-dark); border-radius: 12px; background: rgba(255,255,255,0.03); }
+.lb-colorpanel-sub { font-size: 12.5px; color: var(--text-light-muted); margin: 0 0 10px; line-height: 1.5; }
+.lb-colorpanel-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.lb-colorpicker { width: 54px; height: 44px; min-width: 44px; padding: 2px; border: 1px solid var(--border-dark); border-radius: 10px; background: none; cursor: pointer; }
+.lb-colorhex {
+  flex: 1; min-width: 120px; height: 44px; border-radius: 10px; border: 1.5px solid var(--border-dark);
+  background: rgba(255,255,255,0.05); color: var(--white); padding: 0 12px; font: inherit; font-size: 14px;
+}
+.lb-colorapply { min-height: 44px; padding: 0 16px; }
+.lb-colorhex-err { margin: 8px 0 0; font-size: 12px; color: #ff8a8a; }
+
+/* ============================================================
+   LUMI-UMBAU · Block 3.5 — Stil-Trio auf dem Empfehlungs-Screen
+   ============================================================ */
+.lb-trio-sec { margin: 4px 0 20px; }
+.lb-trio-h { font-size: 13.5px; font-weight: 600; color: var(--text-light); margin: 0 0 10px; }
+.lb-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.lb-trio-card {
+  position: relative; display: flex; flex-direction: column; gap: 6px; padding: 8px;
+  border: 1.5px solid var(--border-dark); border-radius: 14px; background: rgba(255,255,255,0.03); cursor: pointer;
+  transition: border-color .15s ease, transform .12s ease;
+}
+.lb-trio-card:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-1px); }
+.lb-trio-card.is-on { border-color: var(--green); background: rgba(174,240,0,0.08); }
+.lb-trio-card .cmock { margin: 0; }
+.lb-trio-card .cmock-cap { display: none; }
+.lb-trio-card .cmock-browser { max-width: 100%; box-shadow: none; }
+.lb-trio-tag { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--text-light-muted); }
+.lb-trio-card.is-on .lb-trio-tag { color: var(--green); }
+.lb-trio-name { font-size: 12px; font-weight: 700; color: var(--text-light); text-align: center; }
+@media (max-width: 620px) { .lb-trio { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   LUMI-UMBAU · Block 2 — Nutzer-Antwort als eigene Sprechblase (rechts)
+   ============================================================ */
+.lb-you { display: flex; justify-content: flex-end; margin: 2px 0 12px; }
+.lb-you-bubble {
+  background: rgba(174,240,0,0.14); border: 1px solid var(--green); color: var(--white);
+  border-radius: 14px 14px 4px 14px; padding: 9px 14px; font-size: 14px; font-weight: 600; max-width: 82%;
 }

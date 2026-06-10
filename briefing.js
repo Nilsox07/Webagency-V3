@@ -229,6 +229,7 @@
 
   var current = null;
   var history = [];
+  var pendingYou = null; // letzte Nutzer-Antwort → erscheint oben als eigene Sprechblase (Chat-Gefühl)
 
   function renderScreen(name) {
     var sc = screens[name];
@@ -237,6 +238,12 @@
     updateProgress(sc.step);
     showPriceBar(false);          // Standard aus; Konfigurator schaltet selbst ein
     clearStage();
+    if (pendingYou) {
+      var yrow = el('div', 'lb-you');
+      yrow.appendChild(el('div', 'lb-you-bubble', pendingYou));
+      stage.appendChild(yrow);
+      pendingYou = null;
+    }
     var focusTarget = sc.render();
     if (!REDUCE) {
       // sanftes Einblenden des neuen Schritt-Inhalts (Opacity + leichter Versatz)
@@ -305,9 +312,9 @@
           '<div class="lb-sum"><span>Einmalig</span><strong id="lbSumOnce">0 €</strong></div>' +
           '<div class="lb-sum lb-sum-mo"><span>Monatlich</span><strong id="lbSumMonthly">0 €</strong></div>' +
         '</div>' +
-        '<button type="button" class="btn btn-primary lb-pricebar-cta">Weiter</button>' +
+        '<button type="button" class="btn btn-primary lb-pricebar-cta">Angebot anfordern</button>' +
       '</div>' +
-      '<p class="lb-pricebar-note">Alle Preise netto zzgl. MwSt. · Festpreis – unverbindliche Übersicht</p>';
+      '<p class="lb-pricebar-note">Unverbindliche Anfrage — es entsteht kein Vertrag.</p>';
     document.body.appendChild(priceBar);
 
     var detail = priceBar.querySelector('#lbPriceDetail');
@@ -350,7 +357,7 @@
     var t = totals();
     sums.innerHTML =
       '<div class="lb-sum"><span>Einmalig</span><strong></strong></div>' +
-      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflege &amp; Speicherplatz</span><strong></strong></div>';
+      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Hosting &amp; Pflege</span><strong></strong></div>';
     sums.children[0].querySelector('strong').textContent = fmtEUR(t.once);
     sums.children[1].querySelector('strong').textContent = fmtEUR(t.monthly) + '/Mon.';
     if (priceDetailOpen) renderPriceDetail();
@@ -475,14 +482,14 @@
       a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">⚙️</span>' +
         '<span class="lb-path-title">Ja, ich stelle mir alles selbst zusammen</span>' +
         '<span class="lb-path-sub">Paket wählen, Extras dazu, Preis sofort sehen.</span>';
-      a.addEventListener('click', function () { A.pfad = 'A'; goTo('configurator'); });
+      a.addEventListener('click', function () { A.pfad = 'A'; pendingYou = 'Ich stelle mir alles selbst zusammen'; goTo('configurator'); });
 
       var b = el('button', 'lb-path-card');
       b.type = 'button';
       b.innerHTML = '<span class="lb-path-icon" aria-hidden="true">💬</span>' +
         '<span class="lb-path-title">Nein, hilf mir wählen</span>' +
-        '<span class="lb-path-sub">8 kurze Fragen — Lumi empfiehlt dir das passende Paket.</span>';
-      b.addEventListener('click', function () { A.pfad = 'B'; goTo('branche'); });
+        '<span class="lb-path-sub">5 kurze Fragen — Lumi empfiehlt dir das passende Paket.</span>';
+      b.addEventListener('click', function () { A.pfad = 'B'; pendingYou = 'Hilf mir wählen'; goTo('branche'); });
 
       wrap.appendChild(a); wrap.appendChild(b);
       stage.appendChild(wrap);
@@ -508,6 +515,8 @@
       }
       buildCards('branche', OPT.branche, { cls: 'lb-tiles', onPick: function (v) {
         renderSonst();
+        var bo = OPT.branche.filter(function (x) { return x.value === v; })[0];
+        if (bo && v !== 'sonstiges') pendingYou = (bo.icon ? bo.icon + ' ' : '') + bo.label;
         // Onlineshop-Weiche: ehrliche Zwischenfrage statt direktem Weiter
         if (v === 'shop') { autoAdvance(function () { goTo('shopGate'); }); return; }
         // Auto-Weiter bei jeder Branche AUSSER „Sonstiges" (dort erscheint ein Textfeld → bleiben)
@@ -555,7 +564,11 @@
         bc.setAttribute('aria-pressed', A.beratung_gewuenscht ? 'true' : 'false');
       });
       bwrap.appendChild(bc); stage.appendChild(bwrap);
-      actions({ onBack: back, onNext: advance, skip: advance });
+      actions({ onBack: back, skip: advance, onNext: function () {
+        var t = labelsFor('ziele', A.ziele).join(', ');
+        if (A.beratung_gewuenscht) t = (t ? t + ' · ' : '') + 'beraten lassen';
+        pendingYou = t; advance();
+      } });
       return h;
     }},
 
@@ -572,6 +585,7 @@
       }
       buildCards('umfang', OPT.umfang, { onPick: function (v) {
         renderSub();
+        pendingYou = labelFor('umfang', v);
         // Auto-Weiter NUR bei „One-Pager" (sonst erscheint die Seiten-Folgefrage → bleiben)
         if (v === 'onepager') autoAdvance();
       }});
@@ -596,9 +610,7 @@
       // direkt unter den Farbkacheln, damit Klick (Farbe) und Reaktion (Vorschau)
       // gemeinsam im Blick sind.
       var mock = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
-      function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
-      function stilFlavor() { return A.stil || 'default'; } // EIN gewählter Stil bestimmt das Layout
-      function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
+      function refreshMock() { if (mock) mock.update({ haupt: farbeHex(A.hauptfarbe), neben: farbeHex(A.nebenfarbe), stil: A.stil || 'default', headline: previewHeadline(), cta: previewCTA() }); }
 
       // (1) Stil-Moodboards — EINFACH-Auswahl (die Vorschau kann nur EINEN Stil zeigen)
       var moods = el('div', 'lb-moods');
@@ -633,23 +645,70 @@
         var wrap = el('div', 'lb-colorrow');
         wrap.appendChild(el('span', 'lb-colorrow-label', label));
         var tiles = el('div', 'lb-colortiles');
+        function clearActive() {
+          Array.prototype.forEach.call(tiles.querySelectorAll('.lb-colortile'), function (x) {
+            x.classList.remove('is-on'); x.setAttribute('aria-pressed', 'false');
+          });
+        }
+        // 12 benannte Presets (Name + Wirkung)
         OPT.farben.forEach(function (opt) {
           var b = el('button', 'lb-colortile'); b.type = 'button';
-          b.setAttribute('aria-label', label + ': ' + opt.label);
+          b.setAttribute('aria-label', label + ': ' + opt.label + ' — ' + opt.wirkung);
           b.setAttribute('aria-pressed', A[slot] === opt.value ? 'true' : 'false');
-          b.innerHTML = '<span class="lb-colordot" style="background:' + opt.hex + '"></span><small>' + opt.label + '</small>';
+          b.innerHTML = '<span class="lb-colordot" style="background:' + opt.hex + '"></span>' +
+            '<span class="lb-colormeta"><strong>' + opt.label + '</strong><small>' + opt.wirkung + '</small></span>';
           if (A[slot] === opt.value) b.classList.add('is-on');
           b.addEventListener('click', function () {
-            A[slot] = (A[slot] === opt.value) ? null : opt.value; // erneut klicken = abwählen
-            Array.prototype.forEach.call(tiles.querySelectorAll('.lb-colortile'), function (x) {
-              x.classList.remove('is-on'); x.setAttribute('aria-pressed', 'false');
-            });
-            if (A[slot] === opt.value) { b.classList.add('is-on'); b.setAttribute('aria-pressed', 'true'); }
-            refreshMock(); // Farb-Vorschau-Mockup live aktualisieren (optional, s. u.)
+            var pick = (A[slot] === opt.value) ? null : opt.value; // erneut klicken = abwählen
+            A[slot] = pick; clearActive();
+            if (pick) { b.classList.add('is-on'); b.setAttribute('aria-pressed', 'true'); }
+            refreshMock();
           });
           tiles.appendChild(b);
         });
+        // Kachel „Deine Farbe" (eigene HEX-Farbe) — nur sichtbar, wenn gesetzt
+        var customTile = el('button', 'lb-colortile lb-colortile-custom'); customTile.type = 'button'; customTile.hidden = true;
+        function showCustom(hex) {
+          customTile.hidden = false;
+          customTile.innerHTML = '<span class="lb-colordot" style="background:' + hex + '"></span>' +
+            '<span class="lb-colormeta"><strong>Deine Farbe</strong><small>' + hex + '</small></span>';
+        }
+        customTile.addEventListener('click', function () {
+          if (A[slot] && A[slot].charAt(0) === '#') { clearActive(); A[slot] = A[slot]; customTile.classList.add('is-on'); customTile.setAttribute('aria-pressed', 'true'); refreshMock(); }
+        });
+        if (A[slot] && A[slot].charAt(0) === '#') { showCustom(A[slot]); customTile.classList.add('is-on'); customTile.setAttribute('aria-pressed', 'true'); }
+        tiles.appendChild(customTile);
         wrap.appendChild(tiles);
+        // „Eigene Farbe wählen" → Panel mit Farbwähler (Drag) + HEX-Feld
+        var toggle = el('button', 'lb-colorcustom-toggle'); toggle.type = 'button'; toggle.textContent = 'Eigene Farbe wählen';
+        var panel = el('div', 'lb-colorpanel'); panel.hidden = true;
+        panel.innerHTML =
+          '<p class="lb-colorpanel-sub">Du hast eine feste Firmenfarbe? Trag sie hier ein. Die genaue Abstimmung machen wir gemeinsam im Design.</p>' +
+          '<div class="lb-colorpanel-row">' +
+            '<input type="color" class="lb-colorpicker" value="#2A5BD7" aria-label="Farbe ziehen" />' +
+            '<input type="text" class="lb-colorhex" placeholder="#2A5BD7" maxlength="7" inputmode="text" aria-label="HEX-Code" />' +
+            '<button type="button" class="btn btn-primary lb-colorapply">Übernehmen</button>' +
+          '</div>' +
+          '<p class="lb-colorhex-err" hidden>Bitte 6 Zeichen, z. B. #2A5BD7</p>';
+        toggle.addEventListener('click', function () { panel.hidden = !panel.hidden; toggle.classList.toggle('is-open', !panel.hidden); });
+        var picker = panel.querySelector('.lb-colorpicker');
+        var hexIn = panel.querySelector('.lb-colorhex');
+        var err = panel.querySelector('.lb-colorhex-err');
+        var apply = panel.querySelector('.lb-colorapply');
+        var valid = function (v) { return /^#?[0-9a-fA-F]{6}$/.test(v); };
+        picker.addEventListener('input', function () { hexIn.value = picker.value.toUpperCase(); err.hidden = true; });
+        hexIn.addEventListener('input', function () {
+          var v = hexIn.value.trim(); err.hidden = true;
+          if (valid(v)) { if (v.charAt(0) !== '#') v = '#' + v; picker.value = v; }
+        });
+        apply.addEventListener('click', function () {
+          var v = hexIn.value.trim() || picker.value;
+          if (!valid(v)) { err.hidden = false; return; }
+          if (v.charAt(0) !== '#') v = '#' + v; v = v.toUpperCase(); err.hidden = true;
+          A[slot] = v; clearActive(); showCustom(v); customTile.classList.add('is-on'); customTile.setAttribute('aria-pressed', 'true');
+          refreshMock(); panel.hidden = true; toggle.classList.remove('is-open');
+        });
+        wrap.appendChild(toggle); wrap.appendChild(panel);
         return wrap;
       }
 
@@ -703,7 +762,9 @@
       }
       buildChips('material', OPT.material, { exclusive: ['nichts'], onChange: renderUploads });
       stage.appendChild(uploads); renderUploads();
-      actions({ onBack: back, onNext: advance, skip: advance });
+      actions({ onBack: back, skip: advance, onNext: function () {
+        pendingYou = labelsFor('material', A.material).join(', '); advance();
+      } });
       return h;
     }},
 
@@ -760,6 +821,8 @@
       var backLink = el('button', 'lb-back', '‹ Zurück'); backLink.type = 'button';
       backLink.addEventListener('click', back); top.appendChild(backLink);
       stage.appendChild(top);
+      // Stil-Trio (Pfad B, kein Enterprise) — erfüllt das „2–3 Stil-Richtungen"-Versprechen
+      if (A.pfad === 'B' && !isEnterprise()) stage.appendChild(buildStilTrio());
 
       // Paket immer sichtbar (keine Sackgasse); restliche Sektionen je nach Modus
       var pkgSec = el('div', 'lb-cfg-section');
@@ -1251,6 +1314,56 @@
     var zphrase = z0 ? ' mit Ziel „' + z0 + '“' : '';
     return 'Für ' + bt + zphrase + ' passt ' + pkgById(A.paket_empfohlen).name + ' am besten.';
   }
+  // --- Live-Vorschau-Texte (feste Beispiele lt. Tabelle) ---
+  var PREVIEW_HEADLINE = {
+    handwerk: 'Meisterbetrieb mit Handschlagqualität', gastro: 'Ein Tisch, der auf dich wartet',
+    beratung: 'Klarheit für deinen nächsten Schritt', gesundheit: 'Gut aufgehoben — von Anfang an',
+    kreativ: 'Momente, die bleiben', dienstleistung: 'Schnell. Zuverlässig. Vor Ort.',
+    immobilien: 'Ihr Zuhause beginnt hier', shop: 'Produkte, die überzeugen'
+  };
+  function previewHeadline() { return PREVIEW_HEADLINE[A.branche] || 'Deine Website. Dein Auftritt.'; }
+  function previewCTA() {
+    var z0 = (A.ziele && A.ziele[0]) || '';
+    if (z0 === 'termine') return 'Termin buchen';
+    if (z0 === 'bewerber') return 'Jetzt bewerben';
+    return 'Jetzt anfragen';
+  }
+  function farbeHex(v) {
+    if (!v) return null;
+    if (v.charAt(0) === '#') return v; // eigene Farbe als HEX
+    var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0];
+    return o ? o.hex : null;
+  }
+  // Nachbar-Stile für das Stil-Trio
+  var STIL_NEIGHBORS = {
+    minimal: ['elegant', 'corporate'], elegant: ['minimal', 'warm'], bold: ['corporate', 'minimal'],
+    warm: ['verspielt', 'elegant'], verspielt: ['warm', 'bold'], corporate: ['bold', 'minimal']
+  };
+  function buildStilTrio() {
+    var sec = el('div', 'lb-trio-sec');
+    sec.appendChild(el('p', 'lb-trio-h', 'Drei Stil-Richtungen mit deinen Farben — klick dich durch:'));
+    var row = el('div', 'lb-trio');
+    function paint() {
+      row.textContent = '';
+      var chosen = A.stil;
+      var list = chosen ? [chosen].concat(STIL_NEIGHBORS[chosen] || []) : ['minimal', 'warm', 'bold'];
+      list.slice(0, 3).forEach(function (stil) {
+        var card = el('div', 'lb-trio-card');
+        var isChosen = chosen && stil === chosen;
+        if (isChosen) card.classList.add('is-on');
+        card.appendChild(el('span', 'lb-trio-tag', isChosen ? 'deine Wahl' : 'Alternative'));
+        var mk = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
+        if (mk) { card.appendChild(mk); mk.update({ haupt: farbeHex(A.hauptfarbe), neben: farbeHex(A.nebenfarbe), stil: stil, headline: previewHeadline(), cta: previewCTA() }); }
+        var o = (OPT.stil || []).filter(function (x) { return x.value === stil; })[0];
+        card.appendChild(el('span', 'lb-trio-name', o ? o.label : stil));
+        card.addEventListener('click', function () { A.stil = stil; paint(); });
+        row.appendChild(card);
+      });
+    }
+    paint();
+    sec.appendChild(row);
+    return sec;
+  }
 
   /* ============================================================
      ZUSAMMENFASSUNG / READ-BACK
@@ -1281,7 +1394,7 @@
     });
     return out.join(', ');
   }
-  function colorLabel(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.label : ''; }
+  function colorLabel(v) { if (!v) return ''; if (v.charAt(0) === '#') return 'Eigene Farbe ' + v; var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.label : ''; }
   function entLabel(group, value) { var o = (PRICING.enterpriseOptions[group] || []).filter(function (x) { return x.value === value; })[0]; return o ? o.label : value; }
   function summaryRows() {
     var ent = isEnterprise();
