@@ -675,6 +675,11 @@ a { text-decoration: none; color: inherit; }
   transition: .2s;
 }
 .footer-social a:hover { background: var(--green); color: #0a1200; }
+.footer-social .footer-social-soon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,.06); color: var(--text-light);
+  display: inline-flex; align-items: center; justify-content: center; opacity: .45;
+}
 
 /* ============ PRICING PAGE ============ */
 /* Page hero */
