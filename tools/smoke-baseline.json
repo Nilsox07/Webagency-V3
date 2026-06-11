@@ -1,0 +1,17 @@
+[
+  {
+    "check": "a",
+    "name": "admin.html: h1==1",
+    "msg": "gefunden: 0"
+  },
+  {
+    "check": "c",
+    "name": "leistung-wartung.html: anker /preise#wartung",
+    "msg": "id=\"wartung\" fehlt in preise.html"
+  },
+  {
+    "check": "c",
+    "name": "leistung-wartung.html: anker /preise#wartung",
+    "msg": "id=\"wartung\" fehlt in preise.html"
+  }
+]
