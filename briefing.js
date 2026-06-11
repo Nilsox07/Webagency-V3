@@ -1078,36 +1078,6 @@
       }
       // Varianten-Gruppe (z. B. SEO-Betreuung Lite/Pro/Premium): Karten NEBENEINANDER
       // wie bei Paket & Wartung — genau EINE Variante wählbar, erneut klicken = abwählen.
-      function buildTierGroup(groupId, members) {
-        var meta = (PRICING.addonGroups || {})[groupId] || {};
-        var wrap = el('div', 'lb-tiergroup');
-        wrap.innerHTML =
-          '<div class="lb-tiergroup-h"><span class="lb-tiergroup-name">' + (meta.label || groupId) + '</span>' +
-          '<span class="lb-tiergroup-hint">' + (meta.hint || 'eine Variante wählen') + '</span></div>';
-        var grid = el('div', 'lb-tiers');
-        members.forEach(function (a) {
-          var st = A.addons[a.id];
-          var b = el('button', 'lb-tier'); b.type = 'button';
-          b.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
-          b.innerHTML =
-            '<span class="lb-tier-name">' + (a.short || a.name) + '</span>' +
-            '<span class="lb-tier-price">' + addonPriceText(a) + (a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '') + '</span>' +
-            (a.desc ? '<span class="lb-tier-desc">' + a.desc + '</span>' : '');
-          if (st.selected) b.classList.add('is-on');
-          b.addEventListener('click', function () {
-            var wasSelected = st.selected;
-            members.forEach(function (o) { A.addons[o.id].selected = false; });
-            st.selected = !wasSelected;   // erneut klicken = abwählen, sonst exklusiv wählen
-            renderAddons(); renderPriceBar();
-          });
-          grid.appendChild(b);
-        });
-        wrap.appendChild(grid);
-        // Mengen-Stepper der gewählten Variante (z. B. Einzelseite × N)
-        var withQty = members.filter(function (o) { return o.qty && A.addons[o.id].selected; })[0];
-        if (withQty) wrap.appendChild(buildQtyRow(withQty, A.addons[withQty.id]));
-        return wrap;
-      }
       // Kuratierte Extras-Welt (Nachtrag Block 2): genau 4 sichtbar + 1 ausklappbar.
       // Texte/Umzug/Statistik sind in alle Pakete gewandert; SEO-Betreuung nur auf
       // /leistung-seo. Payload-Keys aller übrigen Add-ons bleiben technisch erhalten.
