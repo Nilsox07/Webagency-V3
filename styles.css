@@ -526,32 +526,12 @@ a { text-decoration: none; color: inherit; }
   max-width: 420px;
   margin-bottom: 30px;
 }
-.cta-feature { display: flex; gap: 16px; }
-.cta-icon {
-  flex-shrink: 0;
-  width: 44px; height: 44px;
-  border-radius: 12px;
-  background: rgba(174, 240, 0, 0.12);
-  color: var(--green);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.cta-feature h3, .cta-feature h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.cta-feature p { font-size: 14px; color: var(--text-light-muted); }
 
 /* ============ FOOTER ============ */
 .site-footer {
   background: var(--bg-dark-2);
   border-top: 1px solid var(--border-dark);
   padding: 28px 0;
-}
-.footer-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
 }
 .footer-nav { display: flex; flex-wrap: wrap; gap: 14px 28px; max-width: 100%; }
 .footer-nav a {
@@ -784,26 +764,6 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* Notes block */
-.pricing-notes {
-  margin-top: 26px;
-  display: grid;
-  gap: 10px;
-}
-.pricing-notes li {
-  list-style: none;
-  position: relative;
-  padding-left: 22px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-.pricing-notes li::before {
-  content: "";
-  position: absolute;
-  left: 4px; top: 8px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green-strong);
-}
 
 /* Callout (BFSG hint) */
 .callout {
@@ -830,15 +790,8 @@ a { text-decoration: none; color: inherit; }
 .callout p { font-size: 14px; color: var(--text-muted); }
 .callout-guarantee { border-left-color: var(--green); background: linear-gradient(180deg, #ffffff, #fafdf0); }
 /* Klickbare Callout-Variante (Verweis-Box) */
-.callout-link { text-decoration: none; color: inherit; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; margin-top: 0; margin-bottom: 30px; }
-.callout-link:hover { transform: translateY(-2px); border-left-color: var(--green); box-shadow: 0 20px 40px -28px rgba(13, 19, 32, 0.4); }
-.callout-link h4 { color: var(--text-dark); }
-.callout-link p { color: var(--text-muted); }
 /* Dezenter Förder-Hinweis unter den Paketen (Preise-Seite) */
-.foerder-hint-section { background: var(--bg-light); padding: 0 0 80px; }
 .foerder-hint-section .callout { margin-top: 0; }
-.foerder-hint-section a { color: var(--green-strong); font-weight: 600; }
-.foerder-hint-section a:hover { text-decoration: underline; }
 
 /* ---------- Zahlung in Meilensteinen ---------- */
 .pay-grid {
@@ -859,17 +812,7 @@ a { text-decoration: none; color: inherit; }
   border-color: var(--green);
   box-shadow: 0 24px 50px -24px rgba(174, 240, 0, 0.45);
 }
-.pay-badge {
-  position: absolute;
-  top: -12px; left: 24px;
-  background: var(--green);
-  color: #0a1200;
-  font-size: 11.5px; font-weight: 800;
-  letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 5px 12px; border-radius: 999px;
-}
 .pay-name { font-size: 18px; font-weight: 800; color: var(--text-dark); }
-.pay-sum { font-size: 15px; font-weight: 600; color: var(--text-muted); margin-bottom: 18px; }
 .pay-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 .pay-steps li {
   display: flex;
@@ -889,32 +832,14 @@ a { text-decoration: none; color: inherit; }
 }
 .pay-card.featured .pay-pct { color: var(--green-strong); }
 .pay-when { font-size: 14px; font-weight: 600; color: var(--text-muted); }
-.pay-alt { margin-top: 16px; font-size: 13.5px; color: var(--text-muted); }
-.pay-alt strong { color: var(--text-dark); }
-.pay-note { margin-top: 22px; font-size: 13px; color: var(--text-muted); text-align: center; }
 
 @media (max-width: 900px) {
   .pay-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
 }
 
 /* Two-column add-on tables */
-.addon-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 26px;
-  align-items: start;
-}
 /* Grid-Items dürfen unter ihre Inhalts-Min-Breite schrumpfen, damit die
    Preistabelle innerhalb von .price-table-wrap scrollt statt die Seite zu sprengen. */
-.addon-block { min-width: 0; }
-.addon-block h3 {
-  font-size: 18px;
-  font-weight: 800;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 .addon-block h3 .tag {
   font-size: 11px;
   font-weight: 700;
@@ -927,32 +852,6 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* Excluded list */
-.exclude-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
-.exclude-card {
-  background: var(--white);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius);
-  padding: 22px 22px;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-.exclude-icon {
-  flex-shrink: 0;
-  width: 34px; height: 34px;
-  border-radius: 9px;
-  background: rgba(13, 19, 32, 0.05);
-  color: var(--text-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.exclude-card p { font-size: 14px; color: var(--text-muted); }
-.exclude-card strong { color: var(--text-dark); font-weight: 700; }
 
 /* ============ JOURNEY / ABLAUF ============ */
 .journey {
@@ -1177,22 +1076,6 @@ a { text-decoration: none; color: inherit; }
   background: var(--green);
   border-radius: 999px;
   transition: width .4s ease;
-}
-
-.lumi-chat {
-  padding: 24px 20px;
-  height: 420px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  scroll-behavior: smooth;
-}
-.lumi-msg {
-  display: flex;
-  gap: 10px;
-  max-width: 86%;
-  animation: lumiIn .3s ease;
 }
 @keyframes lumiIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .lumi-msg .bubble {
