@@ -821,3 +821,38 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   .cmock-cards { gap: 8px; }
   .cmock-card { padding: 8px; }
 }
+
+/* ============================================================
+   DESKTOP-STICKY LIVE-VORSCHAU (Schritt 5 · Design)
+   ------------------------------------------------------------
+   Mobil/Tablet (< 900px): .lb-design-grid ist ein normaler Block,
+   die Vorschau steht inline unter den Farben (Bestand, unverändert).
+   Desktop (>= 900px): zweispaltig — Bedienelemente links, die
+   Live-Vorschau rechts und „klebend" (position: sticky), damit sie
+   beim Scrollen durch Stile/Farben sichtbar bleibt.
+   Greift nur mit .has-preview (gesetzt, wenn das optionale
+   color-mockup.js geladen ist) — sonst bleibt alles einspaltig.
+   ============================================================ */
+@media (min-width: 900px) {
+  /* etwas breitere Karte nur für diesen Schritt, damit zwei Spalten Luft haben */
+  .lumi-card--wide { max-width: 1000px; }
+
+  .lb-design-grid.has-preview {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 36%, 420px);
+    column-gap: 32px;
+    align-items: start;
+  }
+  /* alle Bedienelemente in die linke Spalte (Quellreihenfolge bleibt) */
+  .lb-design-grid.has-preview > * { grid-column: 1; min-width: 0; }
+  /* Vorschau: rechte Spalte, über die volle Höhe, sichtbar mitklebend */
+  .lb-design-grid.has-preview > .cmock {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    align-self: start;
+    position: sticky;
+    top: 90px;           /* unter dem sticky Header (74px) + etwas Luft */
+    margin: 0;
+  }
+  .lb-design-grid.has-preview > .cmock .cmock-browser { max-width: 100%; }
+}

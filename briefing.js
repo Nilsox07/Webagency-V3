@@ -233,6 +233,9 @@
     updateProgress(sc.step);
     showPriceBar(false);          // Standard aus; Konfigurator schaltet selbst ein
     clearStage();
+    // Breitere Karte nur für den Design-Schritt (zweispaltige Live-Vorschau am Desktop)
+    var lumiCard = document.querySelector('.lumi-card');
+    if (lumiCard) lumiCard.classList.toggle('lumi-card--wide', name === 'design');
     var focusTarget = sc.render();
     if (!REDUCE) {
       // sanftes Einblenden des neuen Schritt-Inhalts (Opacity + leichter Versatz)
@@ -560,15 +563,21 @@
 
     /* ---------- Pfad B · 5 · Design (Stil + Farbe + HEX) ---------- */
     design: { step: 5, render: function () {
-      var h = lumiSays('Welcher Look gefällt dir?', 'Wähle einen Stil — er bestimmt die Vorschau unten.');
+      var h = lumiSays('Welcher Look gefällt dir?', 'Wähle einen Stil — er bestimmt die Live-Vorschau.');
 
-      // Mockup + Helfer früh anlegen (gehoistet); angehängt wird es WEITER UNTEN,
-      // direkt unter den Farbkacheln, damit Klick (Farbe) und Reaktion (Vorschau)
-      // gemeinsam im Blick sind.
+      // Mockup + Helfer früh anlegen (gehoistet); angehängt wird es WEITER UNTEN
+      // ins Design-Grid (mobil unter den Farbkacheln, am Desktop klebend daneben),
+      // damit Klick (Farbe) und Reaktion (Vorschau) gemeinsam im Blick sind.
       var mock = window.SARTU_COLOR_MOCKUP ? window.SARTU_COLOR_MOCKUP.build() : null;
       function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
       function stilFlavor() { return A.stil || 'default'; } // EIN gewählter Stil bestimmt das Layout
       function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
+
+      // Zweispaltiges Layout (nur Desktop, via CSS): Bedienelemente links, Vorschau rechts klebend.
+      // Mobil bleibt das ein normaler Block → Reihenfolge wie bisher (Vorschau inline unter den Farben).
+      // has-preview nur, wenn das optionale Mockup existiert (sonst einspaltig).
+      var dgrid = el('div', 'lb-design-grid');
+      if (mock) dgrid.classList.add('has-preview');
 
       // (1) Stil-Moodboards — EINFACH-Auswahl (die Vorschau kann nur EINEN Stil zeigen)
       var moods = el('div', 'lb-moods');
@@ -593,10 +602,10 @@
         moodBtns[opt.value] = b;
         moods.appendChild(b);
       });
-      stage.appendChild(moods);
+      dgrid.appendChild(moods);
 
-      // (2) Unterfrage Farben
-      subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.');
+      // (2) Unterfrage Farben (subQuestion hängt an stage an → in dgrid umhängen)
+      dgrid.appendChild(subQuestion('Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.'));
 
       // Farbe: NUR zwei Farben — Hauptfarbe + Nebenfarbe (laienverständlich, kein Regler)
       function colorRow(label, slot) {
@@ -624,14 +633,14 @@
       }
 
       // (3) Farbkacheln Haupt- + Nebenfarbe
-      stage.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
-      stage.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
+      dgrid.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
+      dgrid.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
 
       // (4) DANN die Vorschau — direkt unter den Farben (Aktion & Reaktion zusammen)
       // === Farb-Vorschau-Mockup – optional, entfernbar (siehe color-mockup.js) ===
       // Entfernen genügt: <script src="color-mockup.js"> aus briefing.html nehmen.
       // Dieser Block prüft auf window.SARTU_COLOR_MOCKUP und überspringt sich sonst.
-      if (mock) { stage.appendChild(mock); refreshMock(); }
+      if (mock) { dgrid.appendChild(mock); refreshMock(); }
       // === Ende Farb-Vorschau-Mockup ===
 
       // (5) optionales Markenfarben-Feld (kein Pflichtfeld, kein HEX-Zwang)
@@ -640,12 +649,13 @@
       var inp = el('input'); inp.type = 'text'; inp.placeholder = 'z. B. #B6FF3B';
       inp.value = A.markenfarben_hex || '';
       inp.addEventListener('input', function (e) { A.markenfarben_hex = e.target.value; });
-      lbl.appendChild(inp); stage.appendChild(lbl);
+      lbl.appendChild(inp); dgrid.appendChild(lbl);
 
       // (6) dezenter Realitäts-Hinweis (kein Baukasten)
-      stage.appendChild(el('p', 'lb-design-note',
+      dgrid.appendChild(el('p', 'lb-design-note',
         'Das ist nur eine grobe Richtung zur Veranschaulichung — den Feinschliff und die genauen Farbtöne machen wir gemeinsam nach dem Start. Alles wird handgemacht, kein Baukasten.'));
 
+      stage.appendChild(dgrid);
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
