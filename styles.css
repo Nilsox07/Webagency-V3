@@ -2327,3 +2327,15 @@ body:has(.cookie-banner.is-visible) .fab { bottom: 110px; }
 @media (max-width: 560px) {
   .extra-grid, .extras-more .extra-grid { grid-template-columns: 1fr; }
 }
+
+/* Nachtrag: Extras-Welt 4 sichtbar + „Nur Design"-Zeile */
+.extra-grid.extra-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.design-only-line {
+  margin-top: 26px; text-align: center; font-size: 15px; color: var(--text-muted);
+  background: var(--white); border: 1px dashed var(--border-light);
+  border-radius: var(--radius); padding: 16px 20px; max-width: 760px; margin-left: auto; margin-right: auto;
+}
+.design-only-line strong { color: var(--text-dark); }
+.design-only-line a { font-weight: 700; color: var(--green-strong); white-space: nowrap; }
+@media (max-width: 900px) { .extra-grid.extra-grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .extra-grid.extra-grid-4 { grid-template-columns: 1fr; } }

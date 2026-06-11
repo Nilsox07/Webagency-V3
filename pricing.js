@@ -68,6 +68,21 @@
     maintenanceOrder: ['care-s', 'care-m', 'care-l'],
     mandatoryNote: 'Hosting & Pflege (Sartu Care) ist bei jeder Website Pflicht. Preise bei Jahreszahlung.',
 
+    /* ---- Stundensatz für Arbeiten über die Inklusiv-Kontingente hinaus ----
+       Wortlaut überall identisch. Minutengenau im 5-Minuten-Takt — keine
+       Viertelstunden- oder Stunden-Aufrundung. */
+    hourlyRate: 150,
+    hourlyRateNote: '150 €/Std — minutengenau im 5-Minuten-Takt abgerechnet. Ab 30 Minuten geschätztem Umfang bekommst du vorher eine Kostenschätzung.',
+
+    /* ---- „Nur das Design" — ohne Paket kaufbar (Code-Lieferung, kein Betrieb) ----
+       Preise zentral hier; nirgends hart codieren. */
+    designProducts: [
+      { id: 'design-onepager', name: 'Onepager-Design', price: 990,
+        scope: '1 Seite', desc: 'Fertiges Website-Design für eine Seite, geliefert als sauberer HTML/CSS-Code zum Selbst-Verwenden.' },
+      { id: 'design-mehrseiten', name: 'Mehrseiten-Design', price: 1990,
+        scope: 'bis 8 Seitentypen', desc: 'Design-System bis 8 Seitentypen (Startseite + Unterseiten-Layouts), geliefert als HTML/CSS.' },
+    ],
+
     /* ---- Add-ons / Funktionen (aus der Leistungsbeschreibung) ----
        group  = Varianten-Gruppe: wird im Konfigurator als Karten NEBENEINANDER
                 gerendert (wie Pakete/Wartung), nur EINE Variante gleichzeitig wählbar.
@@ -101,17 +116,17 @@
         desc: 'FAQ-Bot (EU/DSGVO) auf bis 20 Dokumente trainiert. 490 € Einrichtung + 49 €/Monat Betrieb (ca. 500 Gespräche/Mon. inkl.).' },
       { id: 'newsletter',   name: 'Newsletter-Anbindung', price: 290, type: 'once',
         desc: 'Anmeldeformular mit Double-Opt-In (DOI), Anbindung an dein Newsletter-Tool (EU/DSGVO).' },
-      { id: 'analytics',    name: 'Analytics-/Tracking-Setup', price: 190, type: 'once',
+      { id: 'analytics',    name: 'Analytics-/Tracking-Setup', price: 190, type: 'once', hidden: true,
         desc: 'GA4 oder Matomo (1 Property) + Search Console, Consent Mode v2, bis 3 Conversions/Events. DSGVO-konform an Cookie-Consent gekoppelt.' },
       { id: 'social-feed',  name: 'Bewertungs-/Social-Feed', price: 90, type: 'once', from: true,
         desc: 'Ein Feed (Google-Bewertungen ODER Instagram/Facebook) als DSGVO-Widget, einmalige Design-Einpassung.' },
-      { id: 'migration',    name: 'Domain-Umzug / Migration', price: 190, type: 'once', from: true,
+      { id: 'migration',    name: 'Domain-Umzug / Migration', price: 190, type: 'once', from: true, hidden: true,
         desc: 'Transfer 1 Domain zum Sartu-Hosting, DNS + SSL, Redirects bestehender URLs, bis 3 E-Mail-Postfächer.' },
       { id: 'korrektur',    name: 'Zusätzliche Korrekturrunde', price: 140, type: 'once',
         qty: { min: 1, max: 5, default: 1, unit: 'pro Runde' }, desc: 'Ein gebündelter, schriftlicher Feedback-Durchlauf inkl. einmaliger Umsetzung.' },
-      { id: 'mehrsprachig', name: 'Mehrsprachigkeit', price: null, type: 'percent', pct: 40,
+      { id: 'mehrsprachig', name: 'Mehrsprachigkeit', price: null, type: 'percent', pct: 40, common: true,
         qty: { min: 1, max: 5, default: 1, unit: 'pro Sprache' },
-        desc: '+40 % je Sprache: hreflang, /en/-URL-Struktur, Sprachumschalter, sprachspezifische Sitemap. Übersetzung lieferst du.' },
+        desc: 'Deine Website in mehreren Sprachen — komplett übersetzt und technisch sauber eingerichtet (Sprachumschalter, hreflang). +40 % je Sprache; Rechtstexte bleiben deutsch.' },
       { id: 'express',      name: 'Express-Lieferung', price: null, type: 'percent', pct: 50, min: 390,
         desc: 'Vorrang: Onepager in 5, Einzelseite/Text in 2 Werktagen ab vollständiger Inhaltslieferung (+50 %, mind. 390 €).' },
 
