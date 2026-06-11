@@ -825,6 +825,12 @@
       var wartSec, pageSec, addSec, wishSec; // in renderDynamic() befüllt
       stage.appendChild(pkgSec); stage.appendChild(dynSec); stage.appendChild(paySec);
 
+      // WICHTIG: EXTRAS_VISIBLE/EXTRAS_MORE VOR dem ersten renderDynamic() zuweisen.
+      // Vorher lief die var-Zuweisung erst weiter unten → beim Erstrender war
+      // EXTRAS_VISIBLE undefined → forEach-Crash riss Extras, Preisleiste und Weiter-Logik ab.
+      var EXTRAS_VISIBLE = ['logo-lite', 'terminbuchung', 'mehrsprachig', 'express'];
+      var EXTRAS_MORE = ['newsletter'];
+
       renderPkg(); renderDynamic(); renderPayTerms();
 
       // CTA unter den Sektionen (zusätzlich zur Preisleiste)
@@ -1105,8 +1111,7 @@
       // Kuratierte Extras-Welt (Nachtrag Block 2): genau 4 sichtbar + 1 ausklappbar.
       // Texte/Umzug/Statistik sind in alle Pakete gewandert; SEO-Betreuung nur auf
       // /leistung-seo. Payload-Keys aller übrigen Add-ons bleiben technisch erhalten.
-      var EXTRAS_VISIBLE = ['logo-lite', 'terminbuchung', 'mehrsprachig', 'express'];
-      var EXTRAS_MORE = ['newsletter'];
+      // (EXTRAS_VISIBLE/EXTRAS_MORE werden bewusst VOR dem Erstrender zugewiesen — siehe oben.)
       function addonById(id) { return PRICING.addons.filter(function (a) { return a.id === id; })[0]; }
       function renderAddons() {
         addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
