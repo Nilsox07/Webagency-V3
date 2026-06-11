@@ -630,6 +630,28 @@ a { text-decoration: none; color: inherit; }
 .cta-solo { max-width: 680px; margin: 0 auto; text-align: center; }
 .cta-solo .cta-lead { max-width: 520px; margin-left: auto; margin-right: auto; }
 .cta-solo .hero-actions { justify-content: center; }
+
+/* Startseiten-Nachschlag: Kontrast-Karten (Problem → Lösung) */
+.contrast-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.contrast-card { background: var(--white); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 24px; }
+.contrast-row { display: flex; gap: 11px; align-items: flex-start; font-size: 15px; line-height: 1.55; }
+.contrast-row .ico { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; margin-top: 1px; }
+.contrast-problem { color: var(--text-muted); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+.contrast-problem .ico { background: var(--bg-light); color: var(--text-muted); }
+.contrast-problem strong { text-decoration: line-through; text-decoration-color: var(--text-light-muted); font-weight: 700; }
+.contrast-answer { color: var(--text-dark); }
+.contrast-answer .ico { background: var(--green); color: var(--bg-dark); }
+.contrast-answer strong { color: var(--text-dark); font-weight: 800; }
+@media (max-width: 820px) { .contrast-grid { grid-template-columns: 1fr; } }
+
+/* Startseiten-Nachschlag: Leistungs-Pills statt Kacheln */
+.svc-pills-label { text-align: center; font-size: 14px; font-weight: 600; color: var(--text-muted); margin: 34px 0 14px; }
+.svc-pills { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.svc-pills .pill { display: inline-flex; align-items: center; padding: 9px 18px; border: 1px solid var(--border-light); border-radius: 99px; font-size: 14.5px; font-weight: 600; color: var(--text-dark); background: var(--white); transition: border-color .15s ease; }
+.svc-pills .pill:hover { border-color: var(--text-dark); }
+
+/* Startseiten-Nachschlag: Kontaktlos-Fußnote in der 3-Schritte-Sektion */
+.journey-note { text-align: center; max-width: 640px; margin: 26px auto 0; font-size: 15px; color: var(--text-muted); }
 .cta-copy .section-title { margin-bottom: 18px; }
 .cta-lead {
   font-size: 16px;
