@@ -197,25 +197,7 @@
 .mood-corporate .m3 { left: 14px; bottom: 14px; width: 30%; height: 16px; background: #4f9cff; border-radius: 6px; }
 
 /* ---- Design: Farbkacheln ---- */
-.lb-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
-.lb-swatch {
-  font: inherit; cursor: pointer; text-align: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid var(--border-dark);
-  border-radius: 12px;
-  padding: 12px 14px 10px;
-  min-width: 104px;
-  transition: border-color .15s ease, transform .12s ease;
-}
-.lb-swatch:hover { transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.3); }
 .lb-swatch.is-on { border-color: var(--green); background: rgba(174, 240, 0, 0.1); }
-.lb-swatch-dots { display: flex; justify-content: center; margin-bottom: 8px; }
-.lb-swatch-dots span {
-  width: 24px; height: 24px; border-radius: 50%;
-  margin-left: -7px; border: 2px solid #0e1626;
-}
-.lb-swatch-dots span:first-child { margin-left: 0; }
-.lb-swatch small { font-size: 12px; color: var(--text-light); font-weight: 600; }
 
 /* ---- Uploads ---- */
 .lb-upload input[type="file"] {
@@ -232,35 +214,8 @@
 .lb-upload-files { display: block; margin-top: 7px; font-size: 12.5px; color: var(--green-strong); }
 
 /* ---- Paketempfehlung ---- */
-.lb-pakete { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-.lb-paket {
-  position: relative; font: inherit; cursor: pointer; text-align: left;
-  display: flex; flex-direction: column; gap: 5px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1.5px solid var(--border-dark);
-  border-radius: 16px; padding: 20px 18px 18px;
-  transition: border-color .15s ease, transform .12s ease;
-}
-.lb-paket:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.3); }
 .lb-paket.is-on { border-color: var(--green); background: rgba(174, 240, 0, 0.1); }
-.lb-paket-badge {
-  position: absolute; top: -10px; left: 16px;
-  background: var(--green); color: #0a1200;
-  font-size: 11px; font-weight: 800; letter-spacing: .04em;
-  padding: 4px 10px; border-radius: 999px; text-transform: uppercase;
-}
-.lb-paket-name { font-weight: 800; font-size: 17px; color: var(--white); }
-.lb-paket-price { font-weight: 800; font-size: 20px; color: var(--green); }
-.lb-paket-note { font-size: 12.5px; color: var(--text-light-muted); }
-.lb-unsure {
-  display: block; width: 100%; margin-top: 12px; font: inherit;
-  font-size: 14px; font-weight: 600; color: var(--text-light);
-  background: transparent; border: 1.5px dashed var(--border-dark);
-  border-radius: 12px; padding: 14px 16px; cursor: pointer; min-height: 48px;
-}
-.lb-unsure:hover { border-color: rgba(255, 255, 255, 0.35); }
 .lb-unsure.is-on { border-style: solid; border-color: var(--green); color: var(--white); background: rgba(174, 240, 0, 0.08); }
-.lb-paket-hint { margin-top: 14px; font-size: 12.5px; color: var(--text-light-muted); }
 
 /* ---- Kontaktformular ---- */
 .lb-form { display: grid; gap: 4px; }
@@ -403,25 +358,7 @@
 .lb-pkg-scope { font-size: 12.5px; color: var(--text-light-muted); }
 
 /* ---- Wartung ---- */
-.lb-warts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-.lb-wart {
-  position: relative; display: flex; flex-direction: column; gap: 4px; text-align: left;
-  font: inherit; cursor: pointer;
-  background: rgba(255,255,255,0.04); border: 1.5px solid var(--border-dark);
-  border-radius: 14px; padding: 16px;
-  transition: border-color .15s ease, transform .12s ease;
-}
-.lb-wart:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-1px); }
 .lb-wart.is-on { border-color: var(--green); background: rgba(174,240,0,0.1); }
-.lb-wart-rec {
-  position: absolute; top: -10px; right: 14px;
-  background: var(--white); color: #0d1320;
-  font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
-  padding: 4px 9px; border-radius: 999px;
-}
-.lb-wart-name { font-size: 14.5px; font-weight: 700; color: var(--white); }
-.lb-wart-price { font-size: 15px; font-weight: 800; color: var(--green); }
-.lb-wart-hint { font-size: 12px; color: var(--text-light-muted); }
 
 /* ---- Kurz-Vorteile (Perks) in Paket-/Wartungskarten ---- */
 .lb-perks { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
@@ -603,8 +540,6 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 .lb-pkg-pages { font-size: 11.5px; color: var(--green-strong); font-weight: 600; }
 
 /* ---- Wartung: gesperrte (unter Paket-Floor) Stufen ---- */
-.lb-wart.is-locked { opacity: .45; cursor: not-allowed; }
-.lb-wart.is-locked:hover { transform: none; border-color: var(--border-dark); }
 .lb-cfg-foot { margin-top: 10px; font-size: 12px; color: var(--text-light-muted); }
 
 /* ---- Seiten-Sektion (Inklusiv + Extraseiten) ---- */
