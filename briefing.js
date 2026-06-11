@@ -57,9 +57,10 @@
     // Konfigurator
     paket_gewaehlt: null,
     paket_empfohlen: null,
-    wartung: null,
+    wartung: null,                    // fixer Rundum-Schutz = Paket-Floor (keine Auswahl mehr)
     extraPages: 0,                    // Seiten über dem Inklusiv-Kontingent (Variante A)
     addons: {},                       // { addonId: {selected:bool, qty:int} }
+    wuensche: [],                     // Topf 3: Wünsche ohne Festpreis-Liste (onRequest-ids)
     _prefilled: false,                // Pfad-B-Vorbefüllung nur einmal anwenden
     _recShown: false,                 // Tipp-Indikator vor der Empfehlung nur einmal zeigen
     // Enterprise-Abzweig (strukturierte Anfrage statt Fixpreis)
@@ -347,9 +348,13 @@
     priceBar.classList.remove('is-enterprise');
     if (toggle) toggle.style.visibility = '';
     var t = totals();
+    var wishLine = (A.wuensche && A.wuensche.length)
+      ? '<div class="lb-sum lb-sum-wish"><span>+ Sonderwünsche</span><strong>Festpreis im Angebot</strong></div>'
+      : '';
     sums.innerHTML =
       '<div class="lb-sum"><span>Einmalig</span><strong></strong></div>' +
-      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflicht</span><strong></strong></div>';
+      '<div class="lb-sum lb-sum-mo"><span>Monatlich · Pflicht</span><strong></strong></div>' +
+      wishLine;
     sums.children[0].querySelector('strong').textContent = fmtEUR(t.once);
     sums.children[1].querySelector('strong').textContent = fmtEUR(t.monthly) + '/Mon.';
     if (priceDetailOpen) renderPriceDetail();
@@ -736,9 +741,9 @@
             hint: 'Für Shop, Portal, Mehrsprachigkeit oder Sonderfunktionen sammle ich kurz deine Anforderungen — ohne Fixpreis. Du kannst jederzeit zu einem kleineren Paket wechseln.' }
         : (A.pfad === 'B'
           ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-              hint: 'Paket, Pflicht-Wartung und passende Add-ons sind vorausgewählt. Ändere alles frei — der Preis rechnet live mit.' }
+              hint: 'Paket und Rundum-Schutz sind gesetzt, passende Extras vorgeschlagen. Ändere alles frei — der Preis rechnet live mit.' }
           : { q: 'Stell dir dein Paket zusammen.',
-              hint: 'Wähle Paket und Add-ons — Hosting & Wartung ist Pflicht und schon gesetzt. Der Preis unten rechnet live mit.' });
+              hint: 'Wähle Paket und Extras — der Rundum-Schutz gehört dazu und ist schon gesetzt. Der Preis unten rechnet live mit.' });
       var h = lumiSays(intro.q, intro.hint);
 
       // Zurück-Link oben
@@ -751,7 +756,7 @@
       var pkgSec = el('div', 'lb-cfg-section');
       var dynSec = el('div');
       var paySec = el('div', 'lb-cfg-section lb-cfg-pay');
-      var wartSec, pageSec, addSec; // in renderDynamic() befüllt
+      var wartSec, pageSec, addSec, wishSec; // in renderDynamic() befüllt
       stage.appendChild(pkgSec); stage.appendChild(dynSec); stage.appendChild(paySec);
 
       renderPkg(); renderDynamic(); renderPayTerms();
@@ -774,7 +779,32 @@
         wartSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wartSec);
         pageSec = el('div', 'lb-cfg-section'); dynSec.appendChild(pageSec);
         addSec = el('div', 'lb-cfg-section'); dynSec.appendChild(addSec);
-        renderWartung(); renderPages(); renderAddons();
+        wishSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wishSec);
+        renderWartung(); renderPages(); renderAddons(); renderWuensche();
+      }
+
+      /* -- Topf 3: Wünsche ohne Festpreis-Liste (anwählbare Chips, kein Preis) -- */
+      function renderWuensche() {
+        var list = PRICING.onRequest || [];
+        if (!list.length) return;
+        wishSec.innerHTML = '<h3 class="lb-cfg-h">Wünsche ohne Festpreis-Liste <span class="lb-cfg-opt">(optional)</span></h3>';
+        var grid = el('div', 'lb-wish-chips');
+        list.forEach(function (w) {
+          var on = A.wuensche.indexOf(w.id) > -1;
+          var b = el('button', 'lb-wish-chip'); b.type = 'button';
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          if (on) b.classList.add('is-on');
+          b.innerHTML = '<span class="lb-wish-name">' + w.name + '</span>' +
+            (w.desc ? '<span class="lb-wish-desc">' + w.desc + '</span>' : '');
+          b.addEventListener('click', function () {
+            var i = A.wuensche.indexOf(w.id);
+            if (i > -1) A.wuensche.splice(i, 1); else A.wuensche.push(w.id);
+            renderWuensche(); renderPriceBar();
+          });
+          grid.appendChild(b);
+        });
+        wishSec.appendChild(grid);
+        wishSec.appendChild(el('p', 'lb-cfg-foot', 'Festpreis dafür steht in deinem schriftlichen Angebot.'));
       }
 
       /* -- Paketauswahl -- */
@@ -791,13 +821,17 @@
           var pagesLine = p.includedPages
             ? '<span class="lb-pkg-pages">' + p.includedPages + ' Seite' + (p.includedPages > 1 ? 'n' : '') + ' inkl. · jede weitere ab ' + PRICING.extraPage.price + ' €</span>'
             : '';
+          // Sonderprojekte (configurable === false): schlichte Karte ohne Perk-Liste
+          var body = p.configurable === false
+            ? '<span class="lb-pkg-situation">Individuelles Festpreis-Angebot</span>'
+            : (p.situation ? '<span class="lb-pkg-situation">Für dich, wenn ' + p.situation + '</span>' : '') +
+              (p.perks && p.perks.length ? '<ul class="lb-perks">' + p.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
           c.innerHTML =
-            (p.popular ? '<span class="lb-pkg-badge">Beliebt</span>' : '') +
+            (p.popular ? '<span class="lb-pkg-badge">Meistgewählt</span>' : '') +
             (p.id === A.paket_empfohlen && A.pfad === 'B' ? '<span class="lb-pkg-badge lb-pkg-badge-rec">Empfohlen</span>' : '') +
             '<span class="lb-pkg-name">' + p.name + '</span>' +
             '<span class="lb-pkg-price">' + priceTxt + '</span>' +
-            '<span class="lb-pkg-scope">' + p.scope + '</span>' + pagesLine +
-            (p.perks && p.perks.length ? '<ul class="lb-perks">' + p.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
+            '<span class="lb-pkg-scope">' + p.scope + '</span>' + pagesLine + body;
           if (A.paket_gewaehlt === p.id) c.classList.add('is-on');
           c.addEventListener('click', function () {
             A.paket_gewaehlt = p.id;
@@ -810,27 +844,19 @@
         pkgSec.appendChild(grid);
       }
 
-      /* -- Hosting & Wartung (PFLICHT, nur Upgrade über den Paket-Floor) -- */
+      /* -- Rundum-Schutz: gehört fix zum Paket (keine Auswahl mehr) -- */
       function renderWartung() {
-        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Hosting &amp; Wartung <span class="lb-cfg-opt">(Pflicht – im Paket enthalten)</span></h3>';
         var floor = pkgFloor(A.paket_gewaehlt);
-        var floorIdx = maintIndex(floor);
-        var grid = el('div', 'lb-warts');
-        PRICING.maintenance.forEach(function (m) {
-          var locked = maintIndex(m.id) < floorIdx; // unter dem Paket-Floor → nicht wählbar
-          var c = el('button', 'lb-wart'); c.type = 'button';
-          if (locked) { c.disabled = true; c.classList.add('is-locked'); }
-          c.innerHTML =
-            (m.id === floor ? '<span class="lb-wart-rec">Im Paket</span>' : (m.recommended ? '<span class="lb-wart-rec">Empfohlen</span>' : '')) +
-            '<span class="lb-wart-name">' + m.name + '</span>' +
-            '<span class="lb-wart-price">' + priceLabel(m.price, { from: m.from, period: true }) + '</span>' +
-            (m.perks && m.perks.length ? '<ul class="lb-perks">' + m.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
-          if (A.wartung === m.id) c.classList.add('is-on');
-          if (!locked) c.addEventListener('click', function () { A.wartung = m.id; renderWartung(); renderPriceBar(); });
-          grid.appendChild(c);
-        });
-        wartSec.appendChild(grid);
-        wartSec.appendChild(el('p', 'lb-cfg-foot', PRICING.mandatoryNote + ' Standardpreis monatlich – günstiger bei Jahreszahlung.'));
+        A.wartung = floor;                 // fix auf den Paket-Floor (Care S/M/L)
+        var m = wartById(floor);
+        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Rundum-Schutz <span class="lb-cfg-opt">(gehört dazu)</span></h3>';
+        var box = el('div', 'lb-protect-line');
+        box.innerHTML =
+          '<p class="lb-protect-main">Dein Rundum-Schutz: <strong>' + m.name + '</strong> — ' +
+            m.price.toLocaleString('de-DE') + ' €/Monat, gehört dazu.</p>' +
+          '<p class="lb-protect-sub">Preise gelten bei Jahreszahlung. Mindestlaufzeit 12 Monate, danach monatlich kündbar.</p>' +
+          '<p class="lb-protect-sub">Höhere Stufe? Sag’s uns in der Anfrage.</p>';
+        wartSec.appendChild(box);
       }
 
       /* -- Seiten: Inklusiv-Kontingent + Extraseiten (Variante A) -- */
@@ -1008,6 +1034,9 @@
         var hidden = 0;
         var groupDone = {};
         PRICING.addons.forEach(function (a) {
+          // SEO-Betreuung erscheint öffentlich nur noch als „Gefunden-werden-Programm"
+          // auf /leistung-seo — nicht mehr im Konfigurator (Block 1.4).
+          if (a.group === 'seo-betreuung') return;
           // Varianten-Gruppen: einmal als Karten-Reihe rendern (sichtbar, wenn ein
           // Mitglied common/gewählt ist oder die Liste aufgeklappt wurde)
           if (a.group) {
@@ -1063,7 +1092,7 @@
       var recap = el('div', 'lb-recap');
       if (isEnterprise()) {
         recap.innerHTML =
-          '<span><strong>Enterprise</strong></span>' +
+          '<span><strong>Sonderprojekte</strong></span>' +
           '<span class="lb-recap-sums">Individuelles Festpreis-Angebot</span>';
       } else {
         recap.innerHTML =
@@ -1250,7 +1279,7 @@
     }
     // Konfiguration
     if (ent) {
-      rows.push({ k: 'Paket', v: 'Enterprise · individuelles Angebot', screen: 'configurator' });
+      rows.push({ k: 'Paket', v: 'Sonderprojekte · individuelles Angebot', screen: 'configurator' });
       var E = A.enterprise;
       var sf = (E.sonderfunktionen || []).map(function (v) { return entLabel('sonderfunktionen', v); }).join(', ');
       if (sf) rows.push({ k: 'Sonderfunktionen', v: sf, screen: 'configurator' });
@@ -1265,8 +1294,11 @@
       rows.push({ k: 'Paket', v: p.name + ' · ' + priceLabel(p.price, { from: p.from }), screen: 'configurator' });
       var inc = p.includedPages || 0, tot = inc + (A.extraPages || 0);
       rows.push({ k: 'Seiten', v: tot + ' (' + inc + ' inkl.' + ((A.extraPages || 0) > 0 ? ' + ' + A.extraPages + ' extra' : '') + ')', screen: 'configurator' });
-      rows.push({ k: 'Hosting & Wartung', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (Pflicht)', screen: 'configurator' });
+      rows.push({ k: 'Rundum-Schutz', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (gehört dazu)', screen: 'configurator' });
       rows.push({ k: 'Add-ons', v: selectedAddonsText() || 'keine', screen: 'configurator' });
+      if ((A.wuensche || []).length) {
+        rows.push({ k: 'Sonderwünsche', v: A.wuensche.map(function (id) { var w = (PRICING.onRequest || []).filter(function (x) { return x.id === id; })[0]; return w ? w.name : id; }).join(', ') + ' · Festpreis im Angebot', screen: 'configurator' });
+      }
       rows.push({ k: 'Einmalig', v: fmtEUR(t.once) + ' netto', screen: null });
       rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto (Pflicht)', screen: null });
     }
@@ -1278,6 +1310,10 @@
      ============================================================ */
   function collect() {
     var t = totals();
+    var selectedWuensche = (A.wuensche || []).map(function (id) {
+      var w = (PRICING.onRequest || []).filter(function (x) { return x.id === id; })[0];
+      return w ? { id: w.id, name: w.name } : { id: id };
+    });
     var selectedAddons = [];
     PRICING.addons.forEach(function (a) {
       var st = A.addons[a.id];
@@ -1308,6 +1344,7 @@
         modus: 'enterprise',
         paket: 'enterprise',
         anforderungen: A.enterprise,
+        wuensche: selectedWuensche,
         zahlungsstaffelung: PAY.forPackage('enterprise'),
       } : {
         modus: 'fixpreis',
@@ -1321,6 +1358,7 @@
         wartung_name: wartById(A.wartung).name,
         wartung_preis: wartById(A.wartung).price,
         addons: selectedAddons,
+        wuensche: selectedWuensche,
         summe_einmalig: t.once,
         summe_monatlich: t.monthly,
         zahlungsstaffelung: PAY.forPackage(A.paket_gewaehlt),

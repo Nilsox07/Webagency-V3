@@ -856,3 +856,41 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   }
   .lb-design-grid.has-preview > .cmock .cmock-browser { max-width: 100%; }
 }
+
+/* ============================================================
+   BLOCK 5 — Konfigurator: fester Rundum-Schutz, Situationszeile,
+   Wünsche-Chips (Topf 3)
+   ============================================================ */
+/* Situationszeile auf den Paketkarten */
+.lb-pkg-situation {
+  display: block; font-size: 12.5px; line-height: 1.45;
+  color: var(--text-light-muted); margin-top: 8px;
+}
+
+/* Rundum-Schutz Info-Zeile (statt Care-Auswahl) */
+.lb-protect-line {
+  background: rgba(174, 240, 0, 0.06);
+  border: 1.5px solid rgba(174, 240, 0, 0.30);
+  border-radius: 14px; padding: 16px 18px;
+}
+.lb-protect-main { font-size: 15px; color: var(--white); margin: 0 0 6px; }
+.lb-protect-main strong { color: var(--green); }
+.lb-protect-sub { font-size: 12.5px; color: var(--text-light-muted); margin: 2px 0 0; }
+
+/* Wünsche-Chips ohne Preis (Topf 3) */
+.lb-wish-chips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.lb-wish-chip {
+  text-align: left; font: inherit; cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid var(--border-dark); border-radius: 12px;
+  padding: 12px 14px; transition: border-color .15s ease, background .15s ease;
+}
+.lb-wish-chip:hover { border-color: rgba(174, 240, 0, 0.5); }
+.lb-wish-chip.is-on { border-color: var(--green); background: rgba(174, 240, 0, 0.10); }
+.lb-wish-name { display: block; font-size: 14px; font-weight: 700; color: var(--white); }
+.lb-wish-desc { display: block; font-size: 12px; color: var(--text-light-muted); margin-top: 3px; line-height: 1.4; }
+
+/* Sonderwünsche-Zeile in der Preisleiste */
+.lb-sum-wish strong { color: var(--green); font-weight: 700; }
+
+@media (max-width: 560px) { .lb-wish-chips { grid-template-columns: 1fr; } }
