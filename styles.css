@@ -101,7 +101,6 @@ a { text-decoration: none; color: inherit; }
 }
 .eyebrow-green { color: var(--green-strong); }
 .center { text-align: center; }
-.center-left { text-align: left; }
 .eyebrow.center { margin-left: auto; margin-right: auto; }
 
 .section-title {
@@ -116,13 +115,6 @@ a { text-decoration: none; color: inherit; }
 
 /* ---------- Logo ---------- */
 .logo { display: inline-flex; align-items: center; gap: 10px; }
-.logo-mark { color: var(--green); display: inline-flex; }
-.logo-text {
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: 0.04em;
-  color: var(--white);
-}
 .logo-img {
   height: 30px;
   width: auto;
@@ -278,20 +270,6 @@ a { text-decoration: none; color: inherit; }
   gap: 16px;
   margin-bottom: 40px;
 }
-.hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 26px;
-  list-style: none;
-}
-.hero-badges li {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-light);
-}
 .dot-icon {
   width: 16px; height: 16px;
   border-radius: 50%;
@@ -314,17 +292,6 @@ a { text-decoration: none; color: inherit; }
   margin: 0 0 16px;
   max-width: 480px;
   font-size: 16px;
-}
-.hero-stat {
-  max-width: 480px;
-  margin: 0 0 30px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--text-light-muted);
-}
-.hero-stat cite {
-  font-style: normal;
-  opacity: 0.85;
 }
 
 /* Vertrauensleiste unter dem Hero */
@@ -513,101 +480,8 @@ a { text-decoration: none; color: inherit; }
 .benefit p { font-size: 15px; color: var(--text-muted); }
 
 /* ============ REFERENCES ============ */
-.references {
-  background: var(--bg-light);
-  padding: 30px 0 90px;
-}
 .references .eyebrow { color: var(--text-muted); }
-.references-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 44px;
-}
-.reference-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
-}
-.reference-card {
-  background: var(--white);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 14px 14px 22px;
-  transition: transform .2s ease, box-shadow .2s ease;
-}
-.reference-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 50px -24px rgba(13, 19, 32, 0.25);
-}
-.ref-thumb {
-  position: relative;
-  border-radius: 14px;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  margin-bottom: 20px;
-  padding: 18px;
-  display: flex;
-  align-items: center;
-}
-.thumb-blue  { background: linear-gradient(135deg, #2a4a7c, #16243f); }
-.thumb-amber { background: linear-gradient(135deg, #7c5a2a, #3f2e16); }
-.thumb-green { background: linear-gradient(135deg, #2a5c3a, #163f24); }
-
-.mini-laptop {
-  width: 70%;
-  aspect-ratio: 16/10;
-  background: rgba(0,0,0,.25);
-  border: 4px solid rgba(0,0,0,.4);
-  border-radius: 8px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-}
-.mini-cap { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.2; }
-.mini-btn { width: 46px; height: 12px; background: var(--green); border-radius: 4px; }
-.mini-btn.amber { background: #f0a800; }
 .mini-btn.green { background: var(--green); }
-.mini-phone {
-  position: absolute;
-  right: 18px; bottom: 0;
-  width: 46px;
-  aspect-ratio: 9/18;
-  background: rgba(0,0,0,.35);
-  border: 3px solid rgba(0,0,0,.5);
-  border-radius: 10px 10px 0 0;
-}
-
-.reference-card h3 {
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0 4px 8px;
-}
-.reference-card > p {
-  font-size: 14.5px;
-  color: var(--text-muted);
-  margin: 0 4px 20px;
-}
-.ref-stats {
-  display: flex;
-  gap: 14px;
-  border-top: 1px solid var(--border-light);
-  padding: 18px 4px 0;
-}
-.ref-stats div { flex: 1; }
-.ref-stats strong {
-  display: block;
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text-dark);
-}
-.ref-stats span { font-size: 13px; color: var(--text-muted); }
 
 /* ============ FINAL CTA ============ */
 .cta {
@@ -616,14 +490,7 @@ a { text-decoration: none; color: inherit; }
     var(--bg-dark);
   color: var(--white);
   padding: 80px 0;
-}
-.cta-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 60px;
-  align-items: center;
-}
-.cta-grid > * { min-width: 0; } /* Grid-Items dürfen auf schmalen Screens schrumpfen */
+} /* Grid-Items dürfen auf schmalen Screens schrumpfen */
 /* Startseite Etappe 4: 3-Schritte-Teaser-Fußzeile + Solo-CTA (Karten-Trio entfernt) */
 .journey-foot { text-align: center; margin-top: 30px; font-size: 15px; color: var(--text-muted); }
 .journey-foot a { font-weight: 700; color: var(--green-strong); white-space: nowrap; }
@@ -658,10 +525,6 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-light);
   max-width: 420px;
   margin-bottom: 30px;
-}
-.cta-features {
-  display: grid;
-  gap: 26px;
 }
 .cta-feature { display: flex; gap: 16px; }
 .cta-icon {
