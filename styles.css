@@ -235,6 +235,13 @@ a { text-decoration: none; color: inherit; }
   transition: .25s;
 }
 
+/* ============ STARTSEITE: 6-ABSCHNITT-GERÜST ============ */
+/* Semantische Bündelung der Startseite in 6 <section>-Landmarks.
+   Die Optik liegt weiterhin auf den inneren Blöcken (.hero/.stats/.pricing/
+   .guarantee/.founder/.faq/.cta …), damit der Hintergrund-Rhythmus 1:1 bleibt.
+   Der Wrapper selbst ist box-neutral (kein eigener Hintergrund/kein Padding). */
+.home-section { display: block; margin: 0; padding: 0; }
+
 /* ============ HERO ============ */
 .hero {
   background:
