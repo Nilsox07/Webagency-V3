@@ -1139,19 +1139,9 @@ a { text-decoration: none; color: inherit; }
 .lumi-swatch.selected { border-color: var(--green); }
 
 /* Final summary */
-.lumi-summary-row { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border-dark); font-size: 14.5px; }
-.lumi-summary-row:last-child { border-bottom: none; }
 .lumi-summary-row .k { color: var(--text-light-muted); width: 130px; flex-shrink: 0; }
 .lumi-summary-row .v { color: var(--white); font-weight: 600; }
-.lumi-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-.lumi-preview-shot { border-radius: 10px; overflow: hidden; border: 1px solid var(--border-dark); }
-.lumi-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
 .lumi-disclaimer { font-size: 12.5px; color: var(--text-light-muted); text-align: center; margin-top: 18px; }
-.lumi-restart {
-  background: none; border: none; color: var(--text-light-muted);
-  font-size: 13px; cursor: pointer; text-decoration: underline; font-family: inherit;
-}
-.lumi-restart:hover { color: var(--green); }
 
 /* ============ FAQ (Akkordeon) ============ */
 .faq { background: var(--bg-light); padding: 84px 0 90px; }
@@ -1210,7 +1200,6 @@ a { text-decoration: none; color: inherit; }
   font-size: 15px;
   line-height: 1.65;
 }
-.faq-more { text-align: center; margin-top: 36px; }
 
 /* ============ GLOSSAR / RATGEBER ============ */
 .glossary { background: var(--bg-light); padding: 46px 0 90px; }
@@ -1546,12 +1535,7 @@ a { text-decoration: none; color: inherit; }
 .svc-facts .btn { width: 100%; justify-content: center; margin-top: 18px; }
 
 /* ============ PROBLEM -> LÖSUNG ============ */
-.ps-section { background: linear-gradient(180deg, #ffffff, var(--bg-light)); padding: 84px 0; }
-.ps-block { max-width: 1000px; margin: 0 auto; }
-.ps-block + .ps-block { margin-top: 50px; padding-top: 50px; border-top: 1px solid var(--border-light); }
-.ps-head { text-align: center; margin-bottom: 40px; }
 .ps-head .section-title { margin-bottom: 8px; }
-.ps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
 .benefit-icon.muted { background: rgba(13, 19, 32, 0.06); color: var(--text-muted); }
 
 /* ============ FOOTER (mehrspaltig, Startseite) ============ */
@@ -1622,18 +1606,13 @@ a { text-decoration: none; color: inherit; }
 
   .hero-grid { grid-template-columns: 1fr; gap: 70px; }
   .hero-visual { max-width: 520px; }
-  .cta-grid { grid-template-columns: 1fr; gap: 44px; }
   .benefits-grid { grid-template-columns: repeat(2, 1fr); gap: 30px 24px; }
 
   .price-grid { grid-template-columns: repeat(2, 1fr); }
   .plan-grid { grid-template-columns: 1fr; }
-  .addon-grid { grid-template-columns: 1fr; }
-  .exclude-grid { grid-template-columns: 1fr; }
 
   .founder-grid { grid-template-columns: 1fr; gap: 36px; }
   .founder-photo { max-width: 340px; }
-
-  .ps-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
   .footer-brand { grid-column: 1 / -1; }
 
@@ -1646,21 +1625,15 @@ a { text-decoration: none; color: inherit; }
 }
 
 @media (max-width: 700px) {
-  .reference-grid { grid-template-columns: 1fr; }
-  .references-head { flex-direction: column; align-items: flex-start; }
   .phone { right: 0; bottom: -30px; width: 96px; }
 }
 
 @media (max-width: 480px) {
   .benefits-grid { grid-template-columns: 1fr; }
-  .hero-badges { gap: 14px 22px; }
   .btn-lg { width: 100%; justify-content: center; }
   .hero-actions { flex-direction: column; }
   .price-grid { grid-template-columns: 1fr; }
-  .lumi-styles { grid-template-columns: 1fr; }
-  .lumi-preview-grid { grid-template-columns: 1fr; }
   .guarantee .btn { width: 100%; justify-content: center; }
-  .lumi-send { padding: 0 16px; }
   .lumi-progress-bar { width: 84px; }
   .lumi-cta-row .btn { width: 100%; justify-content: center; }
   .legal-content { padding: 28px 22px; }
@@ -1736,25 +1709,8 @@ body.cookie-modal-open { overflow: hidden; }
 /* ============================================================
    ZAHLEN / STATISTIK-SEKTION (Startseite) — jede Zahl mit Quelle+Jahr
    ============================================================ */
-.stats { background: var(--bg-dark); color: var(--white); padding: 84px 0 90px; }
 .stats .pricing-head .section-title { color: var(--white); }
 .stats .pricing-head p { color: var(--text-light); }
-
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.stat-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-dark);
-  border-radius: var(--radius-lg);
-  padding: 28px 24px;
-}
-.stat-num {
-  font-size: clamp(40px, 6vw, 54px); font-weight: 900; line-height: 1;
-  letter-spacing: -0.02em; color: var(--green); margin-bottom: 14px;
-}
-.stat-claim { font-size: 14.5px; line-height: 1.6; color: var(--text-light); }
-.stat-src { margin-top: 14px; font-size: 11.5px; color: var(--text-light-muted); }
-
-.stat-mini-list { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
 .stat-mini-list li { font-size: 14px; color: var(--text-light); border-top: 2px solid var(--green); padding-top: 12px; }
 .stat-mini-list li strong { color: var(--white); font-weight: 800; }
 .stat-mini-list li span { display: block; margin-top: 6px; font-size: 11.5px; color: var(--text-light-muted); }
