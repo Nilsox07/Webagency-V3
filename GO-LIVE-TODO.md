@@ -27,3 +27,14 @@ Diese Punkte sind bewusst bis zum Go-live offen. **Reihenfolge bei Domain-Wechse
 ## Strukturierte Daten (erst mit echter Adresse)
 - [ ] LocalBusiness/ProfessionalService-Schema mit echter NAP ergänzen + Organization um `address` erweitern.
 - [ ] Organization `sameAs` mit den echten Social-URLs füllen.
+
+## Rechtliches / AGB (Nachtrag Extras + Mehrsprachigkeit)
+- [ ] **AGB von Kanzlei prüfen lassen:** Sprachversions-Klausel („Änderungen und Kontingente
+      zählen je Sprachversion") + Inklusiv-Definitionen für Texte, Umzug und Besucher-Statistik
+      sowie die Mehrsprachigkeits-Definition (maschinelle Übersetzung mit menschlicher Prüfung;
+      Rechtstexte bleiben deutsch, Übersetzung über Kanzlei = Drittkosten).
+- [ ] Stundensatz 150 €/Std (5-Minuten-Takt, ab 30 Min. Kostenschätzung) in AGB/Angebotsvorlage spiegeln.
+
+## Redaktionsplan / Backlog
+- [ ] Ratgeber-Artikel als Nachfrage-Generator: „Lohnt sich eine polnische oder tschechische
+      Website für Betriebe in der Lausitz?" (Mehrsprachigkeit Grenzregion).

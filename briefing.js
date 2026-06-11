@@ -54,6 +54,9 @@
     features: [], stil: null, hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
     material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
     zeitrahmen: null,
+    // Was suchst du? 'website' = komplette Website (Standard), 'design' = nur Design
+    produkt_typ: 'website',
+    design_umfang: null,              // Design-Pfad: 'onepager' | 'mehrseiten'
     // Konfigurator
     paket_gewaehlt: null,
     paket_empfohlen: null,
@@ -210,8 +213,8 @@
   var progressFill = document.getElementById('lumiProgressFill');
 
   function updateProgress(step) {
-    // Fortschritt nur im Lumi-Flow (Pfad B) und ab Schritt 2
-    if (A.pfad === 'B' && step && step >= 2) {
+    // Fortschritt nur im Lumi-Flow (Pfad B, komplette Website) und ab Schritt 2
+    if (A.pfad === 'B' && !isDesign() && step && step >= 2) {
       progressWrap.hidden = false;
       progressLabel.textContent = 'Schritt ' + step + ' von ' + SCHEMA.totalSteps;
       progressFill.style.width = Math.round((step / SCHEMA.totalSteps) * 100) + '%';
@@ -345,6 +348,14 @@
       if (toggle) toggle.style.visibility = 'hidden';
       return;
     }
+    // Design-Pfad: nur Einmalbetrag, keine Monatszeile
+    if (isDesign()) {
+      priceBar.classList.remove('is-enterprise');
+      var dp = currentDesign();
+      sums.innerHTML = '<div class="lb-sum"><span>Einmalig</span><strong>' + fmtEUR(dp ? dp.price : 0) + '</strong></div>';
+      if (toggle) toggle.style.visibility = 'hidden';
+      return;
+    }
     priceBar.classList.remove('is-enterprise');
     if (toggle) toggle.style.visibility = '';
     var t = totals();
@@ -393,6 +404,22 @@
     var p = pkgById(A.paket_gewaehlt);
     return !!(p && p.configurable === false); // Enterprise = nicht konfigurierbar → Abzweig
   }
+  /* ---- „Nur Design"-Pfad ---- */
+  function isDesign() { return A.produkt_typ === 'design'; }
+  function designProductFor(umfang) {
+    var list = PRICING.designProducts || [];
+    var id = umfang === 'mehrseiten' ? 'design-mehrseiten' : 'design-onepager';
+    return list.filter(function (d) { return d.id === id; })[0] || list[0] || null;
+  }
+  function designPriceFor(umfang) { var d = designProductFor(umfang); return d ? d.price : 0; }
+  function currentDesign() { return designProductFor(A.design_umfang || 'onepager'); }
+  // Upsell: Differenz zum passenden Paket (Onepager→Start, Mehrseiten→Wachstum), dynamisch aus pricing.js
+  function designUpsell() {
+    var d = currentDesign();
+    var p = pkgById(A.design_umfang === 'mehrseiten' ? 'pro' : 'basis');
+    if (!d || !p || typeof p.price !== 'number') return null;
+    return { diff: Math.max(0, p.price - d.price), paketName: p.name };
+  }
   // Hosting/Wartung ist PFLICHT: immer mind. der Paket-Floor, nur Upgrade nach oben.
   function ensureWartungDefault() {
     var floor = pkgFloor(A.paket_gewaehlt);
@@ -427,18 +454,10 @@
     var on = function (id, qty) {
       if (A.addons[id]) { A.addons[id].selected = true; if (qty) A.addons[id].qty = qty; }
     };
-    // Funktionen → passende Add-ons
+    // Nachtrag Block 2: Empfehlung nur noch Logo (kein Logo) + Terminbuchung (Ziel Termine).
+    // Texte/Umzug/Statistik sind in allen Paketen inklusive → keine Vorauswahl mehr.
     if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung');
-    if (hasF('newsletter')) on('newsletter');
-    if (hasF('mehrsprachig')) on('mehrsprachig', 1);
-    // Kein Logo vorhanden → Logo-Add-on vorschlagen
     if (!hasM('logo')) on('logo-lite');
-    // Keine Texte vorhanden → Texte vorschlagen (Onepager: 1 Seite, sonst Komplettpaket)
-    if (!hasM('texte')) { if (A.umfang === 'onepager') on('texte', 1); else on('texte-paket'); }
-    // Bestehende Website → Migration
-    if (hasM('website')) on('migration');
-    // Sehr eilig → Express
-    if (A.zeitrahmen === 'asap') on('express');
 
     // Enterprise-Abzweig vorbefüllen (falls Empfehlung/Funktionen darauf hindeuten)
     var E = A.enterprise;
@@ -467,7 +486,7 @@
         var btn = el('button', 'btn btn-primary btn-lg lb-start');
         btn.type = 'button';
         btn.innerHTML = 'Los geht’s <span class="arrow" aria-hidden="true">→</span>';
-        btn.addEventListener('click', function () { goTo('path'); });
+        btn.addEventListener('click', function () { goTo('intent'); });
         wrap.appendChild(btn);
         stage.appendChild(wrap);
         if (h && h.focus) { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }
@@ -500,6 +519,49 @@
       wrap.appendChild(a); wrap.appendChild(b);
       stage.appendChild(wrap);
       actions({ onBack: back });
+      return h;
+    }},
+
+    /* ---------- Weichen-Frage: Komplette Website oder nur Design? ---------- */
+    intent: { step: null, render: function () {
+      var h = lumiSays('Was suchst du?',
+        'Beides ist möglich — du kannst es dir später noch anders überlegen.');
+      var wrap = el('div', 'lb-paths');
+      var a = el('button', 'lb-path-card'); a.type = 'button';
+      a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">🌐</span>' +
+        '<span class="lb-path-title">Komplette Website — ihr kümmert euch um alles</span>' +
+        '<span class="lb-path-sub">Design, Texte, Technik, online bringen und betreuen.</span>';
+      a.addEventListener('click', function () { A.produkt_typ = 'website'; goTo('path'); });
+      var b = el('button', 'lb-path-card'); b.type = 'button';
+      b.innerHTML = '<span class="lb-path-icon" aria-hidden="true">🎨</span>' +
+        '<span class="lb-path-title">Nur ein Design — ich setze selbst um</span>' +
+        '<span class="lb-path-sub">Du bekommst den fertigen Look als HTML/CSS-Code.</span>';
+      b.addEventListener('click', function () { A.produkt_typ = 'design'; A.pfad = 'B'; goTo('d_branche'); });
+      wrap.appendChild(a); wrap.appendChild(b);
+      stage.appendChild(wrap);
+      actions({ onBack: back });
+      return h;
+    }},
+
+    /* ---------- Design-Pfad · 1 · Branche ---------- */
+    d_branche: { step: null, render: function () {
+      var h = lumiSays('Aus welcher Branche kommst du?',
+        'Hilft uns, den passenden Stil vorzuschlagen.');
+      buildCards('branche', OPT.branche, { cls: 'lb-tiles', onPick: function () {} });
+      actions({ onBack: back, onNext: function () { goTo('design'); }, skip: function () { goTo('design'); } });
+      return h;
+    }},
+
+    /* ---------- Design-Pfad · 3 · Umfang ---------- */
+    d_umfang: { step: null, render: function () {
+      var h = lumiSays('Wie groß soll dein Design sein?',
+        'Den Preis siehst du unten — es entsteht kein Vertrag.');
+      buildCards('design_umfang', [
+        { value: 'onepager', label: 'Onepager-Design', sub: '1 Seite · ' + fmtEUR(designPriceFor('onepager')) },
+        { value: 'mehrseiten', label: 'Mehrseiten-Design', sub: 'bis 8 Seitentypen · ' + fmtEUR(designPriceFor('mehrseiten')) },
+      ], { onPick: function () { showPriceBar(true); renderPriceBar(); } });
+      showPriceBar(true); renderPriceBar();
+      actions({ onBack: back, onNext: function () { goTo('contact'); } });
       return h;
     }},
 
@@ -661,7 +723,9 @@
         'Das ist nur eine grobe Richtung zur Veranschaulichung — den Feinschliff und die genauen Farbtöne machen wir gemeinsam nach dem Start. Alles wird handgemacht, kein Baukasten.'));
 
       stage.appendChild(dgrid);
-      actions({ onBack: back, onNext: advance, skip: advance });
+      // Design-Pfad endet nach Stil/Farben beim Umfang; Website-Pfad läuft normal weiter
+      var designNext = function () { isDesign() ? goTo('d_umfang') : advance(); };
+      actions({ onBack: back, onNext: designNext, skip: designNext });
       return h;
     }},
 
@@ -693,6 +757,8 @@
         }
       }
       buildChips('material', OPT.material, { exclusive: ['nichts'], onChange: renderUploads });
+      // Nachtrag: Texte & Umzug sind im Paket inklusive — entsprechend beruhigen
+      stage.appendChild(el('p', 'lb-hint', 'Keine Texte? Kein Problem — die schreiben wir sowieso für dich. Bestehende Website? Dein Umzug ist im Paket drin.'));
       stage.appendChild(uploads); renderUploads();
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
@@ -1028,41 +1094,32 @@
         if (withQty) wrap.appendChild(buildQtyRow(withQty, A.addons[withQty.id]));
         return wrap;
       }
+      // Kuratierte Extras-Welt (Nachtrag Block 2): genau 4 sichtbar + 1 ausklappbar.
+      // Texte/Umzug/Statistik sind in alle Pakete gewandert; SEO-Betreuung nur auf
+      // /leistung-seo. Payload-Keys aller übrigen Add-ons bleiben technisch erhalten.
+      var EXTRAS_VISIBLE = ['logo-lite', 'terminbuchung', 'mehrsprachig', 'express'];
+      var EXTRAS_MORE = ['newsletter'];
+      function addonById(id) { return PRICING.addons.filter(function (a) { return a.id === id; })[0]; }
       function renderAddons() {
-        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Add-ons <span class="lb-cfg-opt">(optional)</span></h3>';
+        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-addons');
-        var hidden = 0;
-        var groupDone = {};
-        PRICING.addons.forEach(function (a) {
-          // SEO-Betreuung erscheint öffentlich nur noch als „Gefunden-werden-Programm"
-          // auf /leistung-seo — nicht mehr im Konfigurator (Block 1.4).
-          if (a.group === 'seo-betreuung') return;
-          // Varianten-Gruppen: einmal als Karten-Reihe rendern (sichtbar, wenn ein
-          // Mitglied common/gewählt ist oder die Liste aufgeklappt wurde)
-          if (a.group) {
-            if (groupDone[a.group]) return;
-            groupDone[a.group] = true;
-            var members = PRICING.addons.filter(function (o) { return o.group === a.group; });
-            var visible = addonsExpanded || members.some(function (o) {
-              return o.common || (A.addons[o.id] && A.addons[o.id].selected);
-            });
-            if (visible) grid.appendChild(buildTierGroup(a.group, members));
-            else hidden += members.length;
-            return;
-          }
-          var st = A.addons[a.id];
-          // Sichtbar: kurze Standardliste (common), ausgewählte/vorbefüllte oder wenn aufgeklappt
-          if (a.common || st.selected || addonsExpanded) {
-            grid.appendChild(buildAddonCard(a, st));
-          } else {
-            hidden++;
-          }
+        EXTRAS_VISIBLE.forEach(function (id) {
+          var a = addonById(id), st = A.addons[id];
+          if (a && st) grid.appendChild(buildAddonCard(a, st));
         });
         addSec.appendChild(grid);
-        if (hidden > 0 || addonsExpanded) {
+        if (addonsExpanded) {
+          var moreGrid = el('div', 'lb-addons');
+          EXTRAS_MORE.forEach(function (id) {
+            var a = addonById(id), st = A.addons[id];
+            if (a && st) moreGrid.appendChild(buildAddonCard(a, st));
+          });
+          addSec.appendChild(moreGrid);
+        }
+        if (EXTRAS_MORE.length) {
           var more = el('button', 'lb-addon-more');
           more.type = 'button';
-          more.textContent = addonsExpanded ? 'Weniger Add-ons anzeigen' : 'Alle Add-ons anzeigen (+' + hidden + ')';
+          more.textContent = addonsExpanded ? 'Weniger anzeigen' : 'Weitere Extras anzeigen (+' + EXTRAS_MORE.length + ')';
           more.addEventListener('click', function () { addonsExpanded = !addonsExpanded; renderAddons(); });
           addSec.appendChild(more);
         }
@@ -1094,12 +1151,27 @@
         recap.innerHTML =
           '<span><strong>Sonderprojekte</strong></span>' +
           '<span class="lb-recap-sums">Individuelles Festpreis-Angebot</span>';
+      } else if (isDesign()) {
+        var dp = currentDesign();
+        recap.innerHTML =
+          '<span><strong>' + (dp ? dp.name : 'Design') + '</strong></span>' +
+          '<span class="lb-recap-sums">Einmalig <strong>' + fmtEUR(dp ? dp.price : 0) + '</strong> · 50 % bei Auftrag, 50 % bei Lieferung</span>';
       } else {
         recap.innerHTML =
           '<span><strong>' + pkgById(A.paket_gewaehlt).name + '</strong> + ' + wartById(A.wartung).name + '</span>' +
           '<span class="lb-recap-sums">Einmalig <strong>' + fmtEUR(t.once) + '</strong> · Monatlich <strong>' + fmtEUR(t.monthly) + '</strong> (Pflicht)</span>';
       }
       stage.appendChild(recap);
+      // Design-Pfad: Upsell-Zeile (dynamische Differenz zum passenden Paket)
+      if (isDesign()) {
+        var up = designUpsell();
+        if (up) {
+          var ups = el('p', 'lb-design-upsell');
+          ups.innerHTML = 'Übrigens: Für <strong>' + fmtEUR(up.diff) + '</strong> mehr bekommst du beim ' +
+            up.paketName + '-Paket die fertige Website — inklusive aller Texte, online gebracht und rundum betreut.';
+          stage.appendChild(ups);
+        }
+      }
 
       var form = el('form', 'lb-form');
       form.setAttribute('novalidate', 'novalidate');
@@ -1163,8 +1235,10 @@
       });
       stage.appendChild(list);
 
-      // Zahlungsstaffelung (Anzeige)
-      var terms = PAY.forPackage(A.paket_gewaehlt);
+      // Zahlungsstaffelung (Anzeige) — Design-Pfad: 50 % bei Auftrag, 50 % bei Lieferung
+      var terms = isDesign()
+        ? [{ pct: 50, when: 'bei Auftrag' }, { pct: 50, when: 'bei Lieferung' }]
+        : PAY.forPackage(A.paket_gewaehlt);
       var pay = el('div', 'lb-done-pay');
       pay.innerHTML = '<h4>Geplante Zahlung</h4><ol class="lb-pay-steps">' +
         terms.map(function (s) { return '<li><span class="lb-pay-pct">' + s.pct + '&nbsp;%</span><span class="lb-pay-when">' + s.when + '</span></li>'; }).join('') +
@@ -1256,9 +1330,23 @@
   function colorLabel(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.label : ''; }
   function entLabel(group, value) { var o = (PRICING.enterpriseOptions[group] || []).filter(function (x) { return x.value === value; })[0]; return o ? o.label : value; }
   function summaryRows() {
+    var rows = [];
+    // Design-Pfad: schlanke Zusammenfassung (kein Paket/Care)
+    if (isDesign()) {
+      var dbr = labelFor('branche', A.branche);
+      if (A.branche === 'sonstiges' && A.branche_sonstiges) dbr += ' (' + A.branche_sonstiges + ')';
+      rows.push({ k: 'Branche', v: dbr || '—', screen: 'd_branche' });
+      var dstil = labelFor('stil', A.stil);
+      var dfarben = [colorLabel(A.hauptfarbe), colorLabel(A.nebenfarbe)].filter(Boolean).join(' + ');
+      if (dfarben) dstil += (dstil ? ' · ' : '') + dfarben;
+      rows.push({ k: 'Design', v: dstil || '—', screen: 'design' });
+      var dp = currentDesign();
+      rows.push({ k: 'Produkt', v: dp ? dp.name + ' · ' + fmtEUR(dp.price) : '—', screen: 'd_umfang' });
+      rows.push({ k: 'Einmalig', v: fmtEUR(dp ? dp.price : 0) + ' netto', screen: null });
+      return rows;
+    }
     var ent = isEnterprise();
     var t = ent ? null : totals();
-    var rows = [];
     // Pfad B: Briefing-Angaben zuerst
     if (A.pfad === 'B') {
       var branche = labelFor('branche', A.branche);
@@ -1327,9 +1415,11 @@
         });
       }
     });
+    var dProd = isDesign() ? currentDesign() : null;
     return {
       schemaVersion: SCHEMA.version,
       pfad: A.pfad,
+      produkt_typ: A.produkt_typ, // 'website' | 'design' (additiv, bestehende Keys unverändert)
       createdAt: new Date().toISOString(),
       briefing: A.pfad === 'B' ? {
         branche: A.branche, branche_sonstiges: A.branche_sonstiges,
@@ -1340,7 +1430,18 @@
         uploads: A.uploads, zeitrahmen: A.zeitrahmen,
         paket_empfohlen: A.paket_empfohlen,
       } : null,
-      konfiguration: isEnterprise() ? {
+      konfiguration: isDesign() ? {
+        modus: 'design',
+        produkt: dProd ? dProd.id : null,
+        produkt_name: dProd ? dProd.name : null,
+        produkt_preis: dProd ? dProd.price : null,
+        design_umfang: A.design_umfang,
+        paket: null,
+        wartung: null,
+        summe_einmalig: dProd ? dProd.price : 0,
+        summe_monatlich: 0,
+        zahlungsstaffelung: [{ pct: 50, when: 'bei Auftrag' }, { pct: 50, when: 'bei Lieferung' }],
+      } : isEnterprise() ? {
         modus: 'enterprise',
         paket: 'enterprise',
         anforderungen: A.enterprise,

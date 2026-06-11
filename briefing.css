@@ -894,3 +894,12 @@ body.lb-has-pricebar { padding-bottom: 156px; }
 .lb-sum-wish strong { color: var(--green); font-weight: 700; }
 
 @media (max-width: 560px) { .lb-wish-chips { grid-template-columns: 1fr; } }
+
+/* Nachtrag: Design-Pfad — Upsell-Zeile auf dem Kontakt-Screen */
+.lb-design-upsell {
+  margin: 12px 0 0; padding: 12px 16px;
+  background: rgba(174, 240, 0, 0.08);
+  border: 1.5px solid rgba(174, 240, 0, 0.30);
+  border-radius: 12px; font-size: 14px; color: var(--text-light);
+}
+.lb-design-upsell strong { color: var(--green); }
