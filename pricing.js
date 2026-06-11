@@ -25,24 +25,35 @@
     /* ---- Extraseite (Variante A): Inklusiv-Kontingent + Festpreis je weiterer Seite ---- */
     extraPage: { price: 199, label: 'Zusätzliche Seite' }, // Leistungsbeschreibung: 199 €/Seite
 
-    /* ---- Pakete (einmalig) ---- */
+    /* ---- Pakete (einmalig) ----
+       WICHTIG: id bleibt technisch (basis/pro/platin/enterprise) — Admin & Payload hängen daran.
+       name ist NUR Anzeige-Label und wurde auf die neue Produktwelt umgestellt.
+       situation = "Für dich, wenn …"-Zeile (Anzeige). */
     packages: [
-      { id: 'basis', name: 'Basis', price: 1290, scope: 'One-Pager', includedPages: 1,
+      { id: 'basis', name: 'Start', price: 1290, scope: 'One-Pager', includedPages: 1,
         configurable: true, maintenanceFloor: 'care-s', popular: false,
+        situation: 'Kunden dich nach einer Empfehlung googeln — und einen richtig guten Eindruck bekommen sollen.',
         perks: ['Alles Wichtige auf einer Seite', 'Mobil-optimiert & DSGVO-konform', '2 Korrekturrunden'] },
-      { id: 'pro', name: 'Pro', price: 2990, scope: 'bis 8 Seiten', includedPages: 8,
+      { id: 'pro', name: 'Wachstum', price: 2990, scope: 'bis 8 Seiten', includedPages: 8,
         configurable: true, maintenanceFloor: 'care-m', popular: false,
-        perks: ['Bis 8 Unterseiten, individuell', 'OnPage-SEO für alle Seiten', '3 Korrekturrunden'] },
-      { id: 'platin', name: 'Platin', price: 5990, scope: 'bis 20 Seiten', includedPages: 20,
+        situation: 'deine Website aktiv neue Anfragen bringen soll — jede Leistung wird einzeln bei Google gefunden.',
+        perks: ['Bis 8 Unterseiten, individuell', 'Jede Leistung wird bei Google gefunden', '3 Korrekturrunden'] },
+      { id: 'platin', name: 'Platzhirsch', price: 5990, scope: 'bis 20 Seiten', includedPages: 20,
         configurable: true, maintenanceFloor: 'care-l', popular: true,
-        perks: ['Bis 20 Seiten', 'Lokales SEO inkl. Google-Profil-Setup', '4 Korrekturrunden'] },
-      // Enterprise = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null).
-      // priceFrom ist NUR Anzeige ("ab 9.990 €" wie auf Leistungs-/Preise-Seite) und
-      // fließt bewusst NICHT in die Live-Berechnung ein.
-      { id: 'enterprise', name: 'Enterprise', price: null, priceFrom: 9990, scope: 'individuell', includedPages: null,
+        situation: 'du in deiner Region die Nummer 1 sein willst — und auch Mitarbeiter über die Website finden möchtest.',
+        perks: ['Bis 20 Seiten inkl. Team & Jobs', 'Kunden aus deiner Region finden dich', '4 Korrekturrunden'] },
+      // Sonderprojekte = Abzweig, KEIN durchkonfigurierbarer Fixpreis (price: null).
+      // priceFrom ist NUR Anzeige ("ab 9.990 €") und fließt bewusst NICHT in die Live-Berechnung ein.
+      { id: 'enterprise', name: 'Sonderprojekte', price: null, priceFrom: 9990, scope: 'individuell', includedPages: null,
         configurable: false, maintenanceFloor: 'care-l', popular: false,
         perks: ['Individueller Seitenumfang', 'Sonderprogrammierung / Integrationen', 'Persönlicher Projektplan'] },
     ],
+
+    /* ---- Fester Rundum-Schutz: Care gehört fix zum Paket (keine Auswahl mehr) ----
+       Zuordnung über maintenanceFloor: Start→Care S, Wachstum→Care M, Platzhirsch→Care L,
+       Sonderprojekte→individuell. Höhere Stufe bleibt auf Anfrage möglich.
+       Im Verkauf heißt das Bündel "Rundum-Schutz"; die Stufennamen Care S/M/L bleiben. */
+    careFixed: true,
 
     /* ---- Sartu Care — Hosting, Sicherheit & Wartung (monatlich, PFLICHT) ----
        Preise gelten bei Jahreszahlung. Pro Paket gilt ein Mindest-Care, Upgrade nach oben möglich. */
@@ -157,5 +168,20 @@
       ],
     },
     enterpriseTriggerFeatures: ['shop', 'login'],
+
+    /* ---- Topf 3: "Festpreis im Angebot" — Wünsche OHNE öffentlichen Preis ----
+       Werden nirgends mit Preis gezeigt. Begleitsatz überall:
+       "Auch dafür bekommst du vorab einen Festpreis — schriftlich, bevor du zusagst."
+       Im Konfigurator als anwählbare Chips (Payload-Key: wuensche). */
+    onRequest: [
+      { id: 'ki-assistent', name: 'KI-Assistent für deine Website',
+        desc: 'Beantwortet Besucherfragen rund um die Uhr — trainiert auf deine eigenen Inhalte.' },
+      { id: 'kundenbereich', name: 'Geschützter Kundenbereich / Login',
+        desc: 'Ein passwortgeschützter Bereich für Kunden, Mitglieder oder Dokumente.' },
+      { id: 'shop', name: 'Shop-Funktionen',
+        desc: 'Produkte online verkaufen — mit Warenkorb und sicherer Bezahlung.' },
+      { id: 'schnittstellen', name: 'Schnittstellen / Anbindungen',
+        desc: 'Verbindung zu deinen Programmen (z. B. Warenwirtschaft, Kalender, CRM).' },
+    ],
   };
 });
