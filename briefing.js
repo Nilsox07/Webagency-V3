@@ -835,6 +835,14 @@
       cta.appendChild(go);
       stage.appendChild(cta);
 
+      // Lokale Branchen / Ziel Neukunden: dezenter Programm-Hinweis (kein Auto-Add)
+      if (A.pfad === 'B' && !isEnterprise() &&
+          (['gastro', 'handwerk', 'gesundheit', 'dienstleistung', 'immobilien', 'kreativ'].indexOf(A.branche) > -1
+           || (A.ziele || []).indexOf('neukunden') > -1)) {
+        stage.appendChild(el('p', 'lb-cfg-foot',
+          'Tipp nach dem Go-live: Das Gefunden-werden-Programm ab 149 €/Monat — Google-Profil-Pflege inklusive.'));
+      }
+
       showPriceBar(true);
       renderPriceBar();
 

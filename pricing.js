@@ -91,11 +91,11 @@
     addons: [
       /* — Einmalig — */
       /* Texterstellung (Leistungsseite Texte): eine Variante wählen */
-      { id: 'texte',        name: 'Texterstellung pro Seite', short: 'Einzelseite', price: 120, type: 'once', common: true, group: 'texte',
+      { id: 'texte',        name: 'Texterstellung pro Seite', short: 'Einzelseite', price: 120, type: 'once', hidden: true, group: 'texte',
         qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' }, desc: '300–500 Wörter je Seite, 2 Korrekturschleifen, Meta-Title + -Description.' },
-      { id: 'texte-paket',  name: 'Texte-Paket (5 Seiten)', short: '5er-Paket', price: 490, type: 'once', common: true, group: 'texte',
+      { id: 'texte-paket',  name: 'Texte-Paket (5 Seiten)', short: '5er-Paket', price: 490, type: 'once', hidden: true, group: 'texte',
         desc: 'Texte für 5 Seiten – ca. 98 €/Seite.' },
-      { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', short: '10er-Paket', price: 890, type: 'once', group: 'texte',
+      { id: 'texte-paket10',name: 'Texte-Paket (10 Seiten)', short: '10er-Paket', price: 890, type: 'once', hidden: true, group: 'texte',
         desc: 'Texte für 10 Seiten – ca. 89 €/Seite.' },
       { id: 'texte-seo',    name: 'SEO-Option für Texte', price: 30, type: 'once',
         qty: { min: 1, max: 10, default: 1, unit: 'pro Seite' },
@@ -109,7 +109,7 @@
         desc: 'Designsystem, komplette Geschäftsausstattung, bis 5 Social-Templates, Styleguide (15+ S.).' },
       { id: 'terminbuchung',name: 'Online-Terminbuchung', price: 290, type: 'once', from: true, common: true,
         desc: 'Einrichtung 1 Buchungstool, 1 Kalender/Mitarbeiter, Bestätigungs- & Erinnerungsmail.' },
-      { id: 'google-profil',name: 'Google-Profil-Setup', price: 290, type: 'once', common: true,
+      { id: 'google-profil',name: 'Google-Profil-Setup', price: 290, type: 'once', hidden: true,
         desc: 'Einrichtung + Verifizierung, Hauptkategorie + bis 9 Zusatzkategorien, Beschreibung (bis 750 Z.), bis 10 Fotos, NAP-Konsistenz-Check.' },
       /* Kombi-Add-on: Einrichtung einmalig + Betrieb monatlich in EINER Option */
       { id: 'chatbot',      name: 'KI-Chatbot', price: 490, type: 'once', monthly: 49,
@@ -133,15 +133,15 @@
       /* — Wiederkehrend (monatlich) — */
       /* SEO-Betreuung als Retainer (Leistungsseite SEO): eine Stufe wählen */
       { id: 'seo-lite',     name: 'SEO-Betreuung Lite', short: 'Lite', price: 149, type: 'month', group: 'seo-betreuung',
-        desc: 'Bis 5 Kernseiten (Title/Meta), Keyword-Tracking bis 10, Profil-Grundpflege, Monatsreport. 3 Mon. Mindestlaufzeit.' },
+        desc: 'Google-Profil-Pflege komplett, Title/Meta aller Seiten, Keyword-Tracking bis 20, 1 Seiten-Refresh/Quartal, Klartext-Monatsreport. Nur für Sartu-Websites, 3 Mon. Mindestlaufzeit.' },
       { id: 'seo-pro',      name: 'SEO-Betreuung Pro', short: 'Pro', price: 390, type: 'month', group: 'seo-betreuung',
-        desc: 'Alles aus Lite + OnPage aller Seiten, tiefe Keyword-Recherche, 2 Landingpages/Quartal, Tracking bis 30.' },
+        desc: 'Alles aus Lite + KI-Suche-Optimierung, 2 Seiten-Refreshes + 1 neue Seite inkl. Text pro Monat, Tracking bis 50, Strategie-Call je Quartal.' },
       { id: 'seo-premium',  name: 'SEO-Betreuung Premium', short: 'Premium', price: 790, type: 'month', group: 'seo-betreuung',
-        desc: 'Alles aus Pro + Content-Strategie, bis 2 Backlinks/Mon., GEO/KI-Suche-Optimierung, Tracking bis 50.' },
+        desc: 'Alles aus Pro + KI-Sichtbarkeits-Monitoring, bis 2 neue Seiten/Monat, lokale Sichtbarkeits-Beratung, Tracking bis 100, Strategie-Call je Monat.' },
       /* Google-Profil-Pflege (Leistungsseite Lokales SEO): eine Stufe wählen */
-      { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', short: 'Basic', price: 79, type: 'month', group: 'profil-pflege',
+      { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', short: 'Basic', price: 79, type: 'month', hidden: true, group: 'profil-pflege',
         desc: 'Alle Rezensionen (Erstreaktion ≤ 2 Werktage), Öffnungszeiten/Infos aktuell, Profil-Monitoring.' },
-      { id: 'profil-pro',   name: 'Google-Profil-Pflege Pro', short: 'Pro', price: 149, type: 'month', group: 'profil-pflege',
+      { id: 'profil-pro',   name: 'Google-Profil-Pflege Pro', short: 'Pro', price: 149, type: 'month', hidden: true, group: 'profil-pflege',
         desc: 'Alles aus Basic + 2–4 Posts/Mon., bis 4 Fotos, Q&A-Management, Monatsreport.' },
     ],
 
