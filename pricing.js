@@ -77,9 +77,9 @@
     /* ---- „Nur das Design" — ohne Paket kaufbar (Code-Lieferung, kein Betrieb) ----
        Preise zentral hier; nirgends hart codieren. */
     designProducts: [
-      { id: 'design-onepager', name: 'Onepager-Design', price: 990,
+      { id: 'design-onepager', name: 'Onepager-Design', price: 990, hidden: true,
         scope: '1 Seite', desc: 'Fertiges Website-Design für eine Seite, geliefert als sauberer HTML/CSS-Code zum Selbst-Verwenden.' },
-      { id: 'design-mehrseiten', name: 'Mehrseiten-Design', price: 1990,
+      { id: 'design-mehrseiten', name: 'Mehrseiten-Design', price: 1990, hidden: true,
         scope: 'bis 8 Seitentypen', desc: 'Design-System bis 8 Seitentypen (Startseite + Unterseiten-Layouts), geliefert als HTML/CSS.' },
     ],
 

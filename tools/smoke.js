@@ -6,7 +6,7 @@
    d) node --check über alle JS-Dateien (Repo-Root)
    e) pricing.js + pricing-calc.js byte-identisch zu main (git diff)
    f) Lumi-Durchlauf in jsdom (Pfad A: Konfigurator + Paketwechsel + Extra-Toggle;
-      Pfad B: "Nur ein Design" bis Kontakt-Screen) — kein window-error, Preisleiste zeigt €
+      Pfad B: "Website-Redesign" durch Website-Flow bis Submit) — kein window-error, Payload-Beleg
    g) Marker-Grep (Schutz-Stichproben)
    Exit-Code 0 = grün (bzw. nur vorbestehend rote Checks, siehe BASELINE). */
 'use strict';
@@ -89,12 +89,18 @@ function checkD() {
   }
 }
 
-/* ---------- e) Schutzliste byte-identisch zu main ---------- */
+/* ---------- e) Schutzliste: pricing-calc.js byte-identisch; pricing.js nur erlaubte hidden-Flags ---------- */
 function checkE() {
-  for (const f of ['pricing.js', 'pricing-calc.js']) {
-    const r = cp.spawnSync('git', ['diff', 'main', '--', f], { cwd: ROOT, encoding: 'utf8' });
-    rec('e', `${f} identisch zu main`, r.stdout.trim() === '', 'Diff vorhanden');
-  }
+  // pricing-calc.js: strikt byte-identisch
+  let r = cp.spawnSync('git', ['diff', 'main', '--', 'pricing-calc.js'], { cwd: ROOT, encoding: 'utf8' });
+  rec('e', 'pricing-calc.js identisch zu main', r.stdout.trim() === '', 'Diff vorhanden');
+  // pricing.js: einzig erlaubte Änderung = `hidden: true` an design-onepager/design-mehrseiten
+  r = cp.spawnSync('git', ['diff', 'main', '--', 'pricing.js'], { cwd: ROOT, encoding: 'utf8' });
+  const changed = r.stdout.split('\n').filter(l => /^[+-]/.test(l) && !/^[+-]{3}/.test(l));
+  const onlyAllowed = changed.every(l => /design-onepager|design-mehrseiten/.test(l));
+  const addsHidden = changed.filter(l => l.startsWith('+')).every(l => /hidden: true/.test(l));
+  rec('e', 'pricing.js: nur erlaubte hidden-Flags (design-Produkte)', changed.length > 0 && onlyAllowed && addsHidden,
+    `geänderte Zeilen: ${changed.length}, nur-design: ${onlyAllowed}, alle +hidden: ${addsHidden}`);
 }
 
 /* ---------- f) Lumi-Durchlauf in jsdom ---------- */
@@ -112,7 +118,16 @@ function lumiDom() {
   w.Element.prototype.scrollIntoView = function () {};
   w.HTMLElement.prototype.scrollTo = function () {};
   w.scrollTo = function () {};
-  w.fetch = () => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({}), text: () => Promise.resolve('') });
+  // Browser-treuer Polyfill: benannter Formular-Control-Zugriff (form.name/email/telefon/dsgvo).
+  // jsdom implementiert die benannten HTMLFormElement-Properties nicht — echte Browser schon.
+  ['name', 'email', 'telefon', 'dsgvo'].forEach((fld) => {
+    Object.defineProperty(w.HTMLFormElement.prototype, fld, {
+      configurable: true,
+      get() { return this.querySelector('[name="' + fld + '"]') || (fld === 'name' ? (this.getAttribute('name') || '') : undefined); },
+    });
+  });
+  const fetchCalls = [];
+  w.fetch = (url, opts) => { fetchCalls.push({ url: String(url), body: opts && opts.body }); return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({}), text: () => Promise.resolve('') }); };
   // Seiten-Skripte in Dokumentreihenfolge ausführen
   const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1].split('?')[0]);
   for (const s of srcs) {
@@ -120,16 +135,44 @@ function lumiDom() {
     try { w.eval(code); } catch (e) { errors.push(s + ': ' + e.message); }
   }
   w.document.dispatchEvent(new w.Event('DOMContentLoaded', { bubbles: true }));
-  return { dom, w, errors };
+  return { dom, w, errors, fetchCalls };
 }
 const click = (w, elm) => elm.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, view: w }));
+// Treibt den geführten Flow bis zum Kontakt-Screen, füllt das Formular und sendet ab.
+// Liefert das via fetch (Supabase-POST) erfasste Payload-Objekt zurück (oder null).
+async function driveToSubmit(w, fetchCalls) {
+  const qq = (s) => w.document.querySelector(s);
+  const qaa = (s) => [...w.document.querySelectorAll(s)];
+  let guard = 0;
+  while (!/wohin darf Sartu dein Angebot/i.test(qq('#lumiStage').textContent) && guard++ < 30) {
+    const cta = qq('#lumiPriceBar:not([hidden]) .lb-pricebar-cta');
+    const next = qq('.lb-next'), skip = qq('.lb-skip');
+    if (next) { click(w, next); continue; }
+    if (cta) { click(w, cta); continue; }
+    if (skip) { click(w, skip); continue; }
+    const opt = qaa('#lumiStage button').find(b => !/lb-(back|skip|next|pricebar|addon-toggle|pkg)/.test(b.className));
+    if (opt) { click(w, opt); continue; }
+    break;
+  }
+  const form = qq('.lb-form');
+  if (form) {
+    form.querySelector('[name="name"]').value = 'Testnutzer';
+    form.querySelector('[name="email"]').value = 'test@example.de';
+    form.querySelector('[name="dsgvo"]').checked = true;
+    form.dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true }));
+    await new Promise((r) => setTimeout(r, 0)); // async persist()/fetch() abwarten
+  }
+  const post = fetchCalls.find(c => /\/rest\/v1\/briefings/.test(c.url));
+  if (!post || !post.body) return null;
+  try { return JSON.parse(post.body).payload || null; } catch (e) { return null; }
+}
 const q = (w, sel) => w.document.querySelector(sel);
 const qa = (w, sel) => [...w.document.querySelectorAll(sel)];
 
-function checkF() {
+async function checkF() {
   // --- Pfad A: Komplette Website -> direkt zum Konfigurator ---
   try {
-    const { w, errors } = lumiDom();
+    const { w, errors, fetchCalls } = lumiDom();
     const step = (sel, idx, label) => {
       const els = qa(w, sel);
       if (!els[idx || 0]) throw new Error(`Element fehlt: ${label || sel}`);
@@ -155,26 +198,24 @@ function checkF() {
     if (addon) click(w, addon);
     const sum3 = sums();
     rec('f', 'A: Preis nach Extra-Toggle zeigt €', /\d[\d.,]*\s*€/.test(sum3), `Inhalt: "${sum3}"`);
+    // bis zum Kontakt treiben + absenden -> Payload prüfen
+    const payA = await driveToSubmit(w, fetchCalls);
+    rec('f', 'A: Submit-Payload produkt_typ=website', !!payA && payA.produkt_typ === 'website', payA ? `typ=${payA.produkt_typ}` : 'kein Payload');
     rec('f', 'A: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   } catch (e) {
     rec('f', 'A: Durchlauf', false, e.message);
   }
-  // --- Pfad B: Nur ein Design -> bis Kontakt-Screen ---
+  // --- Pfad B: Website-Redesign -> Website-Flow -> Kontakt + Submit ---
   try {
-    const { w, errors } = lumiDom();
+    const { w, errors, fetchCalls } = lumiDom();
     click(w, q(w, '.lb-start'));
-    click(w, qa(w, '.lb-path-card')[1]);                    // Nur ein Design -> d_branche
-    click(w, q(w, '.lb-skip') || q(w, '.lb-next'));         // d_branche überspringen -> design
-    click(w, q(w, '.lb-skip') || q(w, '.lb-next'));         // design-Screen weiter -> d_umfang
-    // Produkt wählen: erster Options-Button im Stage (kein back/skip/next)
-    const opt = qa(w, '#lumiStage button').find(b => !/lb-(back|skip|next)/.test(b.className) && !/btn-primary/.test(b.className));
-    if (opt) click(w, opt);
-    const sEl = q(w, '#lumiPriceBar .lb-pricebar-sums');
-    const sum = sEl ? sEl.textContent : '';
-    rec('f', 'B: Design-Preis in Leiste (€)', /\d[\d.,]*\s*€/.test(sum), `Inhalt: "${sum}"`);
-    click(w, q(w, '.lb-next'));                             // -> contact
-    const stageTxt = q(w, '#lumiStage').textContent;
-    rec('f', 'B: Kontakt-Screen erreicht', /wohin darf Sartu dein Angebot/i.test(stageTxt), stageTxt.slice(0, 80));
+    click(w, qa(w, '.lb-path-card')[1]);                    // Option B = Redesign
+    const q1 = q(w, '.lb-q') ? q(w, '.lb-q').textContent : '';
+    rec('f', 'B: Redesign -> Website-Flow (Branche-Frage)', /Branche/i.test(q1), `Frage: "${q1.slice(0, 50)}"`);
+    const payB = await driveToSubmit(w, fetchCalls);
+    rec('f', 'B: Kontakt erreicht + abgesendet', !!payB, payB ? 'ok' : 'kein Payload');
+    rec('f', 'B: Submit-Payload produkt_typ=redesign', !!payB && payB.produkt_typ === 'redesign', payB ? `typ=${payB.produkt_typ}` : 'kein Payload');
+    rec('f', 'B: Material „Bestehende Website“ vorbelegt', !!payB && payB.briefing && (payB.briefing.material || []).indexOf('website') > -1, payB && payB.briefing ? JSON.stringify(payB.briefing.material) : '—');
     rec('f', 'B: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   } catch (e) {
     rec('f', 'B: Durchlauf', false, e.message);
@@ -189,19 +230,21 @@ function checkG() {
 }
 
 /* ---------- Lauf + Baseline-Logik ---------- */
-checkA(); checkB(); checkC(); checkD(); checkE(); checkF(); checkG();
+(async () => {
+  checkA(); checkB(); checkC(); checkD(); checkE(); await checkF(); checkG();
 
-const failures = results.filter(r => !r.ok);
-let baseline = [];
-if (fs.existsSync(BASELINE_FILE)) baseline = JSON.parse(fs.readFileSync(BASELINE_FILE, 'utf8'));
-const baseSet = new Set(baseline.map(b => b.check + '|' + b.name));
-const newFailures = failures.filter(f => !baseSet.has(f.check + '|' + f.name));
+  const failures = results.filter(r => !r.ok);
+  let baseline = [];
+  if (fs.existsSync(BASELINE_FILE)) baseline = JSON.parse(fs.readFileSync(BASELINE_FILE, 'utf8'));
+  const baseSet = new Set(baseline.map(b => b.check + '|' + b.name));
+  const newFailures = failures.filter(f => !baseSet.has(f.check + '|' + f.name));
 
-if (process.argv.includes('--write-baseline')) {
-  fs.writeFileSync(BASELINE_FILE, JSON.stringify(failures.map(({ check, name, msg }) => ({ check, name, msg })), null, 2));
-  console.log(`Baseline geschrieben: ${failures.length} vorbestehend rote Checks.`);
-}
-console.log(`smoke: ${results.length} Checks · ${failures.length} rot (${failures.length - newFailures.length} vorbestehend) · ${newFailures.length} NEU rot`);
-for (const f of newFailures) console.log(`  NEU ROT [${f.check}] ${f.name} — ${f.msg}`);
-if (process.argv.includes('--verbose')) for (const f of failures) console.log(`  rot [${f.check}] ${f.name} — ${f.msg}`);
-process.exit(newFailures.length ? 1 : 0);
+  if (process.argv.includes('--write-baseline')) {
+    fs.writeFileSync(BASELINE_FILE, JSON.stringify(failures.map(({ check, name, msg }) => ({ check, name, msg })), null, 2));
+    console.log(`Baseline geschrieben: ${failures.length} vorbestehend rote Checks.`);
+  }
+  console.log(`smoke: ${results.length} Checks · ${failures.length} rot (${failures.length - newFailures.length} vorbestehend) · ${newFailures.length} NEU rot`);
+  for (const f of newFailures) console.log(`  NEU ROT [${f.check}] ${f.name} — ${f.msg}`);
+  if (process.argv.includes('--verbose')) for (const f of failures) console.log(`  rot [${f.check}] ${f.name} — ${f.msg}`);
+  process.exit(newFailures.length ? 1 : 0);
+})();
