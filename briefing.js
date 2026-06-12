@@ -1102,16 +1102,16 @@
           'gelesen und bin mit der Verarbeitung meiner Angaben einverstanden. <em>*</em></span></label>' +
         '<p class="lb-form-error" id="lbFormError" role="alert" hidden></p>';
 
-      form.name.value = A.kontakt.name || '';
-      form.email.value = A.kontakt.email || '';
-      form.telefon.value = A.kontakt.telefon || '';
-      form.dsgvo.checked = !!A.kontakt.dsgvo;
+      form.elements.namedItem('name').value = A.kontakt.name || '';
+      form.elements.namedItem('email').value = A.kontakt.email || '';
+      form.elements.namedItem('telefon').value = A.kontakt.telefon || '';
+      form.elements.namedItem('dsgvo').checked = !!A.kontakt.dsgvo;
 
       function sync() {
-        A.kontakt.name = form.name.value.trim();
-        A.kontakt.email = form.email.value.trim();
-        A.kontakt.telefon = form.telefon.value.trim();
-        A.kontakt.dsgvo = form.dsgvo.checked;
+        A.kontakt.name = form.elements.namedItem('name').value.trim();
+        A.kontakt.email = form.elements.namedItem('email').value.trim();
+        A.kontakt.telefon = form.elements.namedItem('telefon').value.trim();
+        A.kontakt.dsgvo = form.elements.namedItem('dsgvo').checked;
       }
       ['input', 'change'].forEach(function (ev) { form.addEventListener(ev, sync); });
 
