@@ -1,7 +1,7 @@
-/* proof-lumi-flow.js — Abnahme-Beleg LUMI FLOW V2 · Etappe 1 (Frage-Schritte neu)
-   Prüft: 8 Schritte erreichbar · Umfang 4 distinkte Preise · Funktions-Tags je Typ ·
-   Eigene-Farbe-Popover → HEX im Payload · seiten_sonstige im Payload · SEO-Default null ·
-   kompletter jsdom-Durchlauf bis Submit · Konsole fehlerfrei. */
+/* proof-lumi-flow.js — Abnahme-Beleg LUMI FLOW V2 · Etappe 2 (Übersicht auf Kontakt-Screen)
+   Prüft: Flow endet im Kontakt (keine Zusammenfassungs-Seite) · Empfehlungs-Karte mit
+   Einmal- & Monatsbetrag · Übersichts-Liste mit „ändern"-Rücksprung · DOM-Count interaktiv ·
+   Logo-Zeile nur ohne Logo-Material + Summen-Update · Deep-Link-Payload · Payload-Keys · Konsole. */
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -35,12 +35,32 @@ const click = (w, el) => el && el.dispatchEvent(new w.MouseEvent('click', { bubb
 const q = (w, s) => w.document.querySelector(s);
 const qa = (w, s) => [...w.document.querySelectorAll(s)];
 const qtext = (w) => (q(w, '.lb-q') ? q(w, '.lb-q').textContent : '');
-const progress = (w) => (q(w, '#lumiProgressLabel') && !q(w, '#lumiProgress').hidden ? q(w, '#lumiProgressLabel').textContent : '');
-const next = (w) => { const n = q(w, '.lb-next'); if (n) return click(w, n); const s = q(w, '.lb-skip'); if (s) return click(w, s); };
+const onContact = (w) => !!q(w, '.lb-form') && !!q(w, '.lb-reccard-slim');
+function next(w) { const n = q(w, '.lb-next'); if (n) { click(w, n); return; } const s = q(w, '.lb-skip'); if (s) click(w, s); }
+function pickCard(w, label) { const c = qa(w, '.lb-card').find(x => x.textContent.includes(label)); if (c) click(w, c); }
+function pickFunc(w, val) { const c = q(w, '.lb-func[data-val="' + val + '"]'); if (c) { const i = c.querySelector('input'); i.checked = true; i.dispatchEvent(new w.Event('change', { bubbles: true })); } }
+function pickChip(w, label) { const c = qa(w, '.lb-chip').find(x => x.textContent.trim() === label); if (c) click(w, c); }
 
-async function submit(w, fetchCalls) {
+// Geführter Durchlauf bis zum Kontakt-Screen (mit gezielten Auswahlen)
+function driveToContact(w, opts) {
+  opts = opts || {};
+  click(w, q(w, '.lb-start')); click(w, qa(w, '.lb-path-card')[0]);   // branche
+  next(w);                                                            // ziele
+  next(w);                                                            // umfang
+  pickCard(w, 'Mehrere Seiten'); next(w);                            // funktion_aktion
+  if (opts.func) pickFunc(w, opts.func);
+  next(w);                                                            // funktion_inhalt
+  next(w);                                                            // design
+  if (q(w, '.lb-mood')) click(w, q(w, '.lb-mood'));
+  if (q(w, '.lb-colortile')) click(w, q(w, '.lb-colortile'));
+  next(w);                                                            // material
+  if (opts.logo) pickChip(w, 'Logo');
+  next(w);                                                            // seo
+  next(w);                                                            // contact
+}
+async function fillSubmit(w, fetchCalls) {
   let guard = 0;
-  while (!/wohin darf Sartu dein Angebot/i.test(q(w, '#lumiStage').textContent) && guard++ < 20) next(w);
+  while (!onContact(w) && guard++ < 12) next(w);
   const form = q(w, '.lb-form');
   if (form) {
     form.querySelector('[name="name"]').value = 'Testnutzer';
@@ -52,105 +72,96 @@ async function submit(w, fetchCalls) {
   const post = fetchCalls.find(c => /\/rest\/v1\/briefings/.test(c.url));
   try { return post && post.body ? JSON.parse(post.body).payload : null; } catch (e) { return null; }
 }
+const cardOnce = (w) => { const m = (q(w, '.lb-reccard-sums') || {}).textContent || ''; const x = /Einmalig\s+([\d.]+)\s*€/.exec(m); return x ? parseInt(x[1].replace(/\./g, ''), 10) : null; };
 
 (async () => {
   let pass = 0, fail = 0;
   const ok = (cond, label, extra) => { console.log((cond ? '  ✓' : '  ✗') + ' ' + label + (extra ? ' — ' + extra : '')); cond ? pass++ : fail++; };
 
-  // ---- [1] 8 Schritte erreichbar + Schrittanzeige ----
-  console.log('\n[1] Flow: 8 Schritte erreichbar');
-  const { w, errors, fetchCalls } = lumiDom();
-  click(w, q(w, '.lb-start'));
-  click(w, qa(w, '.lb-path-card')[0]);                 // Komplette Website
-  const seen = [];
-  let guard = 0;
-  while (!q(w, '.lb-reccard') && !/wohin darf Sartu/.test(q(w, '#lumiStage').textContent) && guard++ < 15) {
-    seen.push({ q: qtext(w).slice(0, 70), p: progress(w) });
-    next(w);
-  }
-  const heads = seen.map(s => s.q);
-  ok(/Branche/i.test(heads[0] || ''), 'Schritt 1 Branche', heads[0]);
-  ok(/erreichen/i.test(heads[1] || ''), 'Schritt 2 Ziele', heads[1]);
-  ok(/groß/i.test(heads[2] || ''), 'Schritt 3 Umfang', heads[2]);
-  ok(/etwas tun/i.test(heads[3] || ''), 'Schritt 4 Funktionen·Aktionen', heads[3]);
-  ok(/zeigen/i.test(heads[4] || ''), 'Schritt 5 Funktionen·Inhalte', heads[4]);
-  ok(/Look/i.test(heads[5] || ''), 'Schritt 6 Stil & Farben', heads[5]);
-  ok(/was hast du schon/i.test(heads[6] || ''), 'Schritt 7 Material + Termin', heads[6]);
-  ok(/oben klettern/i.test(heads[7] || ''), 'Schritt 8 Sichtbarkeit (SEO)', heads[7]);
-  ok(seen.some(s => /Schritt 8 von 8/.test(s.p)), 'Schrittanzeige erreicht „Schritt 8 von 8"');
+  // ---- [1] Flow endet im Kontakt-Screen, KEINE Zusammenfassungs-Seite ----
+  console.log('\n[1] Flow → Kontakt-Screen (keine Zusammenfassungs-Seite)');
+  const a = lumiDom();
+  driveToContact(a.w, { func: 'terminbuchung' });
+  ok(onContact(a.w), 'Kontakt-Screen erreicht (Karte + Formular)');
+  ok(qa(a.w, '#lumiStage details, #lumiStage .lb-fixblock, #lumiStage .lb-accordions').length === 0, 'keine Accordions / kein Festpreis-Block mehr');
+  ok(!!q(a.w, '.lb-reccard-slim'), 'schlanke Empfehlungs-Karte vorhanden');
 
-  // ---- [2] Umfang: 4 distinkte Preise, kein Doppelpreis ----
-  console.log('\n[2] Umfang · 4 distinkte Preise');
-  const u = lumiDom().w;
-  click(u, q(u, '.lb-start')); click(u, qa(u, '.lb-path-card')[0]); next(u);  // -> ziele
-  next(u);                                                                     // -> umfang
-  const cards = qa(u, '.lb-card').map(c => c.textContent.replace(/\s+/g, ' ').trim());
-  const umfangTxt = cards.join(' | ');
-  ['1.290 €', '2.990 €', '5.990 €'].forEach(pr => ok(umfangTxt.indexOf(pr) > -1, 'Umfang enthält ' + pr));
-  ok(/individuelles Festpreis-Angebot/i.test(umfangTxt), 'Umfang enthält „individuelles Festpreis-Angebot"');
-  ok((umfangTxt.match(/2\.990 €/g) || []).length === 1, 'kein Doppelpreis (2.990 € genau 1×)');
-  ok(new Set(['1.290 €', '2.990 €', '5.990 €']).size === 3, '3 Fixpreise distinkt + 1 individuell = 4 Optionen');
+  // ---- [2] Karte: Einmal- UND Monatsbetrag IN der Karte ----
+  console.log('\n[2] Empfehlungs-Karte · beide Beträge in der Karte');
+  const sums = q(a.w, '.lb-reccard-sums') ? q(a.w, '.lb-reccard-sums').textContent : '';
+  ok(/Einmalig\s+[\d.]+\s*€/.test(sums), 'Einmalbetrag in der Karte', sums.trim());
+  ok(/Monatlich\s+[\d.]+\s*€\/Mon\./.test(sums) && /gehört dazu/.test(sums), 'Monatsbetrag (Rundum-Schutz) in der Karte');
 
-  // ---- [3] Funktions-Zeilen: je Tag-Typ ein DOM-Beleg ----
-  console.log('\n[3] Funktions-Zeilen-Karten · Preis-Tags je Typ');
-  const f = lumiDom().w;
-  click(f, q(f, '.lb-start')); click(f, qa(f, '.lb-path-card')[0]);
-  next(f); next(f); next(f);                                                   // -> funktion_aktion (Schritt 4)
-  ok(/etwas tun/i.test(qtext(f)), 'auf Schritt 4 (Aktionen)');
-  ok(!!q(f, '.lb-func-tag-price'), 'Tag-Typ Preis (Lime) vorhanden', q(f, '.lb-func-tag-price') && q(f, '.lb-func-tag-price').textContent);
-  ok(!!q(f, '.lb-func-tag-req'), 'Tag-Typ „Festpreis im Angebot" (grau) vorhanden');
-  ok(!!q(f, '.lb-func-tag-incl'), 'Tag-Typ „inklusive" vorhanden');
-  const kiTag = qa(f, '.lb-func').find(c => /KI-Chat-Assistent/.test(c.textContent));
-  ok(kiTag && /\+990 €/.test(kiTag.textContent) && /\+79 €\/Mon/.test(kiTag.textContent), 'KI-Chat-Assistent: 990 € + 79 €/Mon.', kiTag && kiTag.querySelector('.lb-func-tag') && kiTag.querySelector('.lb-func-tag').textContent);
-  next(f);                                                                     // -> funktion_inhalt (Schritt 5)
-  ok(/zeigen/i.test(qtext(f)), 'auf Schritt 5 (Inhalte)');
-  ok(!!q(f, '.lb-func-tag-platin'), 'Tag-Typ „im Platzhirsch inklusive" (kursiv) vorhanden');
-  const nl = qa(f, '.lb-func').find(c => /Newsletter/.test(c.textContent));
-  ok(nl && /\+290 €/.test(nl.textContent) && /Platzhirsch/.test(nl.textContent), 'Newsletter: +290 € · im Platzhirsch inkl.');
+  // ---- [3] Übersichts-Liste + Funktions-Preis ----
+  console.log('\n[3] Übersichts-Liste (eine Zeile je Thema, „ändern")');
+  const keys = qa(a.w, '.lb-overview-row .k').map(k => k.textContent);
+  ['Seiten', 'Funktionen', 'Design', 'Material', 'Termin', 'Sichtbarkeit'].forEach(k => ok(keys.indexOf(k) > -1, 'Zeile „' + k + '"'));
+  const funcRow = qa(a.w, '.lb-overview-row').find(r => /Funktionen/.test(r.querySelector('.k').textContent));
+  ok(funcRow && /Online-Terminbuchung \+290 €/.test(funcRow.textContent), 'Funktionen-Zeile zeigt „Online-Terminbuchung +290 €"', funcRow && funcRow.querySelector('.v').textContent);
+  ok(qa(a.w, '.lb-overview-row .lb-edit').length === keys.length, 'jede Zeile hat „ändern"-Link', qa(a.w, '.lb-overview-row .lb-edit').length + ' Links');
 
-  // ---- [4] SEO-Schritt: Default „Erstmal ohne" (seo_stufe bleibt null) ----
-  console.log('\n[4] SEO-Schritt · Default null');
-  const s = lumiDom().w;
-  click(s, q(s, '.lb-start')); click(s, qa(s, '.lb-path-card')[0]);
-  for (let i = 0; i < 7; i++) next(s);                                         // -> seo (Schritt 8)
-  ok(/oben klettern/i.test(qtext(s)), 'auf SEO-Schritt');
-  const ohne = qa(s, '.lb-func').find(c => /Erstmal ohne/.test(c.textContent));
-  ok(ohne && ohne.classList.contains('is-on'), '„Erstmal ohne" ist Default (markiert, ohne Vorauswahl einer SEO-Stufe)');
-  ok(qa(s, '.lb-func').some(c => /Empfohlen/.test(c.innerHTML)) === false || true, 'SEO-Stufen vorhanden', String(qa(s, '.lb-func').length) + ' Karten');
+  // ---- [4] DOM-Count: interaktiv nur Formular + Submit/Zurück + ändern (+ ggf. Logo) ----
+  console.log('\n[4] DOM-Count Kontakt-Screen (interaktiv)');
+  const stray = qa(a.w, '#lumiStage .lb-func, #lumiStage .lb-card, #lumiStage .lb-chip, #lumiStage .lb-pkg, #lumiStage .lb-mood, #lumiStage .lb-colortile');
+  ok(stray.length === 0, 'keine Frage-Widgets auf dem Kontakt-Screen', stray.length + ' Fremd-Widgets');
+  const inputs = qa(a.w, '#lumiStage input').map(i => i.name || i.type);
+  ok(['name', 'email', 'telefon', 'dsgvo'].every(n => inputs.indexOf(n) > -1), 'Formularfelder vorhanden', inputs.join(', '));
+  const editLinks = qa(a.w, '.lb-edit').map(b => b.getAttribute('aria-label'));
+  console.log('     ändern-Links: ' + editLinks.join(' · '));
+  ok(!!q(a.w, '.lb-next') && !!q(a.w, '.lb-back'), 'Submit (Weiter) + Zurück vorhanden');
 
-  // ---- [5] Eigene-Farbe-Popover → HEX im Payload + seiten_sonstige + SEO null ----
-  console.log('\n[5] Eigene Farbe (HEX) + seiten_sonstige + SEO-Default im Payload');
-  const d = lumiDom();
-  click(d.w, q(d.w, '.lb-start')); click(d.w, qa(d.w, '.lb-path-card')[0]);
-  next(d.w);                                                                   // ziele -> (click next) -> umfang
-  next(d.w);                                                                   // -> umfang
-  const mehr = qa(d.w, '.lb-card').find(c => /Mehrere Seiten/.test(c.textContent));
-  click(d.w, mehr);                                                            // Umfang „Mehrere Seiten" → Seiten-Folgefrage
-  const sonst = q(d.w, '.lb-chip-sonst');
-  ok(!!sonst, '„Sonstige …"-Toggle erscheint bei Mehrseiten');
-  click(d.w, sonst);
-  const sonstField = q(d.w, '.lb-chip-sonst') && q(d.w, '#lumiStage .lb-inline input[type="text"]');
-  // robust: nimm das zuletzt eingefügte Textfeld
-  const tf = qa(d.w, '#lumiStage input[type="text"]').pop();
-  tf.value = 'Speisekarte, Partner'; tf.dispatchEvent(new d.w.Event('input', { bubbles: true }));
-  next(d.w);                                                                   // -> funktion_aktion
-  next(d.w);                                                                   // -> funktion_inhalt
-  next(d.w);                                                                   // -> design
-  ok(/Look/i.test(qtext(d.w)), 'auf Design-Schritt für Farb-Popover');
-  click(d.w, q(d.w, '.lb-colortile-add'));                                     // Hauptfarbe „Eigene Farbe +"
-  const native = q(d.w, '.lb-colorpop-native');
-  ok(!!native, 'Popover mit nativem Farbfeld geöffnet');
-  ok(!!q(d.w, '.lb-colorpop-rgb'), 'Popover zeigt RGB-Anzeige');
-  native.value = '#abcdef'; native.dispatchEvent(new d.w.Event('input', { bubbles: true }));
-  const payD = await submit(d.w, d.fetchCalls);
-  ok(!!payD, 'Payload erfasst');
-  ok(payD && payD.briefing && /^#abcdef$/i.test(payD.briefing.hauptfarbe || ''), 'Eigene Farbe als HEX im Payload (hauptfarbe)', payD && payD.briefing ? payD.briefing.hauptfarbe : '—');
-  ok(payD && payD.briefing && payD.briefing.seiten_sonstige === 'Speisekarte, Partner', 'seiten_sonstige im Payload', payD && payD.briefing ? JSON.stringify(payD.briefing.seiten_sonstige) : '—');
-  ok(payD && payD.seo_stufe === null && payD.konfiguration && payD.konfiguration.seo_stufe === null, 'SEO-Default null im Payload (keine Vorauswahl)');
+  // ---- [5] „ändern"-Rücksprung für 2 Themen (Design, Funktionen) ----
+  console.log('\n[5] „ändern"-Rücksprung (Rücksprung-Flag)');
+  const b = lumiDom(); driveToContact(b.w, {});
+  const editDesign = qa(b.w, '.lb-overview-row').find(r => /Design/.test(r.querySelector('.k').textContent)).querySelector('.lb-edit');
+  click(b.w, editDesign);
+  ok(/Look/i.test(qtext(b.w)), 'ändern → Design-Schritt', qtext(b.w).slice(0, 30));
+  next(b.w);
+  ok(onContact(b.w), 'Weiter führt direkt zurück zum Kontakt (Design)');
+  const editFunc = qa(b.w, '.lb-overview-row').find(r => /Funktionen/.test(r.querySelector('.k').textContent)).querySelector('.lb-edit');
+  click(b.w, editFunc);
+  ok(/etwas tun/i.test(qtext(b.w)), 'ändern → Funktionen-Schritt');
+  next(b.w);
+  ok(onContact(b.w), 'Weiter führt direkt zurück zum Kontakt (Funktionen)');
 
-  console.log('\n[6] Konsole');
-  ok(errors.length === 0 && d.errors.length === 0, 'keine window-errors', [...errors, ...d.errors].slice(0, 3).join(' | '));
+  // ---- [6] Logo-Zeile: nur ohne Logo-Material, unangehakt, Summen-Update ----
+  console.log('\n[6] Logo-Empfehlungszeile + Summen-Update');
+  const c = lumiDom(); driveToContact(c.w, {});                  // kein Logo-Material
+  const logo = q(c.w, '.lb-logo-offer');
+  ok(!!logo, 'Logo-Zeile erscheint ohne Logo-Material');
+  ok(logo && !logo.querySelector('input').checked, 'Logo-Zeile ist unangehakt (keine Vorauswahl)');
+  const before = cardOnce(c.w);
+  if (logo) { const i = logo.querySelector('input'); i.checked = true; i.dispatchEvent(new c.w.Event('change', { bubbles: true })); }
+  const after = cardOnce(c.w);
+  ok(before != null && after === before + 490, 'Logo-Klick erhöht Einmalsumme um 490 € (' + before + ' → ' + after + ')');
+  const cl = lumiDom(); driveToContact(cl.w, { logo: true });    // mit Logo-Material
+  ok(!q(cl.w, '.lb-logo-offer'), 'Logo-Zeile fehlt, wenn Logo-Material vorhanden');
 
-  console.log('\nPROOF E1: ' + pass + ' grün · ' + fail + ' rot');
+  // ---- [7] Deep-Link von /preise → Kontakt mit vorgewähltem Paket + offenen Zeilen ----
+  console.log('\n[7] Deep-Link ?paket=wachstum → Kontakt');
+  const d = lumiDom('?paket=wachstum');
+  ok(onContact(d.w), 'Deep-Link landet direkt im Kontakt-Screen');
+  ok(/Du hast „Wachstum“ gewählt/.test(qtext(d.w)), 'Karte „Du hast Wachstum gewählt"', qtext(d.w).slice(0, 40));
+  ok(qa(d.w, '.lb-overview-row.is-open').length > 0, 'offene Themen zeigen „noch offen — ändern"', qa(d.w, '.lb-overview-row.is-open').length + ' offen');
+  const payDL = await fillSubmit(d.w, d.fetchCalls);
+  ok(payDL && payDL.pfad === 'A' && payDL.konfiguration && payDL.konfiguration.paket === 'pro', 'Deep-Link-Payload pfad=A · paket=pro', payDL ? payDL.pfad + '/' + payDL.konfiguration.paket : '—');
+
+  // ---- [8] Submit-Payload-Keys (identisch zu vorher) + Konsole ----
+  console.log('\n[8] Payload-Keys + Konsole');
+  const e = lumiDom(); driveToContact(e.w, { func: 'terminbuchung' });
+  const pay = await fillSubmit(e.w, e.fetchCalls);
+  ok(!!pay, 'Payload erfasst');
+  console.log('     top-level : ' + Object.keys(pay || {}).sort().join(', '));
+  console.log('     konfig    : ' + Object.keys((pay && pay.konfiguration) || {}).sort().join(', '));
+  const topExpected = ['briefing', 'createdAt', 'konfiguration', 'kontakt', 'pfad', 'produkt_typ', 'schemaVersion', 'seo_stufe'];
+  ok(pay && topExpected.every(k => k in pay), 'Top-Level-Keys unverändert');
+  ['paket', 'paket_name', 'paket_preis', 'wartung', 'addons', 'wuensche', 'summe_einmalig', 'summe_monatlich', 'seo_stufe', 'stil', 'hauptfarbe', 'nebenfarbe', 'markenfarben_hex']
+    .forEach(k => ok(pay && pay.konfiguration && (k in pay.konfiguration), 'konfiguration.' + k));
+  ok(pay && pay.briefing && ('seiten_sonstige' in pay.briefing), 'briefing.seiten_sonstige vorhanden');
+  const tb = pay && pay.konfiguration && (pay.konfiguration.addons || []).some(x => x.id === 'terminbuchung');
+  ok(tb, 'gewählte Funktion (terminbuchung) liegt im Festpreis (addons)');
+  ok(a.errors.length === 0 && b.errors.length === 0 && c.errors.length === 0 && d.errors.length === 0 && e.errors.length === 0, 'keine window-errors');
+
+  console.log('\nPROOF E2: ' + pass + ' grün · ' + fail + ' rot');
   process.exit(fail ? 1 : 0);
 })();
