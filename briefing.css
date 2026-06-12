@@ -830,3 +830,85 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   border-radius: 12px; font-size: 14px; color: var(--text-light);
 }
 .lb-design-upsell strong { color: var(--green); }
+
+/* ============================================================
+   LUMI-FLOW-UMBAU · Zusammenfassung (Empfehlung + Festpreis)
+   ============================================================ */
+/* Persistenter Preis-Hinweis unter dem Schrittzähler */
+.lumi-fixhint {
+  margin: 0 0 4px; padding: 0 4px;
+  font-size: 12.5px; color: var(--text-light-muted);
+  text-align: center; letter-spacing: .01em;
+}
+
+/* EINE Empfehlungs-Karte */
+.lb-reccard {
+  background: rgba(174, 240, 0, 0.06);
+  border: 1.5px solid rgba(174, 240, 0, 0.30);
+  border-radius: 16px; padding: 18px 20px; margin: 4px 0 0;
+}
+.lb-reccard-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.lb-reccard-name { font-size: 19px; font-weight: 800; color: var(--white); }
+.lb-reccard-price { font-size: 18px; font-weight: 800; color: var(--green); white-space: nowrap; }
+.lb-reccard-situation { margin: 8px 0 0; font-size: 14px; color: var(--text-light); line-height: 1.5; }
+.lb-reccard-perks { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; }
+.lb-reccard-perks li { position: relative; padding-left: 22px; font-size: 14px; color: var(--text-light); line-height: 1.45; }
+.lb-reccard-perks li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--green); font-weight: 800; }
+.lb-reccard-care { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--border-dark); font-size: 13.5px; color: var(--text-light-muted); }
+.lb-reccard-care strong { color: var(--white); }
+
+/* Festpreis-Block (inline, Standard sichtbar) */
+.lb-fixblock {
+  margin: 14px 0 0; padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid var(--border-dark); border-radius: 16px;
+}
+.lb-fix-head { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light-muted); margin-bottom: 8px; }
+.lb-fix-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.lb-fix-row span { font-size: 14px; color: var(--text-light); }
+.lb-fix-row strong { font-size: 17px; font-weight: 800; color: var(--white); }
+.lb-fix-mo strong { color: var(--green); }
+.lb-fix-wish strong, .lb-fix-individual { color: var(--green); font-weight: 700; }
+.lb-fix-individual { font-size: 16px; }
+.lb-fix-payhint { margin: 8px 2px 0; font-size: 12px; color: var(--text-light-muted); line-height: 1.5; }
+
+/* Accordions (FAQ-Optik, Standard ZU) */
+.lb-accordions { margin: 16px 0 0; display: grid; gap: 8px; }
+.lb-acc { border: 1.5px solid var(--border-dark); border-radius: 12px; background: rgba(255, 255, 255, 0.03); overflow: hidden; }
+.lb-acc[open] { border-color: rgba(174, 240, 0, 0.30); }
+.lb-acc-sum {
+  list-style: none; cursor: pointer; user-select: none;
+  padding: 13px 16px; font-size: 14.5px; font-weight: 700; color: var(--white);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.lb-acc-sum::-webkit-details-marker { display: none; }
+.lb-acc-sum::after { content: "+"; font-size: 20px; font-weight: 400; color: var(--text-light-muted); transition: transform .15s ease; }
+.lb-acc[open] .lb-acc-sum::after { content: "−"; }
+.lb-acc-sum:hover { color: var(--green); }
+.lb-acc-sum-link { font-weight: 600; color: var(--text-light); text-decoration: underline; text-underline-offset: 3px; }
+.lb-acc-body { padding: 4px 16px 16px; }
+
+/* „Anderes Paket wählen" — kompakte Liste (kein Karten-Raster) */
+.lb-pkgswitch { display: grid; gap: 8px; }
+.lb-pkgswitch-row {
+  text-align: left; font: inherit; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: baseline;
+  background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-dark);
+  border-radius: 10px; padding: 11px 14px; transition: border-color .15s ease, background .15s ease;
+}
+.lb-pkgswitch-row:hover { border-color: rgba(174, 240, 0, 0.45); }
+.lb-pkgswitch-row.is-on { border-color: var(--green); background: rgba(174, 240, 0, 0.08); }
+.lb-pkgswitch-name { font-size: 14.5px; font-weight: 700; color: var(--white); }
+.lb-pkgswitch-price { font-size: 14px; font-weight: 700; color: var(--green); white-space: nowrap; }
+.lb-pkgswitch-line { grid-column: 1 / -1; font-size: 12.5px; color: var(--text-light-muted); margin-top: 2px; }
+
+/* Schlanker Danke-Screen */
+.lb-done-steps { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; counter-reset: dstep; }
+.lb-done-steps li { position: relative; padding-left: 34px; font-size: 14px; color: var(--text-light); line-height: 1.5; counter-increment: dstep; }
+.lb-done-steps li::before {
+  content: counter(dstep);
+  position: absolute; left: 0; top: -1px; width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(174, 240, 0, 0.14); color: var(--green); font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+.lb-done-steps li strong { color: var(--white); }

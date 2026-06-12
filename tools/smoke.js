@@ -169,55 +169,34 @@ const q = (w, sel) => w.document.querySelector(sel);
 const qa = (w, sel) => [...w.document.querySelectorAll(sel)];
 
 async function checkF() {
-  // --- Pfad A: Komplette Website -> direkt zum Konfigurator ---
+  // --- Weg 1: Komplette Website -> geführter Flow -> Zusammenfassung -> Submit ---
   try {
     const { w, errors, fetchCalls } = lumiDom();
-    const step = (sel, idx, label) => {
-      const els = qa(w, sel);
-      if (!els[idx || 0]) throw new Error(`Element fehlt: ${label || sel}`);
-      click(w, els[idx || 0]);
-    };
-    step('.lb-start', 0, 'Start-Button');
-    step('.lb-path-card', 0, 'Komplette Website');
-    step('.lb-path-card', 0, 'direkt zum Konfigurator');
-    const bar = q(w, '#lumiPriceBar');
-    rec('f', 'A: Preisleiste sichtbar', !!bar && !bar.hidden, bar ? 'hidden' : 'fehlt');
-    const sums = () => { const s = q(w, '#lumiPriceBar .lb-pricebar-sums'); return s ? s.textContent : ''; };
-    const sum1 = sums();
-    rec('f', 'A: Preisleiste zeigt €', /\d[\d.,]*\s*€/.test(sum1), `Inhalt: "${sum1}"`);
-    // Paket wechseln (zweite Karte)
-    const pkgs = qa(w, '.lb-pkg');
-    rec('f', 'A: Paketkarten vorhanden', pkgs.length >= 2, `gefunden: ${pkgs.length}`);
-    if (pkgs[1]) click(w, pkgs[1]);
-    const sum2 = sums();
-    rec('f', 'A: Preis nach Paketwechsel zeigt €', /\d[\d.,]*\s*€/.test(sum2), `Inhalt: "${sum2}"`);
-    // Extra togglen
-    const addon = q(w, '.lb-addon-toggle');
-    rec('f', 'A: Extra-Toggle vorhanden', !!addon, '');
-    if (addon) click(w, addon);
-    const sum3 = sums();
-    rec('f', 'A: Preis nach Extra-Toggle zeigt €', /\d[\d.,]*\s*€/.test(sum3), `Inhalt: "${sum3}"`);
-    // bis zum Kontakt treiben + absenden -> Payload prüfen
+    click(w, q(w, '.lb-start'));
+    click(w, qa(w, '.lb-path-card')[0]);                    // "Komplette Website"
+    const q1 = q(w, '.lb-q') ? q(w, '.lb-q').textContent : '';
+    rec('f', 'Website -> Branche-Frage', /Branche/i.test(q1), `Frage: "${q1.slice(0, 50)}"`);
     const payA = await driveToSubmit(w, fetchCalls);
-    rec('f', 'A: Submit-Payload produkt_typ=website', !!payA && payA.produkt_typ === 'website', payA ? `typ=${payA.produkt_typ}` : 'kein Payload');
-    rec('f', 'A: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
+    rec('f', 'Website: Kontakt erreicht + abgesendet', !!payA, payA ? 'ok' : 'kein Payload');
+    rec('f', 'Website: Submit-Payload produkt_typ=website', !!payA && payA.produkt_typ === 'website', payA ? `typ=${payA.produkt_typ}` : 'kein Payload');
+    rec('f', 'Website: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   } catch (e) {
-    rec('f', 'A: Durchlauf', false, e.message);
+    rec('f', 'Website: Durchlauf', false, e.message);
   }
-  // --- Pfad B: Website-Redesign -> Website-Flow -> Kontakt + Submit ---
+  // --- Weg 2: Website-Redesign -> geführter Flow -> Kontakt + Submit ---
   try {
     const { w, errors, fetchCalls } = lumiDom();
     click(w, q(w, '.lb-start'));
     click(w, qa(w, '.lb-path-card')[1]);                    // Option B = Redesign
     const q1 = q(w, '.lb-q') ? q(w, '.lb-q').textContent : '';
-    rec('f', 'B: Redesign -> Website-Flow (Branche-Frage)', /Branche/i.test(q1), `Frage: "${q1.slice(0, 50)}"`);
+    rec('f', 'Redesign -> Website-Flow (Branche-Frage)', /Branche/i.test(q1), `Frage: "${q1.slice(0, 50)}"`);
     const payB = await driveToSubmit(w, fetchCalls);
-    rec('f', 'B: Kontakt erreicht + abgesendet', !!payB, payB ? 'ok' : 'kein Payload');
-    rec('f', 'B: Submit-Payload produkt_typ=redesign', !!payB && payB.produkt_typ === 'redesign', payB ? `typ=${payB.produkt_typ}` : 'kein Payload');
-    rec('f', 'B: Material „Bestehende Website“ vorbelegt', !!payB && payB.briefing && (payB.briefing.material || []).indexOf('website') > -1, payB && payB.briefing ? JSON.stringify(payB.briefing.material) : '—');
-    rec('f', 'B: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
+    rec('f', 'Redesign: Kontakt erreicht + abgesendet', !!payB, payB ? 'ok' : 'kein Payload');
+    rec('f', 'Redesign: Submit-Payload produkt_typ=redesign', !!payB && payB.produkt_typ === 'redesign', payB ? `typ=${payB.produkt_typ}` : 'kein Payload');
+    rec('f', 'Redesign: Material „Bestehende Website“ vorbelegt', !!payB && payB.briefing && (payB.briefing.material || []).indexOf('website') > -1, payB && payB.briefing ? JSON.stringify(payB.briefing.material) : '—');
+    rec('f', 'Redesign: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   } catch (e) {
-    rec('f', 'B: Durchlauf', false, e.message);
+    rec('f', 'Redesign: Durchlauf', false, e.message);
   }
 }
 

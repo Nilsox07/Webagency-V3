@@ -214,20 +214,23 @@
   var progressWrap = document.getElementById('lumiProgress');
   var progressLabel = document.getElementById('lumiProgressLabel');
   var progressFill = document.getElementById('lumiProgressFill');
+  var fixHint = document.getElementById('lumiFixHint');
 
   function updateProgress(step) {
-    // Fortschritt nur im Lumi-Flow (Pfad B, komplette Website) und ab Schritt 2
+    // Fortschritt + Preis-Versprechen nur in den geführten Fragen (ab Schritt 2)
     if (A.pfad === 'B' && step && step >= 2) {
       progressWrap.hidden = false;
       progressLabel.textContent = 'Schritt ' + step + ' von ' + SCHEMA.totalSteps;
       progressFill.style.width = Math.round((step / SCHEMA.totalSteps) * 100) + '%';
+      if (fixHint) fixHint.hidden = false;
     } else {
       progressWrap.hidden = true;
+      if (fixHint) fixHint.hidden = true;
     }
   }
 
-  // Reihenfolge des Lumi-Flows (Pfad B) → endet im Konfigurator
-  var FLOW_B = ['branche', 'ziele', 'umfang', 'features', 'design', 'material', 'zeitrahmen', 'configurator'];
+  // Reihenfolge des geführten Flows → endet in der Zusammenfassung (Empfehlung + Festpreis)
+  var FLOW_B = ['branche', 'ziele', 'umfang', 'features', 'design', 'material', 'zeitrahmen', 'zusammenfassung'];
   function flowNext(name) { var i = FLOW_B.indexOf(name); return i > -1 ? FLOW_B[i + 1] : null; }
 
   var current = null;
@@ -296,6 +299,10 @@
      LIVE-PREISLEISTE (fix unten, immer sichtbar im Konfigurator)
      ============================================================ */
   var priceBar = null, priceDetailOpen = false;
+  // Hook: die Zusammenfassung setzt hier eine Funktion, die den INLINE-Festpreis-Block
+  // neu zeichnet. So aktualisieren alle bestehenden renderPriceBar()-Aufrufe (aus den
+  // Sektionen) automatisch auch die Inline-Anzeige — die fixe Preisleiste bleibt aus.
+  var updateFixblock = null;
   function ensurePriceBar() {
     if (priceBar) return priceBar;
     priceBar = el('div', 'lb-pricebar');
@@ -370,6 +377,7 @@
     sums.children[0].querySelector('strong').textContent = fmtEUR(t.once);
     sums.children[1].querySelector('strong').textContent = fmtEUR(t.monthly) + '/Mon.';
     if (priceDetailOpen) renderPriceDetail();
+    if (typeof updateFixblock === 'function') updateFixblock();
   }
   function renderPriceDetail() {
     var detail = priceBar.querySelector('#lbPriceDetail');
@@ -530,6 +538,33 @@
   }
 
   /* ============================================================
+     PREIS-TRANSPARENZ IN DEN FRAGEN (ab-Preise/Aufpreise aus pricing.js)
+     — keine harten Werte, alles aus PRICING abgeleitet.
+     ============================================================ */
+  function addonById_(id) { return (PRICING.addons || []).filter(function (a) { return a.id === id; })[0]; }
+  // Umfang: Einstiegs-Festpreis je Größe (Paket-Floor) als „ab X €" anhängen
+  function umfangOptionsPriced() {
+    var floor = { onepager: 'basis', kompakt: 'pro', umfangreich: 'pro', gross: 'platin' };
+    return (OPT.umfang || []).map(function (o) {
+      var p = pkgById(floor[o.value]);
+      var sub = o.sub;
+      if (p && typeof p.price === 'number') sub = o.sub + ' · ab ' + p.price.toLocaleString('de-DE') + ' €';
+      return { value: o.value, label: o.label, sub: sub, icon: o.icon };
+    });
+  }
+  // Funktionen: Aufpreis anhängen, wo es einen Festpreis gibt; sonst „Festpreis im Angebot"
+  function featureOptionsPriced() {
+    return (OPT.features || []).map(function (o) {
+      var suffix = '';
+      if (o.value === 'terminbuchung') { var t = addonById_('terminbuchung'); if (t) suffix = ' +' + t.price.toLocaleString('de-DE') + ' €'; }
+      else if (o.value === 'newsletter') { var n = addonById_('newsletter'); if (n) suffix = ' +' + n.price.toLocaleString('de-DE') + ' €'; }
+      else if (o.value === 'mehrsprachig') { var m = addonById_('mehrsprachig'); if (m) suffix = ' +' + m.pct + ' % je Sprache'; }
+      else if (o.value === 'shop' || o.value === 'login') { suffix = ' · Festpreis im Angebot'; }
+      return { value: o.value, label: o.label + suffix };
+    });
+  }
+
+  /* ============================================================
      SCREENS
      ============================================================ */
   var screens = {
@@ -554,33 +589,7 @@
       return null;
     }},
 
-    /* ---------- Einstiegsfrage: zwei Pfade ---------- */
-    path: { step: null, render: function () {
-      var h = lumiSays('Weißt du schon, welches Paket du möchtest?',
-        'Beide Wege führen zur selben Live-Preisübersicht — du kannst alles jederzeit ändern.');
-      var wrap = el('div', 'lb-paths');
-
-      var a = el('button', 'lb-path-card');
-      a.type = 'button';
-      a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">⚙️</span>' +
-        '<span class="lb-path-title">Ja, ich konfiguriere direkt</span>' +
-        '<span class="lb-path-sub">Paket wählen, Add-ons dazu, Preis sofort sehen.</span>';
-      a.addEventListener('click', function () { A.pfad = 'A'; goTo('configurator'); });
-
-      var b = el('button', 'lb-path-card');
-      b.type = 'button';
-      b.innerHTML = '<span class="lb-path-icon" aria-hidden="true">💬</span>' +
-        '<span class="lb-path-title">Nein, hilf mir wählen</span>' +
-        '<span class="lb-path-sub">8 kurze Fragen — Lumi empfiehlt dir das passende Paket.</span>';
-      b.addEventListener('click', function () { A.pfad = 'B'; goTo('branche'); });
-
-      wrap.appendChild(a); wrap.appendChild(b);
-      stage.appendChild(wrap);
-      actions({ onBack: back });
-      return h;
-    }},
-
-    /* ---------- Weichen-Frage: Komplette Website oder nur Design? ---------- */
+    /* ---------- Weichen-Frage: Komplette Website oder Redesign? ---------- */
     intent: { step: null, render: function () {
       var h = lumiSays('Was suchst du?',
         'Beides ist möglich — du kannst es dir später noch anders überlegen.');
@@ -589,7 +598,7 @@
       a.innerHTML = '<span class="lb-path-icon" aria-hidden="true">🌐</span>' +
         '<span class="lb-path-title">Komplette Website — ihr kümmert euch um alles</span>' +
         '<span class="lb-path-sub">Design, Texte, Technik, online bringen und betreuen.</span>';
-      a.addEventListener('click', function () { A.produkt_typ = 'website'; goTo('path'); });
+      a.addEventListener('click', function () { A.produkt_typ = 'website'; A.pfad = 'B'; goTo('branche'); });
       var b = el('button', 'lb-path-card'); b.type = 'button';
       b.innerHTML = '<span class="lb-path-icon" aria-hidden="true">🔄</span>' +
         '<span class="lb-path-title">Website-Redesign — meine bestehende Seite neu machen</span>' +
@@ -647,7 +656,7 @@
           buildChipsInto(sub, 'seiten', OPT.seiten, { exclusive: ['unsure'] });
         }
       }
-      buildCards('umfang', OPT.umfang, { onPick: function (v) {
+      buildCards('umfang', umfangOptionsPriced(), { onPick: function (v) {
         renderSub();
         // Auto-Weiter NUR bei „One-Pager" (sonst erscheint die Seiten-Folgefrage → bleiben)
         if (v === 'onepager') autoAdvance();
@@ -660,7 +669,7 @@
     /* ---------- Pfad B · 4 · Features ---------- */
     features: { step: 4, render: function () {
       var h = lumiSays('Welche Funktionen brauchst du?', 'Mehrfachauswahl möglich.');
-      buildChips('features', OPT.features, { exclusive: ['beraten'] });
+      buildChips('features', featureOptionsPriced(), { exclusive: ['beraten'] });
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
@@ -717,10 +726,9 @@
       return h;
     }},
 
-    /* ---------- GEMEINSAMER KONFIGURATOR (Pfad A direkt, Pfad B als Ergebnis) ---------- */
-    configurator: { step: 8,
-      // Pfad B: erzählerischer Moment — kurzer Tipp-Indikator vor der Empfehlung
-      // (nur einmal). Pfad A (Direkt-Konfigurator) springt sofort in den Aufbau.
+    /* ---------- ZUSAMMENFASSUNG: EINE Empfehlung + Festpreis (ein Weg für alle) ---------- */
+    zusammenfassung: { step: 8,
+      // erzählerischer Moment — kurzer Tipp-Indikator vor der Empfehlung (nur einmal)
       render: function () {
         var self = this;
         if (A.pfad === 'B' && !A._recShown) {
@@ -735,80 +743,143 @@
         return self.build();
       },
       build: function () {
-      // Vorauswahl
+      // Paket-Vorauswahl = Empfehlung; frei änderbar über „Anderes Paket wählen".
       if (!A.paket_gewaehlt) {
-        A.paket_empfohlen = A.pfad === 'B' ? recommend() : 'pro';
+        A.paket_empfohlen = recommend();
         A.paket_gewaehlt = A.paket_empfohlen;
-      } else if (A.pfad === 'B' && !A.paket_empfohlen) {
+      } else if (!A.paket_empfohlen) {
         A.paket_empfohlen = recommend();
       }
       ensureWartungDefault();
       ensureAddonState();
       prefillFromBriefing();
-      var addonsExpanded = false;
 
-      var intro = isEnterprise()
-        ? { q: 'Enterprise – wir erstellen dir ein individuelles Festpreis-Angebot.',
-            hint: 'Für Shop, Portal, Mehrsprachigkeit oder Sonderfunktionen sammle ich kurz deine Anforderungen — ohne Fixpreis. Du kannst jederzeit zu einem kleineren Paket wechseln.' }
-        : (A.pfad === 'B'
-          ? { q: 'Auf Basis deiner Angaben empfehle ich „' + pkgById(A.paket_empfohlen).name + '“.',
-              hint: 'Paket und Rundum-Schutz sind gesetzt, passende Extras vorgeschlagen. Ändere alles frei — der Preis rechnet live mit.' }
-          : { q: 'Stell dir dein Paket zusammen.',
-              hint: 'Wähle Paket und Extras — der Rundum-Schutz gehört dazu und ist schon gesetzt. Der Preis unten rechnet live mit.' });
+      showPriceBar(false);             // keine fixe Preisleiste mehr — der Festpreis steht inline
+      var ent = isEnterprise();
+      var p = pkgById(A.paket_gewaehlt);
+
+      var intro = ent
+        ? { q: 'Für dein Vorhaben empfehle ich ein individuelles Festpreis-Angebot.',
+            hint: 'Sag mir kurz, was du brauchst — den genauen Festpreis bekommst du schriftlich, bevor du zusagst.' }
+        : { q: 'Auf Basis deiner Angaben empfehle ich „' + p.name + '“.',
+            hint: 'Das ist alles, was du brauchst — zum Festpreis. Unten kannst du noch anpassen, wenn du möchtest.' };
       var h = lumiSays(intro.q, intro.hint);
 
-      // Zurück-Link oben
-      var top = el('div', 'lb-cfg-top');
-      var backLink = el('button', 'lb-back', '‹ Zurück'); backLink.type = 'button';
-      backLink.addEventListener('click', back); top.appendChild(backLink);
-      stage.appendChild(top);
-
-      // Paket immer sichtbar (keine Sackgasse); restliche Sektionen je nach Modus
-      var pkgSec = el('div', 'lb-cfg-section');
-      var dynSec = el('div');
-      var paySec = el('div', 'lb-cfg-section lb-cfg-pay');
-      var wartSec, pageSec, brandSec, addSec, designSec, wishSec, seoSec; // in renderDynamic() befüllt
-      stage.appendChild(pkgSec); stage.appendChild(dynSec); stage.appendChild(paySec);
-
-      // WICHTIG: EXTRAS_VISIBLE/EXTRAS_MORE VOR dem ersten renderDynamic() zuweisen.
-      // Vorher lief die var-Zuweisung erst weiter unten → beim Erstrender war
-      // EXTRAS_VISIBLE undefined → forEach-Crash riss Extras, Preisleiste und Weiter-Logik ab.
+      // Konstanten/Container VOR dem ersten Render der Sektionen (Crash-Historie, siehe Logo-Hinweis)
       var EXTRAS_VISIBLE = ['terminbuchung', 'mehrsprachig', 'express'];
       var EXTRAS_MORE = ['newsletter'];
+      var addonsExpanded = false;
+      var pageSec, addSec, brandSec, seoSec, wishSec;   // Accordion-Bodies (in renderAccordions() befüllt)
 
-      renderPkg(); renderDynamic(); renderPayTerms();
+      // 1) EINE Empfehlungs-Karte  2) Festpreis-Block (inline)  3) Zahlungs-Hinweiszeile
+      var recCard = el('div', 'lb-reccard'); stage.appendChild(recCard);
+      var fixBlock = el('div', 'lb-fixblock'); stage.appendChild(fixBlock);
+      var payHint = el('p', 'lb-fix-payhint',
+        'Zahlung in Meilensteinen · alle Preise netto zzgl. MwSt. — unverbindliche Übersicht, kein Vertrag.');
+      stage.appendChild(payHint);
 
-      // CTA unter den Sektionen (zusätzlich zur Preisleiste)
-      var cta = el('div', 'lb-cfg-cta');
-      var go = el('button', 'btn btn-primary btn-lg'); go.type = 'button';
-      go.innerHTML = 'Weiter zur Angebotsanfrage <span class="arrow" aria-hidden="true">→</span>';
-      go.addEventListener('click', function () { goTo('contact'); });
-      cta.appendChild(go);
-      stage.appendChild(cta);
+      if (ent) {
+        renderRecCardEnterprise(); renderFixblock();
+        var entSec = el('div', 'lb-cfg-section'); stage.appendChild(entSec);
+        renderEnterprise(entSec);
+      } else {
+        renderRecCard(); renderFixblock();
+        // alles Weitere standardmäßig ZU: Anpassungen liegen in geschlossenen Accordions
+        var accWrap = el('div', 'lb-accordions'); stage.appendChild(accWrap);
+        renderAccordions(accWrap);
+      }
 
+      // Weiter / Zurück (einzige offene Buttons im Standard)
+      actions({ onBack: back, onNext: function () { goTo('contact'); }, nextLabel: 'Weiter zur Angebotsanfrage' });
 
-      showPriceBar(true);
-      renderPriceBar();
+      // Hook: bestehende renderPriceBar()-Aufrufe (aus den Sektionen) aktualisieren den Inline-Block
+      updateFixblock = function () { if (fixBlock && fixBlock.isConnected) renderFixblock(); };
 
-      function rerenderAll() { renderPkg(); renderDynamic(); renderPayTerms(); renderPriceBar(); }
-      function renderDynamic() {
-        dynSec.innerHTML = '';
-        if (isEnterprise()) { renderEnterprise(dynSec); return; }
-        wartSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wartSec);
-        pageSec = el('div', 'lb-cfg-section'); dynSec.appendChild(pageSec);
-        brandSec = el('div', 'lb-cfg-section'); dynSec.appendChild(brandSec);
-        addSec = el('div', 'lb-cfg-section'); dynSec.appendChild(addSec);
-        designSec = el('div', 'lb-cfg-section'); dynSec.appendChild(designSec);
-        wishSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wishSec);
-        seoSec = el('div', 'lb-cfg-section'); dynSec.appendChild(seoSec);
-        renderWartung(); renderPages(); renderBranding(); renderAddons(); renderDesignDir(); renderWuensche(); renderSeo();
+      /* -- Inline-Festpreis-Block (Standard sichtbar, aktualisiert sich bei jeder Änderung) -- */
+      function renderFixblock() {
+        if (ent) { fixBlock.innerHTML = '<div class="lb-fix-row lb-fix-individual">Individuelles Festpreis-Angebot</div>'; return; }
+        var t = totals();
+        var seoLine = '';
+        if (A.seo_stufe) { var sp = seoProductFor(A.seo_stufe); if (sp) seoLine = '<div class="lb-fix-row lb-fix-mo"><span>+ SEO-Betreuung</span><strong>' + sp.price.toLocaleString('de-DE') + ' €/Mon.</strong></div>'; }
+        var wishLine = (A.wuensche && A.wuensche.length) ? '<div class="lb-fix-row lb-fix-wish"><span>+ Sonderwünsche</span><strong>Festpreis im Angebot</strong></div>' : '';
+        fixBlock.innerHTML =
+          '<div class="lb-fix-head">Dein Festpreis</div>' +
+          '<div class="lb-fix-row"><span>Einmalig</span><strong>' + fmtEUR(t.once) + '</strong></div>' +
+          '<div class="lb-fix-row lb-fix-mo"><span>Monatlich · Pflicht</span><strong>' + fmtEUR(t.monthly) + '/Mon.</strong></div>' +
+          seoLine + wishLine;
+      }
+
+      /* -- EINE Empfehlungs-Karte (Name, Situation, Klartext-Inklusivliste, Rundum-Schutz) -- */
+      function renderRecCard() {
+        var m = wartById(A.wartung);
+        var perks = (p.perks || []).map(function (x) { return '<li>' + x + '</li>'; }).join('');
+        recCard.innerHTML =
+          '<div class="lb-reccard-head"><span class="lb-reccard-name">' + p.name + '</span>' +
+            '<span class="lb-reccard-price">' + priceLabel(p.price, { from: p.from }) + '</span></div>' +
+          (p.situation ? '<p class="lb-reccard-situation">Für dich, wenn ' + p.situation + '</p>' : '') +
+          '<ul class="lb-reccard-perks">' + perks +
+            '<li>Alle Texte schreiben wir — du lieferst nur Stichpunkte.</li></ul>' +
+          '<p class="lb-reccard-care">Rundum-Schutz <strong>' + m.name + '</strong> (' + m.price.toLocaleString('de-DE') + ' €/Mon.) gehört dazu.</p>';
+      }
+      function renderRecCardEnterprise() {
+        var ep = pkgById('enterprise');
+        recCard.innerHTML =
+          '<div class="lb-reccard-head"><span class="lb-reccard-name">' + ep.name + '</span>' +
+            '<span class="lb-reccard-price">individuell</span></div>' +
+          '<p class="lb-reccard-situation">Dein Vorhaben ist größer als ein Standard-Paket — deshalb bekommst du ein eigenes Angebot.</p>' +
+          '<ul class="lb-reccard-perks">' + (ep.perks || []).map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+      }
+
+      /* -- Accordions (FAQ-Optik, standardmäßig ZU) + kompakte Paket-Umwahl -- */
+      function makeAcc(host, title) {
+        var d = el('details', 'lb-acc');
+        var s = el('summary', 'lb-acc-sum'); s.textContent = title; d.appendChild(s);
+        var body = el('div', 'lb-acc-body'); d.appendChild(body);
+        host.appendChild(d);
+        return body;
+      }
+      function renderAccordions(host) {
+        host.innerHTML = '';
+        addSec   = makeAcc(host, 'Extras hinzufügen');
+        pageSec  = makeAcc(host, 'Seitenzahl anpassen');
+        brandSec = makeAcc(host, 'Logo & Branding');
+        seoSec   = makeAcc(host, 'Sichtbarkeit nach dem Start');
+        wishSec  = makeAcc(host, 'Wünsche ohne Festpreis');
+        renderAddons(); renderPages(); renderBranding(); renderSeo(); renderWuensche();
+        renderPkgSwitch(host);
+      }
+      // „Anderes Paket wählen" — kompakte Liste (Name + Preis + 1 Satz), KEIN Karten-Raster
+      function renderPkgSwitch(host) {
+        var d = el('details', 'lb-acc lb-acc-switch');
+        var s = el('summary', 'lb-acc-sum lb-acc-sum-link'); s.textContent = 'Anderes Paket wählen'; d.appendChild(s);
+        var body = el('div', 'lb-acc-body');
+        var list = el('div', 'lb-pkgswitch');
+        PRICING.packages.forEach(function (pk) {
+          var row = el('button', 'lb-pkgswitch-row'); row.type = 'button';
+          if (A.paket_gewaehlt === pk.id) row.classList.add('is-on');
+          var priceTxt = pk.configurable === false
+            ? (pk.priceFrom ? priceLabel(pk.priceFrom, { from: true }) : 'individuell')
+            : priceLabel(pk.price, { from: pk.from });
+          row.innerHTML =
+            '<span class="lb-pkgswitch-name">' + pk.name + '</span>' +
+            '<span class="lb-pkgswitch-price">' + priceTxt + '</span>' +
+            '<span class="lb-pkgswitch-line">' + pk.scope + '</span>';
+          row.addEventListener('click', function () {
+            A.paket_gewaehlt = pk.id;
+            ensureWartungDefault();
+            if (pk.includedPages == null) A.extraPages = 0;
+            renderScreen('zusammenfassung');     // alles frisch: Karte + Festpreis + Sektionen
+          });
+          list.appendChild(row);
+        });
+        body.appendChild(list); d.appendChild(body); host.appendChild(d);
       }
 
       /* -- Topf 3: Wünsche ohne Festpreis-Liste (anwählbare Chips, kein Preis) -- */
       function renderWuensche() {
         var list = PRICING.onRequest || [];
         if (!list.length) return;
-        wishSec.innerHTML = '<h3 class="lb-cfg-h">5 · Wünsche ohne Festpreis-Liste <span class="lb-cfg-opt">(optional)</span></h3>';
+        wishSec.innerHTML = '<p class="lb-cfg-foot" style="margin-top:0;margin-bottom:12px;">Größere Wünsche ohne öffentlichen Festpreis — den Festpreis bekommst du schriftlich, bevor du zusagst.</p>';
         var grid = el('div', 'lb-wish-chips');
         list.forEach(function (w) {
           var on = A.wuensche.indexOf(w.id) > -1;
@@ -832,7 +903,7 @@
       function brandingProducts() { return (PRICING.addons || []).filter(function (a) { return a.group === 'branding'; }); }
       function clearBranding() { brandingProducts().forEach(function (o) { if (A.addons[o.id]) A.addons[o.id].selected = false; }); }
       function renderBranding() {
-        brandSec.innerHTML = '<h3 class="lb-cfg-h">Logo &amp; Branding <span class="lb-cfg-opt">(optional)</span></h3>';
+        brandSec.innerHTML = '';
         var grid = el('div', 'lb-pkgs');
         brandingProducts().forEach(function (a) {
           var st = A.addons[a.id];
@@ -864,14 +935,10 @@
         brandSec.appendChild(grid);
       }
 
-      function renderDesignDir() {
-        designSec.innerHTML = '<h3 class="lb-cfg-h">Design-Richtung <span class="lb-cfg-opt">(optional)</span></h3>';
-        buildDesignDirection(designSec, false);
-      }
       function renderSeo() {
         var SEO_LOCAL = ['gastro', 'handwerk', 'gesundheit', 'dienstleistung', 'immobilien', 'kreativ'];
-        seoSec.innerHTML = '<h3 class="lb-cfg-h">Sichtbarkeit nach dem Start <span class="lb-cfg-opt">(optional)</span></h3>' +
-          '<p class="lb-cfg-foot" style="margin-top:-4px;margin-bottom:12px;">SEO-Betreuung — damit du bei Google und in der KI-Suche gefunden wirst. Standard: erstmal ohne, jederzeit später dazubuchbar.</p>';
+        seoSec.innerHTML =
+          '<p class="lb-cfg-foot" style="margin-top:0;margin-bottom:12px;">SEO-Betreuung — damit du bei Google und in der KI-Suche gefunden wirst. Standard: erstmal ohne, jederzeit später dazubuchbar.</p>';
         var grid = el('div', 'lb-pkgs');
         var empfohlen = (A.pfad === 'B' && SEO_LOCAL.indexOf(A.branche) > -1);
         (PRICING.addons || []).filter(function (a) { return a.group === 'seo-betreuung'; }).forEach(function (a) {
@@ -901,63 +968,12 @@
         seoSec.appendChild(grid);
       }
 
-      function renderPkg() {
-        pkgSec.innerHTML = '<h3 class="lb-cfg-h">1 · Paket</h3>';
-        var grid = el('div', 'lb-pkgs');
-        PRICING.packages.forEach(function (p) {
-          var c = el('button', 'lb-pkg'); c.type = 'button';
-          // Enterprise: "ab 9.990 €" wie auf Leistungs-/Preise-Seite (priceFrom = reine Anzeige,
-          // Live-Berechnung bleibt "Individuelles Angebot" über den Enterprise-Abzweig)
-          var priceTxt = p.configurable === false
-            ? (p.priceFrom ? priceLabel(p.priceFrom, { from: true }) + ' · individuell' : 'Individuelles Angebot')
-            : priceLabel(p.price, { from: p.from });
-          var pagesLine = p.includedPages
-            ? '<span class="lb-pkg-pages">' + p.includedPages + ' Seite' + (p.includedPages > 1 ? 'n' : '') + ' inkl. · jede weitere ab ' + PRICING.extraPage.price + ' €</span>'
-            : '';
-          // Sonderprojekte (configurable === false): schlichte Karte ohne Perk-Liste
-          var body = p.configurable === false
-            ? '<span class="lb-pkg-situation">Individuelles Festpreis-Angebot</span>'
-            : (p.situation ? '<span class="lb-pkg-situation">Für dich, wenn ' + p.situation + '</span>' : '') +
-              (p.perks && p.perks.length ? '<ul class="lb-perks">' + p.perks.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' : '');
-          c.innerHTML =
-            (p.popular ? '<span class="lb-pkg-badge">Meistgewählt</span>' : '') +
-            (p.id === A.paket_empfohlen && A.pfad === 'B' ? '<span class="lb-pkg-badge lb-pkg-badge-rec">Empfohlen</span>' : '') +
-            '<span class="lb-pkg-name">' + p.name + '</span>' +
-            '<span class="lb-pkg-price">' + priceTxt + '</span>' +
-            '<span class="lb-pkg-scope">' + p.scope + '</span>' + pagesLine + body;
-          if (A.paket_gewaehlt === p.id) c.classList.add('is-on');
-          c.addEventListener('click', function () {
-            A.paket_gewaehlt = p.id;
-            ensureWartungDefault();                 // Pflicht-Wartung auf Paket-Floor heben
-            if (p.includedPages == null) A.extraPages = 0; // Enterprise: keine Extraseiten-Logik
-            rerenderAll();
-          });
-          grid.appendChild(c);
-        });
-        pkgSec.appendChild(grid);
-      }
-
-      /* -- Rundum-Schutz: gehört fix zum Paket (keine Auswahl mehr) -- */
-      function renderWartung() {
-        var floor = pkgFloor(A.paket_gewaehlt);
-        A.wartung = floor;                 // fix auf den Paket-Floor (Care S/M/L)
-        var m = wartById(floor);
-        wartSec.innerHTML = '<h3 class="lb-cfg-h">2 · Rundum-Schutz <span class="lb-cfg-opt">(gehört dazu)</span></h3>';
-        var box = el('div', 'lb-protect-line');
-        box.innerHTML =
-          '<p class="lb-protect-main">Dein Rundum-Schutz: <strong>' + m.name + '</strong> — ' +
-            m.price.toLocaleString('de-DE') + ' €/Monat, gehört dazu.</p>' +
-          '<p class="lb-protect-sub">Preise gelten bei Jahreszahlung. Mindestlaufzeit 12 Monate, danach monatlich kündbar.</p>' +
-          '<p class="lb-protect-sub">Höhere Stufe? Sag’s uns in der Anfrage.</p>';
-        wartSec.appendChild(box);
-      }
-
       /* -- Seiten: Inklusiv-Kontingent + Extraseiten (Variante A) -- */
       function renderPages() {
         var p = pkgById(A.paket_gewaehlt);
         var inc = p.includedPages || 0;
         var total = inc + (A.extraPages || 0);
-        pageSec.innerHTML = '<h3 class="lb-cfg-h">3 · Seiten <span class="lb-cfg-opt">(' + inc + ' inklusive)</span></h3>';
+        pageSec.innerHTML = '';
         var box = el('div', 'lb-pages');
         box.innerHTML =
           '<div class="lb-pages-info"><strong>' + total + ' Seiten</strong> gesamt · ' + inc + ' inklusive' +
@@ -1107,7 +1123,7 @@
       // (EXTRAS_VISIBLE/EXTRAS_MORE werden bewusst VOR dem Erstrender zugewiesen — siehe oben.)
       function addonById(id) { return PRICING.addons.filter(function (a) { return a.id === id; })[0]; }
       function renderAddons() {
-        addSec.innerHTML = '<h3 class="lb-cfg-h">4 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
+        addSec.innerHTML = '';
         var grid = el('div', 'lb-addons');
         EXTRAS_VISIBLE.forEach(function (id) {
           var a = addonById(id), st = A.addons[id];
@@ -1129,18 +1145,6 @@
           more.addEventListener('click', function () { addonsExpanded = !addonsExpanded; renderAddons(); });
           addSec.appendChild(more);
         }
-      }
-
-      /* -- Zahlungsstaffelung (nur Anzeige) -- */
-      function renderPayTerms() {
-        var terms = PAY.forPackage(A.paket_gewaehlt);
-        var steps = terms.map(function (s) {
-          return '<li><span class="lb-pay-pct">' + s.pct + '&nbsp;%</span><span class="lb-pay-when">' + s.when + '</span></li>';
-        }).join('');
-        paySec.innerHTML =
-          '<h3 class="lb-cfg-h">6 · Zahlung in Meilensteinen <span class="lb-cfg-opt">(Übersicht, keine Zahlung)</span></h3>' +
-          '<ol class="lb-pay-steps">' + steps + '</ol>' +
-          '<p class="lb-pay-guarantee">🛡️ ' + PAY.guarantee + '</p>';
       }
 
       return h;
@@ -1207,38 +1211,20 @@
       return h;
     }},
 
-    /* ---------- Abschluss ---------- */
+    /* ---------- Abschluss (schlank: Bestätigung + 3 nächste Schritte) ---------- */
     done: { step: null, render: function () {
-      var h = lumiSays('Danke, ' + (A.kontakt.name.split(' ')[0] || '') + '! Das habe ich für dich zusammengestellt:');
-      var list = el('div', 'lb-summary');
-      summaryRows().forEach(function (r) {
-        var row = el('div', 'lb-summary-row');
-        row.innerHTML = '<span class="k">' + r.k + '</span><span class="v"></span>';
-        row.querySelector('.v').textContent = r.v || '—';
-        if (r.screen) {
-          var edit = el('button', 'lb-edit', 'ändern'); edit.type = 'button';
-          edit.setAttribute('aria-label', r.k + ' ändern');
-          edit.addEventListener('click', function () { goTo(r.screen); });
-          row.appendChild(edit);
-        }
-        list.appendChild(row);
-      });
-      stage.appendChild(list);
-
-      // Zahlungsstaffelung (Anzeige) — Design-Pfad: 50 % bei Auftrag, 50 % bei Lieferung
-      var terms = PAY.forPackage(A.paket_gewaehlt);
-      var pay = el('div', 'lb-done-pay');
-      pay.innerHTML = '<h4>Geplante Zahlung</h4><ol class="lb-pay-steps">' +
-        terms.map(function (s) { return '<li><span class="lb-pay-pct">' + s.pct + '&nbsp;%</span><span class="lb-pay-when">' + s.when + '</span></li>'; }).join('') +
-        '</ol><p class="lb-pay-guarantee">🛡️ ' + PAY.guarantee + '</p>';
-      stage.appendChild(pay);
+      var h = lumiSays('Danke, ' + (A.kontakt.name.split(' ')[0] || '') + '! Deine Anfrage ist raus.');
 
       var box = el('div', 'lb-done');
-      box.innerHTML =
-        '<p class="lb-done-status">' + (lastSendState.msg || '') + '</p>' +
-        '<p class="lb-done-msg">Sartu meldet sich i.&nbsp;d.&nbsp;R. innerhalb von <strong>1 Werktag</strong> mit deinem Angebot. ' +
-        'Es entsteht kein Vertrag — verbindlich wird es erst mit unserer Auftragsbestätigung.</p>';
+      box.innerHTML = '<p class="lb-done-status">' + (lastSendState.msg || '') + '</p>';
       stage.appendChild(box);
+
+      var steps = el('ul', 'lb-done-steps');
+      steps.innerHTML =
+        '<li><strong>Wir prüfen deine Angaben</strong> und stellen dein persönliches Festpreis-Angebot zusammen.</li>' +
+        '<li><strong>Du bekommst es i.&nbsp;d.&nbsp;R. innerhalb von 1 Werktag</strong> per E-Mail — schriftlich und unverbindlich.</li>' +
+        '<li><strong>Erst mit deiner Zusage</strong> geht es los. Vorher entsteht kein Vertrag.</li>';
+      stage.appendChild(steps);
 
       var restart = el('button', 'lb-restart', 'Neue Anfrage starten'); restart.type = 'button';
       restart.addEventListener('click', resetAll);
@@ -1286,87 +1272,6 @@
     return 'pro';
   }
 
-  /* ============================================================
-     ZUSAMMENFASSUNG / READ-BACK
-     ============================================================ */
-  function labelsFor(slot, values) {
-    var list = OPT[slot] || [];
-    return (values || []).map(function (v) {
-      var o = list.filter(function (x) { return x.value === v; })[0];
-      return o ? o.label : v;
-    });
-  }
-  function labelFor(slot, value) {
-    var o = (OPT[slot] || []).filter(function (x) { return x.value === value; })[0];
-    return o ? o.label : (value || '');
-  }
-  function selectedAddonsText() {
-    var out = [];
-    PRICING.addons.forEach(function (a) {
-      var st = A.addons[a.id];
-      if (st && st.selected) {
-        var q = a.qty ? ' ×' + st.qty : '';
-        var amt = addonAmount(a, st);
-        var price = amt == null ? '–' : fmtEUR(amt) + (a.type === 'month' ? '/Mon.' : '');
-        // Kombi-Add-on (KI-Chatbot): Einmalpreis + monatliche Kosten gemeinsam ausweisen
-        if (typeof a.monthly === 'number') price += ' + ' + fmtEUR(a.monthly) + '/Mon.';
-        out.push(a.name + q + ' (' + price + ')');
-      }
-    });
-    return out.join(', ');
-  }
-  function colorLabel(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.label : ''; }
-  function entLabel(group, value) { var o = (PRICING.enterpriseOptions[group] || []).filter(function (x) { return x.value === value; })[0]; return o ? o.label : value; }
-  function summaryRows() {
-    var rows = [];
-    var ent = isEnterprise();
-    var t = ent ? null : totals();
-    // Pfad B: Briefing-Angaben zuerst
-    if (A.pfad === 'B') {
-      var branche = labelFor('branche', A.branche);
-      if (A.branche === 'sonstiges' && A.branche_sonstiges) branche += ' (' + A.branche_sonstiges + ')';
-      rows.push({ k: 'Branche', v: branche, screen: 'branche' });
-      rows.push({ k: 'Ziele', v: labelsFor('ziele', A.ziele).join(', '), screen: 'ziele' });
-      var umfang = labelFor('umfang', A.umfang);
-      if (A.umfang && A.umfang !== 'onepager' && A.seiten.length) umfang += ' · ' + labelsFor('seiten', A.seiten).join(', ');
-      rows.push({ k: 'Umfang', v: umfang, screen: 'umfang' });
-      rows.push({ k: 'Funktionen', v: labelsFor('features', A.features).join(', '), screen: 'features' });
-      var design = labelFor('stil', A.stil); // Stil ist Einfach-Auswahl → genau ein Label (oder '')
-      var farben = [colorLabel(A.hauptfarbe), colorLabel(A.nebenfarbe)].filter(Boolean).join(' + ');
-      if (farben) design += (design ? ' · ' : '') + farben;
-      if (A.markenfarben_hex) design += ' · ' + A.markenfarben_hex;
-      rows.push({ k: 'Design', v: design, screen: 'design' });
-      rows.push({ k: 'Material', v: labelsFor('material', A.material).join(', '), screen: 'material' });
-      rows.push({ k: 'Zeitrahmen', v: labelFor('zeitrahmen', A.zeitrahmen), screen: 'zeitrahmen' });
-    }
-    // Konfiguration
-    if (ent) {
-      rows.push({ k: 'Paket', v: 'Sonderprojekte · individuelles Angebot', screen: 'configurator' });
-      var E = A.enterprise;
-      var sf = (E.sonderfunktionen || []).map(function (v) { return entLabel('sonderfunktionen', v); }).join(', ');
-      if (sf) rows.push({ k: 'Sonderfunktionen', v: sf, screen: 'configurator' });
-      if (E.seitenzahl) rows.push({ k: 'Seitenzahl', v: entLabel('seitenzahl', E.seitenzahl), screen: 'configurator' });
-      if (E.shopGroesse) rows.push({ k: 'Shop', v: entLabel('shopGroesse', E.shopGroesse), screen: 'configurator' });
-      if (E.sprachen) rows.push({ k: 'Sprachen', v: E.sprachen, screen: 'configurator' });
-      if (E.schnittstellen) rows.push({ k: 'Schnittstellen', v: E.schnittstellen, screen: 'configurator' });
-      if (E.zeithorizont) rows.push({ k: 'Zeithorizont', v: entLabel('zeithorizont', E.zeithorizont), screen: 'configurator' });
-      if (E.notiz) rows.push({ k: 'Notiz', v: E.notiz, screen: 'configurator' });
-    } else {
-      var p = pkgById(A.paket_gewaehlt);
-      rows.push({ k: 'Paket', v: p.name + ' · ' + priceLabel(p.price, { from: p.from }), screen: 'configurator' });
-      var inc = p.includedPages || 0, tot = inc + (A.extraPages || 0);
-      rows.push({ k: 'Seiten', v: tot + ' (' + inc + ' inkl.' + ((A.extraPages || 0) > 0 ? ' + ' + A.extraPages + ' extra' : '') + ')', screen: 'configurator' });
-      rows.push({ k: 'Rundum-Schutz', v: wartById(A.wartung).name + ' · ' + priceLabel(wartById(A.wartung).price, { from: wartById(A.wartung).from, period: true }) + ' (gehört dazu)', screen: 'configurator' });
-      rows.push({ k: 'Add-ons', v: selectedAddonsText() || 'keine', screen: 'configurator' });
-      if (A.seo_stufe) { var sp = seoProductFor(A.seo_stufe); rows.push({ k: 'SEO-Betreuung', v: sp.short + ' · ' + priceLabel(sp.price, { period: true }) + ' (optional, mtl. nach 3 Mon. kündbar)', screen: 'configurator' }); }
-      if ((A.wuensche || []).length) {
-        rows.push({ k: 'Sonderwünsche', v: A.wuensche.map(function (id) { var w = (PRICING.onRequest || []).filter(function (x) { return x.id === id; })[0]; return w ? w.name : id; }).join(', ') + ' · Festpreis im Angebot', screen: 'configurator' });
-      }
-      rows.push({ k: 'Einmalig', v: fmtEUR(t.once) + ' netto', screen: null });
-      rows.push({ k: 'Monatlich', v: fmtEUR(t.monthly) + ' netto (Pflicht)', screen: null });
-    }
-    return rows;
-  }
 
   /* ============================================================
      STRUKTURIERTE AUSGABE (Speicherung + optionaler LLM-Call)
@@ -1534,7 +1439,7 @@
      START
      ============================================================ */
   // Direkteinstieg aus der Preise-Seite: briefing.html?paket=basis|pro|platin|enterprise
-  // → Pfad A (Konfigurator) mit vorausgewähltem Paket, Banner/Einstieg übersprungen.
+  // → „Ich weiß, was ich will": direkt zur Zusammenfassung mit vorausgewähltem Paket.
   function startFromUrl() {
     try {
       var params = new URLSearchParams(window.location.search);
@@ -1544,8 +1449,9 @@
       if (!valid) return false;
       A.pfad = 'A';
       A.paket_gewaehlt = p;
-      history = ['path'];          // „Zurück" führt zur Pfad-Auswahl, nicht ins Nichts
-      renderScreen('configurator');
+      A._recShown = true;          // kein Tipp-Indikator beim Direkteinstieg
+      history = ['intent'];        // „Zurück" führt zur Einstiegs-Weiche, nicht ins Nichts
+      renderScreen('zusammenfassung');
       return true;
     } catch (e) { return false; }
   }
