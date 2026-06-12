@@ -226,7 +226,7 @@
 
       // PFAD
       out += section('Pfad', [
-        ['Weg', p.pfad === 'B' ? 'Lumi-Beratung (geführt)' : (p.pfad === 'A' ? 'Direkt-Konfigurator' : val(p.pfad))],
+        ['Weg', p.pfad === 'B' ? 'Lumi-Beratung (geführt)' : (p.pfad === 'A' ? 'Direkteinstieg (Paket vorgewählt)' : val(p.pfad))],
         ['Eingegangen', p.createdAt ? esc(fmtDate(p.createdAt)) : '']
       ]);
 

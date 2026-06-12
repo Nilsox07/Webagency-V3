@@ -24,6 +24,12 @@ Diese Punkte sind bewusst bis zum Go-live offen. **Reihenfolge bei Domain-Wechse
 - [ ] Bing Webmaster Tools + IndexNow einrichten.
 - [ ] Google Search Console einrichten + Sitemap einreichen.
 
+## Lumi-Funnel-Tracking (optional, Opt-in)
+- [ ] `briefing.js` → `CONFIG.trackingEndpoint` (`[ANALYTICS_BEACON_ENDPOINT]`) auf einen echten
+      Beacon-Endpoint setzen. `trackStep()` sendet dann pro Schritt nur den anonymen Schrittnamen
+      (keine Antworten, keine Kontaktdaten) und feuert ausschließlich nach Statistik-Einwilligung
+      (`SartuConsent.has('analytics')`). Ohne Endpoint bleibt es ein No-op.
+
 ## Strukturierte Daten (erst mit echter Adresse)
 - [ ] LocalBusiness/ProfessionalService-Schema mit echter NAP ergänzen + Organization um `address` erweitern.
 - [ ] Organization `sameAs` mit den echten Social-URLs füllen.

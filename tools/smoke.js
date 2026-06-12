@@ -5,8 +5,8 @@
    c) interne Links (ohne http/#/mailto/tel) zeigen auf existierende Seiten/Anker
    d) node --check über alle JS-Dateien (Repo-Root)
    e) pricing.js + pricing-calc.js byte-identisch zu main (git diff)
-   f) Lumi-Durchlauf in jsdom (Pfad A: Konfigurator + Paketwechsel + Extra-Toggle;
-      Pfad B: "Website-Redesign" durch Website-Flow bis Submit) — kein window-error, Payload-Beleg
+   f) Lumi-Durchlauf in jsdom (geführter Flow für „Komplette Website" und
+      „Website-Redesign" bis zur Zusammenfassung + Submit) — kein window-error, Payload-Beleg
    g) Marker-Grep (Schutz-Stichproben)
    Exit-Code 0 = grün (bzw. nur vorbestehend rote Checks, siehe BASELINE). */
 'use strict';

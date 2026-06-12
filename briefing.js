@@ -40,8 +40,28 @@
     supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvaW51c2R4bnJ2bnRxbmFmbnNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNzUyMjIsImV4cCI6MjA5NjY1MTIyMn0.NCTWr8qsz5LOzkMKlq4uWw9cJk-4Q7VKjhBR_xVZrtY',
     notifyEmail: '[SARTU-EMAIL]',
     datenschutzUrl: 'datenschutz.html',
+    // GO-LIVE: anonymes Funnel-Tracking (nur Schrittname, KEINE PII). Erst aktiv, wenn
+    // hier ein echter Beacon-Endpoint steht UND die Statistik-Einwilligung vorliegt.
+    trackingEndpoint: '[ANALYTICS_BEACON_ENDPOINT]',
   };
   var isPlaceholder = function (v) { return !v || /^\[.*\]$/.test(v); };
+
+  /* ============================================================
+     DATENSCHUTZ-KONFORMES SCHRITT-TRACKING (Opt-in, ohne PII)
+     ------------------------------------------------------------
+     Sendet NUR den anonymen Schrittnamen — keine Antworten, keine
+     Kontaktdaten. Feuert ausschließlich nach Statistik-Einwilligung
+     (Cookie-Consent) UND wenn ein echter Endpoint konfiguriert ist.
+     Beides ist bis GO-LIVE bewusst aus → derzeit ein No-op.
+     ============================================================ */
+  function trackStep(name) {
+    try {
+      if (isPlaceholder(CONFIG.trackingEndpoint)) return;                 // GO-LIVE: Endpoint fehlt
+      if (!window.SartuConsent || !window.SartuConsent.has('analytics')) return; // Opt-in fehlt
+      var body = JSON.stringify({ e: 'lumi_step', step: name, ts: Date.now() });
+      if (navigator.sendBeacon) navigator.sendBeacon(CONFIG.trackingEndpoint, body);
+    } catch (e) { /* still: Tracking darf den Flow nie stören */ }
+  }
 
   /* ============================================================
      ZUSTAND — eine Quelle, bleibt über beide Pfade & Zurück erhalten
@@ -240,6 +260,7 @@
     var sc = screens[name];
     if (!sc) return;
     current = name;
+    trackStep(name);              // anonymer Funnel-Schritt (Opt-in, No-op bis GO-LIVE)
     updateProgress(sc.step);
     showPriceBar(false);          // Standard aus; Konfigurator schaltet selbst ein
     clearStage();
@@ -761,8 +782,11 @@
       var intro = ent
         ? { q: 'Für dein Vorhaben empfehle ich ein individuelles Festpreis-Angebot.',
             hint: 'Sag mir kurz, was du brauchst — den genauen Festpreis bekommst du schriftlich, bevor du zusagst.' }
-        : { q: 'Auf Basis deiner Angaben empfehle ich „' + p.name + '“.',
-            hint: 'Das ist alles, was du brauchst — zum Festpreis. Unten kannst du noch anpassen, wenn du möchtest.' };
+        : (A.pfad === 'A'
+          ? { q: 'Du hast „' + p.name + '“ gewählt — hier ist dein Festpreis.',
+              hint: 'Alles drin, kein Kleingedrucktes. Du kannst unten anpassen oder ein anderes Paket wählen.' }
+          : { q: 'Auf Basis deiner Angaben empfehle ich „' + p.name + '“.',
+              hint: 'Das ist alles, was du brauchst — zum Festpreis. Unten kannst du noch anpassen, wenn du möchtest.' });
       var h = lumiSays(intro.q, intro.hint);
 
       // Konstanten/Container VOR dem ersten Render der Sektionen (Crash-Historie, siehe Logo-Hinweis)
@@ -1438,13 +1462,18 @@
   /* ============================================================
      START
      ============================================================ */
-  // Direkteinstieg aus der Preise-Seite: briefing.html?paket=basis|pro|platin|enterprise
-  // → „Ich weiß, was ich will": direkt zur Zusammenfassung mit vorausgewähltem Paket.
+  // Direkteinstieg aus der Preise-Seite: „Ich weiß, was ich will" → direkt zur
+  // Zusammenfassung mit vorausgewähltem Paket. Akzeptiert technische IDs
+  // (basis|pro|platin|enterprise) UND die sichtbaren Namen
+  // (start|wachstum|platzhirsch|sonderprojekte). Sonderprojekte → strukturierte
+  // Anfrage (Enterprise-Fragen) → Kontakt, da kein öffentlicher Fixpreis.
   function startFromUrl() {
     try {
       var params = new URLSearchParams(window.location.search);
-      var p = params.get('paket');
-      if (!p) return false;
+      var raw = (params.get('paket') || '').toLowerCase().trim();
+      if (!raw) return false;
+      var alias = { start: 'basis', wachstum: 'pro', platzhirsch: 'platin', sonderprojekte: 'enterprise', sonderprojekt: 'enterprise' };
+      var p = alias[raw] || raw;
       var valid = PRICING.packages.some(function (x) { return x.id === p; });
       if (!valid) return false;
       A.pfad = 'A';

@@ -12,12 +12,15 @@ const ROOT = path.resolve(__dirname, '..');
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const JSDOM_KNOWN = /Cannot create property '(value|checked)' on string/;
 
-function lumiDom() {
+function lumiDom(query) {
   const html = read('briefing.html');
   const vc = new VirtualConsole(); vc.on('jsdomError', () => {});
-  const dom = new JSDOM(html, { url: 'https://example.test/briefing', runScripts: 'outside-only', virtualConsole: vc, pretendToBeVisual: true });
+  const dom = new JSDOM(html, { url: 'https://example.test/briefing' + (query || ''), runScripts: 'outside-only', virtualConsole: vc, pretendToBeVisual: true });
   const w = dom.window;
   const errors = [];
+  const beaconCalls = [];
+  try { Object.defineProperty(w.navigator, 'sendBeacon', { configurable: true, value: (url, body) => { beaconCalls.push({ url: String(url), body }); return true; } }); } catch (e) {}
+  w.__beaconCalls = beaconCalls;
   w.addEventListener('error', e => { const m = String(e.message || e.error); if (!JSDOM_KNOWN.test(m)) errors.push(m); });
   w.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
   w.Element.prototype.scrollIntoView = function () {};
@@ -31,7 +34,7 @@ function lumiDom() {
   const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1].split('?')[0]);
   for (const s of srcs) { try { w.eval(read(s)); } catch (e) { errors.push(s + ': ' + e.message); } }
   w.document.dispatchEvent(new w.Event('DOMContentLoaded', { bubbles: true }));
-  return { w, errors, fetchCalls };
+  return { w, errors, fetchCalls, beaconCalls };
 }
 const click = (w, el) => el && el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, view: w }));
 const q = (w, s) => w.document.querySelector(s);
@@ -125,8 +128,30 @@ async function driveToSubmit(w, fetchCalls) {
       .forEach(k => ok(k in pay.konfiguration, 'konfiguration.' + k + ' vorhanden'));
   }
 
-  console.log('\n[4] Konsole / window-errors');
+  console.log('\n[4] Konsole / window-errors / Tracking');
   ok(errors.length === 0 && d2.errors.length === 0, 'keine window-errors', [...errors, ...d2.errors].slice(0, 3).join(' | '));
+  ok((w.__beaconCalls || []).length === 0 && (d2.w.__beaconCalls || []).length === 0, 'Schritt-Tracking ist No-op ohne Endpoint/Consent (kein Beacon)');
+
+  // 5) Deeplinks von /preise — direkter Einstieg mit vorgewähltem Paket (Pfad A)
+  console.log('\n[5] Deeplinks /briefing?paket=… → Zusammenfassung mit vorgewähltem Paket');
+  const deeplink = (query, expectName, label) => {
+    const d = lumiDom(query);
+    const stageTxt = q(d.w, '#lumiStage').textContent;
+    const qline = q(d.w, '.lb-q') ? q(d.w, '.lb-q').textContent : '';
+    const hasFix = !!q(d.w, '.lb-fixblock') || /Individuelles Festpreis-Angebot/.test(stageTxt);
+    ok(hasFix && new RegExp(expectName).test(qline), label, qline.slice(0, 60));
+    return d;
+  };
+  deeplink('?paket=wachstum', 'Wachstum', 'Name „wachstum" → Zusammenfassung „Du hast Wachstum gewählt"');
+  deeplink('?paket=pro', 'Wachstum', 'Technische ID „pro" → selbe Zusammenfassung');
+  deeplink('?paket=platzhirsch', 'Platzhirsch', 'Name „platzhirsch" → Zusammenfassung');
+  const dEnt = deeplink('?paket=sonderprojekte', 'individuelles Festpreis-Angebot', 'Name „sonderprojekte" → individuelle Anfrage');
+  ok(!!q(dEnt.w, '.lb-ent') || /Sonderfunktionen/.test(q(dEnt.w, '#lumiStage').textContent), 'Sonderprojekte zeigt strukturierte Enterprise-Fragen');
+  // Pfad-Marker im Payload eines Deeplink-Durchlaufs
+  const dPay = lumiDom('?paket=wachstum');
+  const payDL = await driveToSubmit(dPay.w, dPay.fetchCalls);
+  ok(!!payDL && payDL.pfad === 'A', 'Deeplink-Payload pfad=A (Direkteinstieg)', payDL ? payDL.pfad : '—');
+  ok(!!payDL && payDL.konfiguration && payDL.konfiguration.paket === 'pro', 'Deeplink-Payload paket=pro (Wachstum)', payDL && payDL.konfiguration ? payDL.konfiguration.paket : '—');
 
   console.log('\nPROOF: ' + pass + ' grün · ' + fail + ' rot');
   process.exit(fail ? 1 : 0);
