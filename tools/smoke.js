@@ -89,12 +89,17 @@ function checkD() {
   }
 }
 
-/* ---------- e) Schutzliste: pricing.js + pricing-calc.js byte-identisch zu main ---------- */
+/* ---------- e) Schutzliste: pricing-calc.js byte-identisch; pricing.js IDs+Preise unverändert ---------- */
 function checkE() {
-  for (const f of ['pricing.js', 'pricing-calc.js']) {
-    const r = cp.spawnSync('git', ['diff', 'main', '--', f], { cwd: ROOT, encoding: 'utf8' });
-    rec('e', `${f} identisch zu main`, r.stdout.trim() === '', 'Diff vorhanden');
-  }
+  const r0 = cp.spawnSync('git', ['diff', 'main', '--', 'pricing-calc.js'], { cwd: ROOT, encoding: 'utf8' });
+  rec('e', 'pricing-calc.js identisch zu main', r0.stdout.trim() === '', 'Diff vorhanden');
+  // pricing.js: IDs und Preise müssen identisch zu main bleiben (Texte/Labels dürfen sich ändern)
+  const base = cp.spawnSync('git', ['show', 'main:pricing.js'], { cwd: ROOT, encoding: 'utf8' }).stdout;
+  const cur = read('pricing.js');
+  const ids = s => (s.match(/id:\s*'[^']+'/g) || []).sort();
+  const prices = s => (s.match(/(?:price|minPrice|pct):\s*'?\d+'?/g) || []).sort();
+  rec('e', 'pricing.js: IDs unverändert', JSON.stringify(ids(cur)) === JSON.stringify(ids(base)), 'ID-Menge geändert');
+  rec('e', 'pricing.js: Preise unverändert', JSON.stringify(prices(cur)) === JSON.stringify(prices(base)), 'Preis-Menge geändert');
 }
 
 /* ---------- f) Lumi-Durchlauf in jsdom ---------- */
@@ -218,7 +223,7 @@ async function checkF() {
 
 /* ---------- g) Marker-Grep ---------- */
 function checkG() {
-  const markers = ['1.290', '2.990', '5.990', '9.990', '150 €/Std', 'Gefunden-werden-Programm', '[DOMAIN]', 'GO-LIVE', 'noindex'];
+  const markers = ['1.290', '2.990', '5.990', '9.990', '150 €/Std', 'SEO-Betreuung', '[DOMAIN]', 'GO-LIVE', 'noindex'];
   const all = htmlPages().map(read).join('\n') + fs.readFileSync(path.join(ROOT, 'GO-LIVE-TODO.md'), 'utf8');
   for (const m of markers) rec('g', `Marker "${m}"`, all.includes(m), 'fehlt site-weit');
 }

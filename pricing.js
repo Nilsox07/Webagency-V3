@@ -135,9 +135,9 @@
       { id: 'seo-lite',     name: 'SEO-Betreuung Lite', short: 'Lite', price: 149, type: 'month', group: 'seo-betreuung',
         desc: 'Google-Profil-Pflege komplett, Title/Meta aller Seiten, Keyword-Tracking bis 20, 1 Seiten-Refresh/Quartal, Klartext-Monatsreport. Nur für Sartu-Websites, 3 Mon. Mindestlaufzeit.' },
       { id: 'seo-pro',      name: 'SEO-Betreuung Pro', short: 'Pro', price: 390, type: 'month', group: 'seo-betreuung',
-        desc: 'Alles aus Lite + KI-Suche-Optimierung, 2 Seiten-Refreshes + 1 neue Seite inkl. Text pro Monat, Tracking bis 50, Strategie-Call je Quartal.' },
+        desc: 'Alles aus Lite + KI-Suche-Optimierung, 2 Seiten-Refreshes + 1 neue Seite inkl. Text pro Monat, Tracking bis 50, schriftlicher Strategieplan je Quartal.' },
       { id: 'seo-premium',  name: 'SEO-Betreuung Premium', short: 'Premium', price: 790, type: 'month', group: 'seo-betreuung',
-        desc: 'Alles aus Pro + KI-Sichtbarkeits-Monitoring, bis 2 neue Seiten/Monat, lokale Sichtbarkeits-Beratung, Tracking bis 100, Strategie-Call je Monat.' },
+        desc: 'Alles aus Pro + KI-Sichtbarkeits-Monitoring, bis 2 neue Seiten/Monat, Sichtbarkeits-Empfehlungen schriftlich, Tracking bis 100, monatlicher Maßnahmenplan.' },
       /* Google-Profil-Pflege (Leistungsseite Lokales SEO): eine Stufe wählen */
       { id: 'profil-basic', name: 'Google-Profil-Pflege Basic', short: 'Basic', price: 79, type: 'month', hidden: true, group: 'profil-pflege',
         desc: 'Alle Rezensionen (Erstreaktion ≤ 2 Werktage), Öffnungszeiten/Infos aktuell, Profil-Monitoring.' },
