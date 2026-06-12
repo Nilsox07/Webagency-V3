@@ -773,7 +773,7 @@
       // WICHTIG: EXTRAS_VISIBLE/EXTRAS_MORE VOR dem ersten renderDynamic() zuweisen.
       // Vorher lief die var-Zuweisung erst weiter unten → beim Erstrender war
       // EXTRAS_VISIBLE undefined → forEach-Crash riss Extras, Preisleiste und Weiter-Logik ab.
-      var EXTRAS_VISIBLE = ['logo-lite', 'terminbuchung', 'mehrsprachig', 'express'];
+      var EXTRAS_VISIBLE = ['logo-lite', 'branding-pro', 'corporate', 'terminbuchung', 'mehrsprachig', 'express'];
       var EXTRAS_MORE = ['newsletter'];
 
       renderPkg(); renderDynamic(); renderPayTerms();
@@ -1050,6 +1050,13 @@
           '<span class="lb-addon-price">' + addonPriceText(a) + unit + '</span>';
         toggle.addEventListener('click', function () {
           st.selected = !st.selected;
+          // Gruppen-Add-ons (z. B. Logo & Branding: Lite/Pro/Corporate) sind exklusiv:
+          // beim Auswählen die Geschwister derselben Gruppe abwählen.
+          if (st.selected && a.group) {
+            PRICING.addons.forEach(function (o) {
+              if (o.group === a.group && o.id !== a.id && A.addons[o.id]) A.addons[o.id].selected = false;
+            });
+          }
           renderAddons(); renderPriceBar();
         });
         card.appendChild(toggle);
