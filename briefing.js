@@ -70,7 +70,7 @@
     pfad: null,                       // 'A' | 'B'
     // Lumi-Flow (Pfad B)
     branche: null, branche_sonstiges: '',
-    ziele: [], umfang: null, seiten: [],
+    ziele: [], umfang: null, seiten: [], seiten_sonstige: '',
     features: [], stil: null, hauptfarbe: null, nebenfarbe: null, markenfarben_hex: '',
     seo_stufe: null,                  // E2: gewählte SEO-Betreuung-Stufe (additiv) | null|'lite'|'pro'|'premium'
     material: [], uploads: { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' },
@@ -250,7 +250,7 @@
   }
 
   // Reihenfolge des geführten Flows → endet in der Zusammenfassung (Empfehlung + Festpreis)
-  var FLOW_B = ['branche', 'ziele', 'umfang', 'features', 'design', 'material', 'zeitrahmen', 'zusammenfassung'];
+  var FLOW_B = ['branche', 'ziele', 'umfang', 'funktion_aktion', 'funktion_inhalt', 'design', 'material', 'seo', 'zusammenfassung'];
   function flowNext(name) { var i = FLOW_B.indexOf(name); return i > -1 ? FLOW_B[i + 1] : null; }
 
   var current = null;
@@ -490,7 +490,12 @@
   // den Pfad-B-Schritt 'design' UND die Konfigurator-Sektion (kein Duplikat).
   function buildDesignDirection(host, withMock) {
     var mock = (withMock && window.SARTU_COLOR_MOCKUP) ? window.SARTU_COLOR_MOCKUP.build() : null;
-    function hexOf(v) { var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0]; return o ? o.hex : null; }
+    // hexOf akzeptiert Token (aus OPT.farben) ODER direkt einen HEX-Wert (Eigene Farbe)
+    function hexOf(v) {
+      if (typeof v === 'string' && /^#/.test(v)) return v;
+      var o = (OPT.farben || []).filter(function (x) { return x.value === v; })[0];
+      return o ? o.hex : null;
+    }
     function stilFlavor() { return A.stil || 'default'; }
     function refreshMock() { if (mock) mock.update(hexOf(A.hauptfarbe), hexOf(A.nebenfarbe), stilFlavor()); }
     var dgrid = el('div', 'lb-design-grid');
@@ -521,40 +526,75 @@
     var sq = el('p', 'lb-subq');
     sq.innerHTML = 'Und deine Farben? Wähle eine <strong>Hauptfarbe</strong> und eine <strong>Nebenfarbe</strong>.';
     dgrid.appendChild(sq);
+
+    function isHex(v) { return typeof v === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(v); }
+    // „Eigene Farbe"-Popover: nativer Farbwähler + HEX-Eingabe + RGB-Anzeige → setzt A[slot] auf HEX
+    function openColorPopover(wrap, slot, onApply) {
+      var ex = wrap.querySelector('.lb-colorpop'); if (ex) { wrap.removeChild(ex); return; }
+      var cur = isHex(A[slot]) ? A[slot] : '#2a5bd7';
+      var pop = el('div', 'lb-colorpop');
+      var color = el('input'); color.type = 'color'; color.className = 'lb-colorpop-native'; color.value = cur;
+      var hex = el('input'); hex.type = 'text'; hex.className = 'lb-colorpop-hex'; hex.value = cur;
+      hex.setAttribute('aria-label', 'HEX-Code'); hex.placeholder = '#RRGGBB';
+      var rgb = el('span', 'lb-colorpop-rgb');
+      function toRgb(h) { var m = /^#?([0-9a-fA-F]{6})$/.exec(h); if (!m) return ''; var n = parseInt(m[1], 16); return 'RGB ' + ((n >> 16) & 255) + ', ' + ((n >> 8) & 255) + ', ' + (n & 255); }
+      function apply(h) {
+        if (!/^#?[0-9a-fA-F]{6}$/.test(h)) return;
+        if (h[0] !== '#') h = '#' + h;
+        A[slot] = h; rgb.textContent = toRgb(h); onApply(); refreshMock();
+      }
+      rgb.textContent = toRgb(cur);
+      color.addEventListener('input', function (e) { hex.value = e.target.value; apply(e.target.value); });
+      hex.addEventListener('input', function (e) { apply(e.target.value); });
+      var done = el('button', 'lb-colorpop-done'); done.type = 'button'; done.textContent = 'Übernehmen';
+      done.addEventListener('click', function () { apply(hex.value); if (pop.parentNode) pop.parentNode.removeChild(pop); });
+      pop.appendChild(color); pop.appendChild(hex); pop.appendChild(rgb); pop.appendChild(done);
+      wrap.appendChild(pop);
+    }
+
     function colorRow(label, slot) {
       var wrap = el('div', 'lb-colorrow');
       wrap.appendChild(el('span', 'lb-colorrow-label', label));
       var tiles = el('div', 'lb-colortiles');
-      OPT.farben.forEach(function (opt) {
-        var b = el('button', 'lb-colortile'); b.type = 'button';
-        b.setAttribute('aria-label', label + ': ' + opt.label);
-        b.setAttribute('aria-pressed', A[slot] === opt.value ? 'true' : 'false');
-        b.innerHTML = '<span class="lb-colordot" style="background:' + opt.hex + '"></span><small>' + opt.label + '</small>';
-        if (A[slot] === opt.value) b.classList.add('is-on');
-        b.addEventListener('click', function () {
-          A[slot] = (A[slot] === opt.value) ? null : opt.value;
-          Array.prototype.forEach.call(tiles.querySelectorAll('.lb-colortile'), function (x) {
-            x.classList.remove('is-on'); x.setAttribute('aria-pressed', 'false');
-          });
-          if (A[slot] === opt.value) { b.classList.add('is-on'); b.setAttribute('aria-pressed', 'true'); }
-          refreshMock();
+      function renderTiles() {
+        tiles.textContent = '';
+        OPT.farben.forEach(function (opt) {
+          var b = el('button', 'lb-colortile'); b.type = 'button';
+          var sel = A[slot] === opt.value;
+          b.setAttribute('aria-label', label + ': ' + opt.label + ' — ' + (opt.mood || ''));
+          b.setAttribute('aria-pressed', sel ? 'true' : 'false');
+          if (sel) b.classList.add('is-on');
+          b.innerHTML = '<span class="lb-colordot" style="background:' + opt.hex + '"></span>' +
+            '<small class="lb-colorname">' + opt.label + '</small>' +
+            '<small class="lb-colormood">' + (opt.mood || '') + '</small>';
+          b.addEventListener('click', function () { A[slot] = (A[slot] === opt.value) ? null : opt.value; renderTiles(); refreshMock(); });
+          tiles.appendChild(b);
         });
-        tiles.appendChild(b);
-      });
+        // Eigene Farbe (HEX) als ausgewählter Kreis, falls gesetzt
+        if (isHex(A[slot])) {
+          var cb = el('button', 'lb-colortile lb-colortile-custom is-on'); cb.type = 'button';
+          cb.setAttribute('aria-pressed', 'true'); cb.setAttribute('aria-label', label + ': eigene Farbe ' + A[slot]);
+          cb.innerHTML = '<span class="lb-colordot" style="background:' + A[slot] + '"></span>' +
+            '<small class="lb-colorname">Eigene</small><small class="lb-colormood">' + A[slot] + '</small>';
+          cb.addEventListener('click', function () { A[slot] = null; renderTiles(); refreshMock(); });
+          tiles.appendChild(cb);
+        }
+        // Runder „Eigene Farbe +"-Button → Popover
+        var add = el('button', 'lb-colortile lb-colortile-add'); add.type = 'button';
+        add.setAttribute('aria-label', label + ': eigene Farbe wählen');
+        add.innerHTML = '<span class="lb-coloradd" aria-hidden="true">+</span><small class="lb-colorname">Eigene Farbe</small>';
+        add.addEventListener('click', function () { openColorPopover(wrap, slot, renderTiles); });
+        tiles.appendChild(add);
+      }
+      renderTiles();
       wrap.appendChild(tiles);
       return wrap;
     }
     dgrid.appendChild(colorRow('Hauptfarbe', 'hauptfarbe'));
     dgrid.appendChild(colorRow('Nebenfarbe', 'nebenfarbe'));
     if (mock) { dgrid.appendChild(mock); refreshMock(); }
-    var lbl = el('label', 'lb-field lb-field-optional');
-    lbl.innerHTML = '<span class="lb-field-label">Feste Markenfarbe vorhanden? <em>(HEX-Code, falls bekannt — sonst überspringen)</em></span>';
-    var inp = el('input'); inp.type = 'text'; inp.placeholder = 'z. B. #B6FF3B';
-    inp.value = A.markenfarben_hex || '';
-    inp.addEventListener('input', function (e) { A.markenfarben_hex = e.target.value; });
-    lbl.appendChild(inp); dgrid.appendChild(lbl);
     dgrid.appendChild(el('p', 'lb-design-note',
-      'Das ist nur eine grobe Richtung zur Veranschaulichung — den Feinschliff und die genauen Farbtöne machen wir gemeinsam nach dem Start. Alles wird handgemacht, kein Baukasten.'));
+      'Zeigt nur, wie deine Farben wirken — dein Design entwerfen wir individuell, das Layout hier ist nicht dein Layout. Alles handgemacht, kein Baukasten.'));
     host.appendChild(dgrid);
   }
 
@@ -563,9 +603,11 @@
      — keine harten Werte, alles aus PRICING abgeleitet.
      ============================================================ */
   function addonById_(id) { return (PRICING.addons || []).filter(function (a) { return a.id === id; })[0]; }
-  // Umfang: Einstiegs-Festpreis je Größe (Paket-Floor) als „ab X €" anhängen
+  function eur_(n) { return (n || 0).toLocaleString('de-DE') + ' €'; }
+  // Umfang: Einstiegs-Festpreis je Größe (Paket-Floor) als „ab X €" anhängen.
+  // Floors: One-Pager→Start, Mehrere→Wachstum, Groß→Platzhirsch, Über 20→Sonderprojekte (kein Fixpreis).
   function umfangOptionsPriced() {
-    var floor = { onepager: 'basis', kompakt: 'pro', umfangreich: 'pro', gross: 'platin' };
+    var floor = { onepager: 'basis', kompakt: 'pro', umfangreich: 'platin', gross: 'enterprise' };
     return (OPT.umfang || []).map(function (o) {
       var p = pkgById(floor[o.value]);
       var sub = o.sub;
@@ -573,16 +615,134 @@
       return { value: o.value, label: o.label, sub: sub, icon: o.icon };
     });
   }
-  // Funktionen: Aufpreis anhängen, wo es einen Festpreis gibt; sonst „Festpreis im Angebot"
-  function featureOptionsPriced() {
-    return (OPT.features || []).map(function (o) {
-      var suffix = '';
-      if (o.value === 'terminbuchung') { var t = addonById_('terminbuchung'); if (t) suffix = ' +' + t.price.toLocaleString('de-DE') + ' €'; }
-      else if (o.value === 'newsletter') { var n = addonById_('newsletter'); if (n) suffix = ' +' + n.price.toLocaleString('de-DE') + ' €'; }
-      else if (o.value === 'mehrsprachig') { var m = addonById_('mehrsprachig'); if (m) suffix = ' +' + m.pct + ' % je Sprache'; }
-      else if (o.value === 'shop' || o.value === 'login') { suffix = ' · Festpreis im Angebot'; }
-      return { value: o.value, label: o.label + suffix };
+
+  /* ============================================================
+     FUNKTIONS-AUSWAHL (zwei Schritte) — Zeilen-Karten mit Preis-Tags
+     Preise/Aufpreise ausschließlich aus pricing.js. Auswahl landet in
+     A.features; preisrelevante Funktionen werden auf A.addons gespiegelt
+     (syncAddonsFromFeatures) — keine Vorauswahl, nur explizite Klicks.
+     ============================================================ */
+  var FUNK_AKTION = [
+    { value: 'kontaktformular', label: 'Kontaktformular', desc: 'Besucher schreiben dir direkt über ein Formular.', kind: 'inklusive' },
+    { value: 'terminbuchung', label: 'Online-Terminbuchung', desc: 'Kunden buchen selbst Termine — mit Bestätigungs- und Erinnerungsmail.', kind: 'price', addon: 'terminbuchung' },
+    { value: 'ki-assistent', label: 'KI-Chat-Assistent', desc: 'Beantwortet Besucherfragen rund um die Uhr — trainiert auf deine Inhalte. Bis 500 Unterhaltungen/Monat.', kind: 'combo', addon: 'ki-assistent' },
+    { value: 'shop', label: 'Shop / Bezahlung', desc: 'Produkte online verkaufen — mit Warenkorb und sicherer Bezahlung.', kind: 'onrequest' },
+    { value: 'login', label: 'Geschützter Kundenbereich', desc: 'Passwortgeschützter Bereich für Kunden, Mitglieder oder Dokumente.', kind: 'onrequest' },
+    { value: 'whatsapp', label: 'WhatsApp-Kontakt', desc: 'Ein Klick öffnet den Chat mit dir auf WhatsApp.', kind: 'inklusive' },
+    { value: 'bewertungen', label: 'Google-Bewertungen einbinden', desc: 'Zeigt deine echten Google-Rezensionen direkt auf der Seite.', kind: 'inklusive' },
+  ];
+  var FUNK_INHALT = [
+    { value: 'blog', label: 'Bereich für Neuigkeiten / Blog', desc: 'Eigene Beiträge, News oder ein Blog.', kind: 'platin' },
+    { value: 'galerie', label: 'Bildergalerie', desc: 'Zeig deine Arbeiten, Produkte oder Räume in Bildern.', kind: 'inklusive' },
+    { value: 'newsletter', label: 'Newsletter-Anmeldung', desc: 'Sammle E-Mail-Adressen mit Double-Opt-In, DSGVO-konform.', kind: 'price_platin', addon: 'newsletter' },
+    { value: 'mehrsprachig', label: 'Mehrsprachig', desc: 'Deine Website in mehreren Sprachen — technisch sauber eingerichtet.', kind: 'percent', addon: 'mehrsprachig' },
+    { value: 'anfahrt', label: 'Anfahrt & Karte', desc: 'Karte mit deinem Standort und Anfahrtsbeschreibung.', kind: 'inklusive' },
+    { value: 'social', label: 'Social-Media-Einbindung', desc: 'Verlinkt oder zeigt deine Social-Media-Profile.', kind: 'inklusive' },
+    { value: 'download', label: 'Download-Bereich', desc: 'Stelle PDFs, Preislisten oder Formulare zum Download bereit.', kind: 'inklusive' },
+    { value: 'beraten', label: 'Weiß nicht — beratet mich', desc: 'Wir empfehlen dir, was zu deinem Ziel passt.', kind: 'beraten', exclusive: true },
+  ];
+  function funcTag(it) {
+    var a;
+    switch (it.kind) {
+      case 'inklusive': return { cls: 'lb-func-tag-incl', text: 'inklusive' };
+      case 'price': a = addonById_(it.addon); return { cls: 'lb-func-tag-price', text: '+' + eur_(a.price) };
+      case 'combo': a = addonById_(it.addon); return { cls: 'lb-func-tag-price', text: '+' + eur_(a.price) + ' · +' + a.monthly + ' €/Mon.' };
+      case 'percent': a = addonById_(it.addon); return { cls: 'lb-func-tag-price', text: '+' + a.pct + ' % je Sprache' };
+      case 'price_platin': a = addonById_(it.addon); return { cls: 'lb-func-tag-price', text: '+' + eur_(a.price) + ' · im Platzhirsch inkl.' };
+      case 'onrequest': return { cls: 'lb-func-tag-req', text: 'Festpreis im Angebot' };
+      case 'platin': return { cls: 'lb-func-tag-platin', text: 'im Platzhirsch inklusive' };
+      default: return null;
+    }
+  }
+  // Preisrelevante Funktionen → A.addons spiegeln (Newsletter im Platzhirsch inklusive → kein Aufpreis)
+  function syncAddonsFromFeatures() {
+    ensureAddonState();
+    var map = { terminbuchung: 'terminbuchung', 'ki-assistent': 'ki-assistent', newsletter: 'newsletter', mehrsprachig: 'mehrsprachig' };
+    Object.keys(map).forEach(function (feat) {
+      var st = A.addons[map[feat]]; if (!st) return;
+      var on = A.features.indexOf(feat) > -1;
+      if (feat === 'newsletter' && A.paket_gewaehlt === 'platin') on = false;
+      st.selected = on;
     });
+  }
+  function buildFuncCards(host, items) {
+    var grid = el('div', 'lb-funcs');
+    function refresh() {
+      Array.prototype.forEach.call(grid.querySelectorAll('.lb-func'), function (card) {
+        var v = card.getAttribute('data-val'), on = A.features.indexOf(v) > -1;
+        card.querySelector('input').checked = on; card.classList.toggle('is-on', on);
+      });
+    }
+    items.forEach(function (it) {
+      var card = el('label', 'lb-func'); card.setAttribute('data-val', it.value);
+      var on = A.features.indexOf(it.value) > -1;
+      if (on) card.classList.add('is-on');
+      var tag = funcTag(it);
+      card.innerHTML =
+        '<input type="checkbox" class="lb-func-check"' + (on ? ' checked' : '') + ' />' +
+        '<span class="lb-func-body">' +
+          '<span class="lb-func-top"><span class="lb-func-name">' + it.label + '</span>' +
+            (tag ? '<span class="lb-func-tag ' + tag.cls + '">' + tag.text + '</span>' : '') + '</span>' +
+          '<span class="lb-func-desc">' + it.desc + '</span>' +
+        '</span>';
+      card.querySelector('input').addEventListener('change', function (e) {
+        var v = it.value;
+        if (e.target.checked) {
+          if (it.exclusive) { A.features = [v]; }
+          else { A.features = A.features.filter(function (x) { return x !== 'beraten' && x !== v; }); A.features.push(v); }
+        } else {
+          A.features = A.features.filter(function (x) { return x !== v; });
+        }
+        syncAddonsFromFeatures();
+        refresh();
+      });
+      grid.appendChild(card);
+    });
+    host.appendChild(grid);
+    return grid;
+  }
+
+  // SEO-Schritt: 4 Zeilen-Karten (Erstmal ohne = Default, dann Lite/Pro/Premium aus pricing.js).
+  // KEINE Vorauswahl (A.seo_stufe bleibt null). Empfehlungs-Badge auf Lite bei lokaler Branche + Ziel Neukunden.
+  var SEO_DESC = {
+    lite: 'Google-Profil-Pflege, Title & Meta aller Seiten, Keyword-Tracking, Klartext-Monatsreport.',
+    pro: 'Alles aus Lite + KI-Suche-Optimierung, je Monat eine neue Seite inkl. Text, Quartals-Strategie.',
+    premium: 'Alles aus Pro + Sichtbarkeits-Monitoring, bis 2 neue Seiten pro Monat, monatlicher Maßnahmenplan.',
+  };
+  function buildSeoCards(host) {
+    var SEO_LOCAL = ['gastro', 'handwerk', 'gesundheit', 'dienstleistung', 'immobilien', 'kreativ'];
+    var empfohlen = SEO_LOCAL.indexOf(A.branche) > -1 && (A.ziele || []).indexOf('neukunden') > -1;
+    var grid = el('div', 'lb-funcs lb-seo');
+    function refresh() {
+      Array.prototype.forEach.call(grid.querySelectorAll('.lb-func'), function (c) {
+        var v = c.getAttribute('data-val'), on = (v === 'none') ? !A.seo_stufe : (A.seo_stufe === v);
+        c.querySelector('input').checked = on; c.classList.toggle('is-on', on);
+      });
+    }
+    function card(v, name, price, desc, rec) {
+      var c = el('label', 'lb-func lb-func-radio'); c.setAttribute('data-val', v);
+      var on = (v === 'none') ? !A.seo_stufe : (A.seo_stufe === v);
+      if (on) c.classList.add('is-on');
+      var tag = price == null
+        ? '<span class="lb-func-tag lb-func-tag-incl">0 €</span>'
+        : '<span class="lb-func-tag lb-func-tag-price">' + price.toLocaleString('de-DE') + ' €/Mon.</span>';
+      c.innerHTML =
+        '<input type="radio" name="lbseo" class="lb-func-check"' + (on ? ' checked' : '') + ' />' +
+        '<span class="lb-func-body"><span class="lb-func-top"><span class="lb-func-name">' + name +
+          (rec ? ' <span class="lb-pkg-badge lb-pkg-badge-rec" style="position:static;display:inline-block;margin-left:6px;">Empfohlen</span>' : '') +
+          '</span>' + tag + '</span><span class="lb-func-desc">' + desc + '</span></span>';
+      c.querySelector('input').addEventListener('change', function () {
+        A.seo_stufe = (v === 'none') ? null : v; refresh();
+      });
+      grid.appendChild(c);
+    }
+    card('none', 'Erstmal ohne', null, 'Kein laufender Beitrag — du kannst die SEO-Betreuung jederzeit später starten.', false);
+    (PRICING.addons || []).filter(function (a) { return a.group === 'seo-betreuung'; }).forEach(function (a) {
+      var stufe = a.id.replace('seo-', '');
+      card(stufe, 'SEO ' + (a.short || a.name), a.price, SEO_DESC[stufe] || a.desc, empfohlen && stufe === 'lite');
+    });
+    host.appendChild(grid);
+    return grid;
   }
 
   /* ============================================================
@@ -675,6 +835,24 @@
         if (A.umfang && A.umfang !== 'onepager') {
           sub.appendChild(el('p', 'lb-subq', 'Welche Seiten brauchst du? <span class="lb-opt">(optional)</span>'));
           buildChipsInto(sub, 'seiten', OPT.seiten, { exclusive: ['unsure'] });
+          // „Sonstige …" — Toggle öffnet ein einzeiliges Textfeld (Payload: seiten_sonstige)
+          var sonstWrap = el('div', 'lb-inline');
+          var tgl = el('button', 'lb-chip lb-chip-sonst'); tgl.type = 'button'; tgl.textContent = 'Sonstige …';
+          var open = !!A.seiten_sonstige;
+          function renderSonstField() {
+            var ex = sonstWrap.querySelector('.lb-field'); if (ex) sonstWrap.removeChild(ex);
+            tgl.classList.toggle('is-on', open); tgl.setAttribute('aria-pressed', open ? 'true' : 'false');
+            if (open) {
+              var lbl = el('label', 'lb-field');
+              lbl.innerHTML = '<span class="lb-field-label">Weitere Seiten <em>(optional)</em></span>';
+              var inp = el('input'); inp.type = 'text'; inp.placeholder = 'z. B. „Speisekarte, Anfahrt, Partner“';
+              inp.value = A.seiten_sonstige || '';
+              inp.addEventListener('input', function (e) { A.seiten_sonstige = e.target.value; });
+              lbl.appendChild(inp); sonstWrap.appendChild(lbl);
+            }
+          }
+          tgl.addEventListener('click', function () { open = !open; if (!open) A.seiten_sonstige = ''; renderSonstField(); });
+          sonstWrap.appendChild(tgl); sub.appendChild(sonstWrap); renderSonstField();
         }
       }
       buildCards('umfang', umfangOptionsPriced(), { onPick: function (v) {
@@ -687,25 +865,33 @@
       return h;
     }},
 
-    /* ---------- Pfad B · 4 · Features ---------- */
-    features: { step: 4, render: function () {
-      var h = lumiSays('Welche Funktionen brauchst du?', 'Mehrfachauswahl möglich.');
-      buildChips('features', featureOptionsPriced(), { exclusive: ['beraten'] });
+    /* ---------- Pfad B · 4 · Funktionen · Aktionen ---------- */
+    funktion_aktion: { step: 4, render: function () {
+      var h = lumiSays('Womit sollen deine Besucher etwas tun?', 'Mehrfachauswahl — den Preis siehst du direkt an jeder Funktion.');
+      buildFuncCards(stage, FUNK_AKTION);
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
 
-    /* ---------- Pfad B · 5 · Design (Stil + Farbe + HEX) ---------- */
-    design: { step: 5, render: function () {
+    /* ---------- Pfad B · 5 · Funktionen · Inhalte ---------- */
+    funktion_inhalt: { step: 5, render: function () {
+      var h = lumiSays('Was soll deine Website zeigen?', 'Mehrfachauswahl möglich.');
+      buildFuncCards(stage, FUNK_INHALT);
+      actions({ onBack: back, onNext: advance, skip: advance });
+      return h;
+    }},
+
+    /* ---------- Pfad B · 6 · Design (Stil + Farben) ---------- */
+    design: { step: 6, render: function () {
       var h = lumiSays('Welcher Look gefällt dir?', 'Wähle einen Stil — er bestimmt die Live-Vorschau.');
       buildDesignDirection(stage, true);
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
 
-    /* ---------- Pfad B · 6 · Material (+ Uploads) ---------- */
-    material: { step: 6, render: function () {
-      var h = lumiSays('Was hast du schon?', 'Uploads sind optional — du kannst alles auch später nachreichen.');
+    /* ---------- Pfad B · 7 · Material + Termin (verschmolzen) ---------- */
+    material: { step: 7, render: function () {
+      var h = lumiSays('Fast geschafft — was hast du schon, und bis wann brauchst du die Website?', 'Uploads sind optional — du kannst alles auch später nachreichen.');
       var uploads = el('div', 'lb-inline');
       function renderUploads() {
         uploads.textContent = '';
@@ -735,20 +921,24 @@
       stage.appendChild(el('p', 'lb-hint', 'Keine Texte? Kein Problem — die schreiben wir sowieso für dich. Bestehende Website? Dein Umzug ist im Paket drin.'));
       if (A.produkt_typ === 'redesign') stage.appendChild(el('p', 'lb-hint', 'Deine Texte und Bilder übernehmen wir von deiner alten Seite — Umzug inklusive.'));
       stage.appendChild(uploads); renderUploads();
+      // Termin-Reihe (verschmolzen aus dem früheren Zeitrahmen-Schritt)
+      stage.appendChild(el('p', 'lb-subq', 'Und bis wann brauchst du sie?'));
+      buildCards('zeitrahmen', OPT.zeitrahmen, { cls: 'lb-cards lb-cards-wide' });
       actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
 
-    /* ---------- Pfad B · 7 · Zeitrahmen ---------- */
-    zeitrahmen: { step: 7, render: function () {
-      var h = lumiSays('Bis wann brauchst du die Website?');
-      buildCards('zeitrahmen', OPT.zeitrahmen, { cls: 'lb-cards lb-cards-wide', onPick: function () { autoAdvance(); } });
-      actions({ onBack: back, skip: advance });
+    /* ---------- Pfad B · 8 · Sichtbarkeit nach dem Start (SEO) ---------- */
+    seo: { step: 8, render: function () {
+      var h = lumiSays('Willst du nach dem Go-live bei Google aktiv nach oben klettern?',
+        'Optional — du kannst die SEO-Betreuung auch später starten. Monatlich, nach 3 Monaten kündbar.');
+      buildSeoCards(stage);
+      actions({ onBack: back, onNext: advance, skip: advance });
       return h;
     }},
 
     /* ---------- ZUSAMMENFASSUNG: EINE Empfehlung + Festpreis (ein Weg für alle) ---------- */
-    zusammenfassung: { step: 8,
+    zusammenfassung: { step: null,
       // erzählerischer Moment — kurzer Tipp-Indikator vor der Empfehlung (nur einmal)
       render: function () {
         var self = this;
@@ -774,6 +964,7 @@
       ensureWartungDefault();
       ensureAddonState();
       prefillFromBriefing();
+      syncAddonsFromFeatures();        // gewählte Funktionen (Schritte 4/5) → Festpreis
 
       showPriceBar(false);             // keine fixe Preisleiste mehr — der Festpreis steht inline
       var ent = isEnterprise();
@@ -863,13 +1054,13 @@
         return body;
       }
       function renderAccordions(host) {
+        // Funktionen (Schritte 4/5) und Sichtbarkeit (Schritt 8) werden jetzt in den Fragen
+        // gewählt — daher KEIN Extras- und KEIN SEO-Accordion mehr hier.
         host.innerHTML = '';
-        addSec   = makeAcc(host, 'Extras hinzufügen');
         pageSec  = makeAcc(host, 'Seitenzahl anpassen');
         brandSec = makeAcc(host, 'Logo & Branding');
-        seoSec   = makeAcc(host, 'Sichtbarkeit nach dem Start');
         wishSec  = makeAcc(host, 'Wünsche ohne Festpreis');
-        renderAddons(); renderPages(); renderBranding(); renderSeo(); renderWuensche();
+        renderPages(); renderBranding(); renderWuensche();
         renderPkgSwitch(host);
       }
       // „Anderes Paket wählen" — kompakte Liste (Name + Preis + 1 Satz), KEIN Karten-Raster
@@ -1285,15 +1476,25 @@
      PAKET-EMPFEHLUNG (Pfad B) — aus Umfang + Features
      ============================================================ */
   function recommend() {
-    var u = A.umfang, f = A.features || [];
+    var u = A.umfang, f = A.features || [], s = A.seiten || [];
     var has = function (v) { return f.indexOf(v) > -1; };
-    if (has('shop') || has('mehrsprachig') || has('login')) return 'enterprise';
-    if (u === 'gross') return has('shop') ? 'enterprise' : 'platin';
-    if (u === 'onepager') return 'basis';
-    if (u === 'umfangreich' && (has('galerie') || has('terminbuchung'))) return 'platin';
-    if (u === 'kompakt' || u === 'umfangreich') return 'pro';
-    if (has('galerie') || has('terminbuchung')) return 'platin';
-    return 'pro';
+    // Sonderprojekte-Treiber: sehr großer Umfang ODER Shop/Login (kein öffentlicher Festpreis)
+    if (u === 'gross' || has('shop') || has('login')) return 'enterprise';
+    // Basis-Empfehlung nach Umfang: One-Pager→Start, Groß→Platzhirsch, sonst Wachstum
+    var base = u === 'onepager' ? 'basis' : (u === 'umfangreich' ? 'platin' : 'pro');
+    // Paketgebundene Funktionen heben auf Platzhirsch an (Neuigkeiten/Blog, Newsletter, Karriere-Seite)
+    var order = ['basis', 'pro', 'platin'];
+    var bump = (has('blog') || has('newsletter') || s.indexOf('karriere') > -1) ? 'platin' : base;
+    return order.indexOf(bump) > order.indexOf(base) ? bump : base;
+  }
+  // Begründungs-Halbsatz, falls die Empfehlung durch Funktionen angehoben wurde (für die Kontakt-Übersicht, E2)
+  function recommendReason() {
+    var f = A.features || [], s = A.seiten || [];
+    var why = [];
+    if (f.indexOf('blog') > -1) why.push('Neuigkeiten-Bereich');
+    if (f.indexOf('newsletter') > -1) why.push('Newsletter');
+    if (s.indexOf('karriere') > -1) why.push('Karriere-Seite');
+    return why.length ? why.join(' + ') : '';
   }
 
 
@@ -1327,7 +1528,7 @@
       createdAt: new Date().toISOString(),
       briefing: A.pfad === 'B' ? {
         branche: A.branche, branche_sonstiges: A.branche_sonstiges,
-        ziele: A.ziele, umfang: A.umfang, seiten: A.seiten,
+        ziele: A.ziele, umfang: A.umfang, seiten: A.seiten, seiten_sonstige: A.seiten_sonstige,
         features: A.features, stil: A.stil,
         hauptfarbe: A.hauptfarbe, nebenfarbe: A.nebenfarbe,
         markenfarben_hex: A.markenfarben_hex, material: A.material,
@@ -1446,7 +1647,7 @@
   function resetAll() {
     A.pfad = null;
     A.branche = null; A.branche_sonstiges = '';
-    A.ziele = []; A.umfang = null; A.seiten = [];
+    A.ziele = []; A.umfang = null; A.seiten = []; A.seiten_sonstige = '';
     A.features = []; A.stil = null; A.hauptfarbe = null; A.nebenfarbe = null; A.markenfarben_hex = '';
     A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
     A.zeitrahmen = null;

@@ -912,3 +912,66 @@ body.lb-has-pricebar { padding-bottom: 156px; }
   display: flex; align-items: center; justify-content: center;
 }
 .lb-done-steps li strong { color: var(--white); }
+
+/* ============================================================
+   LUMI FLOW V2 · Etappe 1 — Zeilen-Karten (Funktionen/SEO),
+   Farb-Wirkung + Eigene-Farbe-Popover, „Sonstige"-Chip
+   ============================================================ */
+/* Funktions-/SEO-Zeilenkarten: Checkbox/Radio · Name + Preis-Tag · Erklärzeile */
+.lb-funcs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 4px; }
+@media (max-width: 560px) { .lb-funcs { grid-template-columns: 1fr; } }
+.lb-func {
+  display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start;
+  background: rgba(255, 255, 255, 0.03); border: 1.5px solid var(--border-dark);
+  border-radius: 12px; padding: 12px 14px; cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.lb-func:hover { border-color: rgba(174, 240, 0, 0.45); }
+.lb-func.is-on { border-color: var(--green); background: rgba(174, 240, 0, 0.08); }
+.lb-func-check { margin: 2px 0 0; width: 18px; height: 18px; accent-color: #aef000; cursor: pointer; flex: none; }
+.lb-func-body { display: block; min-width: 0; }
+.lb-func-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lb-func-name { font-size: 14.5px; font-weight: 700; color: var(--white); }
+.lb-func-desc { display: block; margin-top: 3px; font-size: 12.5px; color: var(--text-light-muted); line-height: 1.45; }
+.lb-func-tag { font-size: 12px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lb-func-tag-price { color: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.lb-func-tag-req { color: var(--text-light-muted); font-weight: 600; }
+.lb-func-tag-incl { color: var(--text-light-muted); font-weight: 600; }
+.lb-func-tag-platin { color: var(--text-light); font-style: italic; font-weight: 600; }
+.lb-func-radio .lb-func-check { border-radius: 50%; }
+
+/* Farb-Wirkung: zweite Zeile am Farbkreis */
+.lb-colorname { display: block; font-size: 11px; font-weight: 700; color: var(--text-light); line-height: 1.2; }
+.lb-colormood { display: block; font-size: 10px; color: var(--text-light-muted); line-height: 1.15; }
+.lb-colortile.is-on .lb-colorname { color: var(--white); }
+
+/* „Eigene Farbe +"-Button + ausgewählter Eigenfarben-Kreis */
+.lb-colortile-add { border: 1.5px dashed var(--border-dark); background: transparent; justify-content: center; }
+.lb-colortile-add:hover { border-color: var(--green); }
+.lb-coloradd {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid var(--green); color: var(--green); font-size: 20px; font-weight: 700; line-height: 1;
+}
+.lb-colortile-custom .lb-colordot { box-shadow: 0 0 0 2px var(--green); }
+
+/* Eigene-Farbe-Popover (nativer Picker + HEX + RGB) */
+.lb-colorpop {
+  margin-top: 10px; padding: 12px; width: 100%;
+  background: #0e1626; border: 1.5px solid var(--border-dark); border-radius: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.lb-colorpop-native { width: 46px; height: 34px; border: none; background: none; padding: 0; cursor: pointer; }
+.lb-colorpop-hex {
+  width: 120px; padding: 7px 9px; border: 1.5px solid var(--border-dark); border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04); color: var(--white);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+}
+.lb-colorpop-rgb { font-size: 12px; color: var(--text-light-muted); font-variant-numeric: tabular-nums; }
+.lb-colorpop-done {
+  margin-left: auto; padding: 7px 14px; border: none; border-radius: 8px;
+  background: var(--green); color: #0d1320; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+
+/* „Sonstige …"-Chip (gestrichelt, öffnet Textfeld) */
+.lb-chip-sonst { border-style: dashed; }

@@ -93,13 +93,15 @@ function checkD() {
 function checkE() {
   const r0 = cp.spawnSync('git', ['diff', 'main', '--', 'pricing-calc.js'], { cwd: ROOT, encoding: 'utf8' });
   rec('e', 'pricing-calc.js identisch zu main', r0.stdout.trim() === '', 'Diff vorhanden');
-  // pricing.js: IDs und Preise müssen identisch zu main bleiben (Texte/Labels dürfen sich ändern)
+  // pricing.js: BESTEHENDE IDs und Preise von main müssen erhalten bleiben (Texte/Labels frei,
+  // additive NEUE Produkte/Preise sind erlaubt — z. B. ki-assistent). Geprüft als Multiset-Subset.
   const base = cp.spawnSync('git', ['show', 'main:pricing.js'], { cwd: ROOT, encoding: 'utf8' }).stdout;
   const cur = read('pricing.js');
-  const ids = s => (s.match(/id:\s*'[^']+'/g) || []).sort();
-  const prices = s => (s.match(/(?:price|minPrice|pct):\s*'?\d+'?/g) || []).sort();
-  rec('e', 'pricing.js: IDs unverändert', JSON.stringify(ids(cur)) === JSON.stringify(ids(base)), 'ID-Menge geändert');
-  rec('e', 'pricing.js: Preise unverändert', JSON.stringify(prices(cur)) === JSON.stringify(prices(base)), 'Preis-Menge geändert');
+  const ids = s => (s.match(/id:\s*'[^']+'/g) || []);
+  const prices = s => (s.match(/(?:price|minPrice|pct):\s*'?\d+'?/g) || []);
+  const subset = (sub, sup) => { const c = {}; sup.forEach(x => c[x] = (c[x] || 0) + 1); return sub.every(x => c[x]-- > 0); };
+  rec('e', 'pricing.js: main-IDs erhalten', subset(ids(base), ids(cur)), 'eine ID von main fehlt');
+  rec('e', 'pricing.js: main-Preise erhalten', subset(prices(base), prices(cur)), 'ein Preis von main fehlt');
 }
 
 /* ---------- f) Lumi-Durchlauf in jsdom ---------- */

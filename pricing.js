@@ -114,6 +114,11 @@
       /* Kombi-Add-on: Einrichtung einmalig + Betrieb monatlich in EINER Option */
       { id: 'chatbot',      name: 'KI-Chatbot', price: 490, type: 'once', monthly: 49,
         desc: 'FAQ-Bot (EU/DSGVO) auf bis 20 Dokumente trainiert. 490 € Einrichtung + 49 €/Monat Betrieb (ca. 500 Gespräche/Mon. inkl.).' },
+      // KI-Chat-Assistent (produktisiert aus dem früheren „Wunsch ohne Festpreis"):
+      // Einrichtung einmalig + fester Monatsbetrieb (eigene Monatszeile, getrennt von Care/SEO),
+      // Mindestlaufzeit 12 Monate analog Rundum-Schutz.
+      { id: 'ki-assistent', name: 'KI-Chat-Assistent', price: 990, type: 'once', monthly: 79, common: true,
+        desc: 'Beantwortet Besucherfragen rund um die Uhr — trainiert auf deine eigenen Inhalte. Bis 500 Unterhaltungen/Monat. 990 € Einrichtung + 79 €/Monat Betrieb, Mindestlaufzeit 12 Monate.' },
       { id: 'newsletter',   name: 'Newsletter-Anbindung', price: 290, type: 'once',
         desc: 'Anmeldeformular mit Double-Opt-In (DOI), Anbindung an dein Newsletter-Tool (EU/DSGVO).' },
       { id: 'analytics',    name: 'Analytics-/Tracking-Setup', price: 190, type: 'once', hidden: true,
@@ -189,8 +194,6 @@
        "Auch dafür bekommst du vorab einen Festpreis — schriftlich, bevor du zusagst."
        Im Konfigurator als anwählbare Chips (Payload-Key: wuensche). */
     onRequest: [
-      { id: 'ki-assistent', name: 'KI-Assistent für deine Website',
-        desc: 'Beantwortet Besucherfragen rund um die Uhr — trainiert auf deine eigenen Inhalte.' },
       { id: 'kundenbereich', name: 'Geschützter Kundenbereich / Login',
         desc: 'Ein passwortgeschützter Bereich für Kunden, Mitglieder oder Dokumente.' },
       { id: 'shop', name: 'Shop-Funktionen',

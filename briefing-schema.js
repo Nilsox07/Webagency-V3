@@ -42,17 +42,19 @@
         { value: 'bewerber',  label: 'Bewerber finden' },
       ],
 
-      umfang: [ // Single-Choice
-        { value: 'onepager',    label: 'One-Pager',       sub: 'Alles auf einer Seite' },
-        { value: 'kompakt',     label: 'Kompakt',         sub: '3–5 Seiten' },
-        { value: 'umfangreich', label: 'Umfangreich',     sub: '6–12 Seiten' },
-        { value: 'gross',       label: 'Großes Projekt',  sub: '12+ Seiten / Shop / Portal' },
+      umfang: [ // Single-Choice — Preis-Floors (ab-Preise) werden in briefing.js aus pricing.js ergänzt
+        { value: 'onepager',    label: 'One-Pager', sub: 'alles auf einer Seite' },           // → Start (ab 1.290 €)
+        { value: 'kompakt',     label: 'Mehrere Seiten', sub: 'bis 8' },                       // → Wachstum (ab 2.990 €)
+        { value: 'umfangreich', label: 'Groß', sub: 'bis 20 Seiten' },                         // → Platzhirsch (ab 5.990 €)
+        { value: 'gross',       label: 'Über 20 Seiten / Shop / Portal', sub: 'individuelles Festpreis-Angebot' }, // → Sonderprojekte
       ],
 
       seiten: [ // Multi-Select, bedingte Folgefrage (nur wenn nicht One-Pager)
         { value: 'start',      label: 'Startseite' },
         { value: 'ueber',      label: 'Über uns' },
         { value: 'leistungen', label: 'Leistungen / Angebote' },
+        { value: 'preise',     label: 'Preise / Preisliste' },
+        { value: 'projekte',   label: 'Galerie / Projekte' },
         { value: 'referenzen', label: 'Referenzen / Portfolio' },
         { value: 'team',       label: 'Team' },
         { value: 'kontakt',    label: 'Kontakt' },
@@ -64,16 +66,21 @@
         { value: 'unsure',     label: 'Weiß ich noch nicht' },
       ],
 
-      features: [ // Multi-Select
+      features: [ // Multi-Select (zwei Schritte: Aktionen + Inhalte). Labels = Anzeige im Admin/Read-back.
         { value: 'kontaktformular', label: 'Kontaktformular' },
         { value: 'terminbuchung',   label: 'Online-Terminbuchung' },
+        { value: 'ki-assistent',    label: 'KI-Chat-Assistent' },
         { value: 'shop',            label: 'Shop / Bezahlung' },
-        { value: 'blog',            label: 'Blog / News' },
+        { value: 'login',           label: 'Geschützter Kundenbereich' },
+        { value: 'whatsapp',        label: 'WhatsApp-Kontakt' },
+        { value: 'bewertungen',     label: 'Google-Bewertungen' },
+        { value: 'blog',            label: 'Neuigkeiten / Blog' },
         { value: 'galerie',         label: 'Bildergalerie' },
+        { value: 'newsletter',      label: 'Newsletter-Anmeldung' },
         { value: 'mehrsprachig',    label: 'Mehrsprachig' },
-        { value: 'newsletter',      label: 'Newsletter' },
+        { value: 'anfahrt',         label: 'Anfahrt & Karte' },
         { value: 'social',          label: 'Social-Media-Einbindung' },
-        { value: 'login',           label: 'Kundenbereich / Login' },
+        { value: 'download',        label: 'Download-Bereich' },
         { value: 'beraten',         label: 'Weiß nicht / beraten lassen' },
       ],
 
@@ -88,20 +95,20 @@
 
       // Farbauswahl im Design-Schritt: laienverständlich, Haupt- + Nebenfarbe
       // (jeweils Single-Select aus dieser Liste; KEIN HEX-Zwang)
-      farben: [
-        { value: 'blau',      label: 'Blau',        hex: '#2a5bd7' },
-        { value: 'tuerkis',   label: 'Türkis',      hex: '#2bb3a3' },
-        { value: 'gruen',     label: 'Grün',        hex: '#2f7d4f' },
-        { value: 'lime',      label: 'Lime',        hex: '#b6ff3b' },
-        { value: 'gelb',      label: 'Gelb',        hex: '#f5c518' },
-        { value: 'orange',    label: 'Orange',      hex: '#f2872f' },
-        { value: 'rot',       label: 'Rot',         hex: '#d94d2a' },
-        { value: 'pink',      label: 'Pink',        hex: '#ff5a8a' },
-        { value: 'violett',   label: 'Violett',     hex: '#7b5cff' },
-        { value: 'gold',      label: 'Gold',        hex: '#c9a227' },
-        { value: 'anthrazit', label: 'Anthrazit',   hex: '#222a36' },
-        { value: 'beige',     label: 'Beige',       hex: '#d8c4a0' },
-        { value: 'weiss',     label: 'Weiß',        hex: '#f4f6f8' },
+      farben: [ // mood = Wirkungs-Label (zweite Zeile am Farbkreis)
+        { value: 'blau',      label: 'Blau',        hex: '#2a5bd7', mood: 'vertrauensvoll' },
+        { value: 'tuerkis',   label: 'Türkis',      hex: '#2bb3a3', mood: 'frisch' },
+        { value: 'gruen',     label: 'Grün',        hex: '#2f7d4f', mood: 'natürlich' },
+        { value: 'lime',      label: 'Lime',        hex: '#b6ff3b', mood: 'energiegeladen' },
+        { value: 'gelb',      label: 'Gelb',        hex: '#f5c518', mood: 'freundlich' },
+        { value: 'orange',    label: 'Orange',      hex: '#f2872f', mood: 'einladend' },
+        { value: 'rot',       label: 'Rot',         hex: '#d94d2a', mood: 'kraftvoll' },
+        { value: 'pink',      label: 'Pink',        hex: '#ff5a8a', mood: 'auffällig' },
+        { value: 'violett',   label: 'Violett',     hex: '#7b5cff', mood: 'kreativ' },
+        { value: 'gold',      label: 'Gold',        hex: '#c9a227', mood: 'hochwertig' },
+        { value: 'anthrazit', label: 'Anthrazit',   hex: '#222a36', mood: 'markant' },
+        { value: 'beige',     label: 'Beige',       hex: '#d8c4a0', mood: 'warm' },
+        { value: 'weiss',     label: 'Weiß',        hex: '#f4f6f8', mood: 'pur' },
       ],
 
       material: [ // Multi-Select
@@ -109,6 +116,8 @@
         { value: 'ci',      label: 'Markenfarben / CI' },
         { value: 'texte',   label: 'Texte' },
         { value: 'fotos',   label: 'Eigene Fotos' },
+        { value: 'videos',  label: 'Videos' },
+        { value: 'profil',  label: 'Google-Unternehmensprofil' },
         { value: 'website', label: 'Bestehende Website' },
         { value: 'nichts',  label: 'Noch nichts – bitte mitgestalten' },
       ],

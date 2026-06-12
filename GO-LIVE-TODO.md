@@ -24,6 +24,13 @@ Diese Punkte sind bewusst bis zum Go-live offen. **Reihenfolge bei Domain-Wechse
 - [ ] Bing Webmaster Tools + IndexNow einrichten.
 - [ ] Google Search Console einrichten + Sitemap einreichen.
 
+## KI-Chat-Assistent (vor erstem Verkauf)
+- [ ] **EU-Inferenz-Anbieter festlegen (DSGVO-/CLOUD-Act-konform) VOR dem ersten Verkauf** des
+      KI-Chat-Assistenten (Datenverarbeitung in der EU, AVV, keine Übermittlung in Drittländer).
+- [ ] **AGB-Klauseln durch Kanzlei prüfen:** Fair-Use (bis 500 Unterhaltungen/Monat),
+      Mindestlaufzeit 12 Monate (analog Rundum-Schutz) und die Auskunfts-Abgrenzung
+      („Verbindliche Auskünfte — Preise, Termine, Rechtliches — bestätigt ihr persönlich").
+
 ## Lumi-Funnel-Tracking (optional, Opt-in)
 - [ ] `briefing.js` → `CONFIG.trackingEndpoint` (`[ANALYTICS_BEACON_ENDPOINT]`) auf einen echten
       Beacon-Endpoint setzen. `trackStep()` sendet dann pro Schritt nur den anonymen Schrittnamen
