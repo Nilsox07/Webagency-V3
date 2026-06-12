@@ -63,6 +63,8 @@
     wartung: null,                    // fixer Rundum-Schutz = Paket-Floor (keine Auswahl mehr)
     extraPages: 0,                    // Seiten über dem Inklusiv-Kontingent (Variante A)
     addons: {},                       // { addonId: {selected:bool, qty:int} }
+    addonEmpfohlen: [],                // Pfad B: empfohlene Add-on-IDs (NUR Markierung, keine Vorauswahl)
+    addonGrund: {},                   // { addonId: 'Begründungs-Halbsatz' }
     wuensche: [],                     // Topf 3: Wünsche ohne Festpreis-Liste (onRequest-ids)
     _prefilled: false,                // Pfad-B-Vorbefüllung nur einmal anwenden
     _recShown: false,                 // Tipp-Indikator vor der Empfehlung nur einmal zeigen
@@ -424,16 +426,17 @@
   function prefillFromBriefing() {
     if (A._prefilled || A.pfad !== 'B') return;
     A._prefilled = true;
+    A.addonEmpfohlen = []; A.addonGrund = {};
     var f = A.features || [], m = A.material || [], z = A.ziele || [];
     var hasF = function (v) { return f.indexOf(v) > -1; };
     var hasM = function (v) { return m.indexOf(v) > -1; };
-    var on = function (id, qty) {
-      if (A.addons[id]) { A.addons[id].selected = true; if (qty) A.addons[id].qty = qty; }
+    // Empfehlung NUR markieren (nicht vorauswählen): ID + Begründungs-Halbsatz merken.
+    // buildAddonCard zeigt Badge + Grund; Checkbox bleibt leer, Preisleiste startet ohne Extra.
+    var on = function (id, grund) {
+      if (A.addons[id] && A.addonEmpfohlen.indexOf(id) < 0) { A.addonEmpfohlen.push(id); if (grund) A.addonGrund[id] = grund; }
     };
-    // Nachtrag Block 2: Empfehlung nur noch Logo (kein Logo) + Terminbuchung (Ziel Termine).
-    // Texte/Umzug/Statistik sind in allen Paketen inklusive → keine Vorauswahl mehr.
-    if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung');
-    if (!hasM('logo')) on('logo-lite');
+    if (hasF('terminbuchung') || z.indexOf('termine') > -1) on('terminbuchung', 'dein Ziel: Termine');
+    if (!hasM('logo')) on('logo-lite', 'du hast angegeben: kein Logo');
 
     // Enterprise-Abzweig vorbefüllen (falls Empfehlung/Funktionen darauf hindeuten)
     var E = A.enterprise;
@@ -821,7 +824,7 @@
       function renderWuensche() {
         var list = PRICING.onRequest || [];
         if (!list.length) return;
-        wishSec.innerHTML = '<h3 class="lb-cfg-h">Wünsche ohne Festpreis-Liste <span class="lb-cfg-opt">(optional)</span></h3>';
+        wishSec.innerHTML = '<h3 class="lb-cfg-h">5 · Wünsche ohne Festpreis-Liste <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-wish-chips');
         list.forEach(function (w) {
           var on = A.wuensche.indexOf(w.id) > -1;
@@ -1015,11 +1018,14 @@
         var unit = a.qty ? ' <span class="lb-addon-unit">' + a.qty.unit + '</span>' : '';
         var toggle = el('button', 'lb-addon-toggle'); toggle.type = 'button';
         toggle.setAttribute('aria-pressed', st.selected ? 'true' : 'false');
+        var rec = (A.addonEmpfohlen || []).indexOf(a.id) > -1;
+        var grund = rec && A.addonGrund ? (A.addonGrund[a.id] || '') : '';
         toggle.innerHTML =
           '<span class="lb-addon-check" aria-hidden="true"></span>' +
           '<span class="lb-addon-main">' +
-            '<span class="lb-addon-name">' + a.name + '</span>' +
-            '<span class="lb-addon-desc">' + (a.desc || '') + '</span>' +
+            '<span class="lb-addon-name">' + a.name +
+              (rec ? ' <span class="lb-pkg-badge lb-pkg-badge-rec" style="position:static;display:inline-block;vertical-align:middle;margin-left:6px;">Empfohlen</span>' : '') + '</span>' +
+            '<span class="lb-addon-desc">' + (a.desc || '') + (grund ? ' · ' + grund : '') + '</span>' +
           '</span>' +
           '<span class="lb-addon-price">' + addonPriceText(a) + unit + '</span>';
         toggle.addEventListener('click', function () {
@@ -1038,7 +1044,7 @@
       // (EXTRAS_VISIBLE/EXTRAS_MORE werden bewusst VOR dem Erstrender zugewiesen — siehe oben.)
       function addonById(id) { return PRICING.addons.filter(function (a) { return a.id === id; })[0]; }
       function renderAddons() {
-        addSec.innerHTML = '<h3 class="lb-cfg-h">3 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
+        addSec.innerHTML = '<h3 class="lb-cfg-h">4 · Extras <span class="lb-cfg-opt">(optional)</span></h3>';
         var grid = el('div', 'lb-addons');
         EXTRAS_VISIBLE.forEach(function (id) {
           var a = addonById(id), st = A.addons[id];
@@ -1069,7 +1075,7 @@
           return '<li><span class="lb-pay-pct">' + s.pct + '&nbsp;%</span><span class="lb-pay-when">' + s.when + '</span></li>';
         }).join('');
         paySec.innerHTML =
-          '<h3 class="lb-cfg-h">Zahlung in Meilensteinen <span class="lb-cfg-opt">(Übersicht, keine Zahlung)</span></h3>' +
+          '<h3 class="lb-cfg-h">6 · Zahlung in Meilensteinen <span class="lb-cfg-opt">(Übersicht, keine Zahlung)</span></h3>' +
           '<ol class="lb-pay-steps">' + steps + '</ol>' +
           '<p class="lb-pay-guarantee">🛡️ ' + PAY.guarantee + '</p>';
       }
@@ -1448,7 +1454,7 @@
     A.material = []; A.uploads = { logo: [], fotos: [], texte: [], texte_notiz: '', website_link: '' };
     A.zeitrahmen = null;
     A.paket_gewaehlt = null; A.paket_empfohlen = null;
-    A.wartung = null; A.extraPages = 0; A.addons = {}; A._prefilled = false; A._recShown = false;
+    A.wartung = null; A.extraPages = 0; A.addons = {}; A.addonEmpfohlen = []; A.addonGrund = {}; A._prefilled = false; A._recShown = false;
     A.enterprise = { sonderfunktionen: [], seitenzahl: null, shopGroesse: null, sprachen: '', schnittstellen: '', zeithorizont: null, notiz: '' };
     A.kontakt = { name: '', email: '', telefon: '', dsgvo: false };
     ui.askedClarification = false; lastSendState.msg = '';
