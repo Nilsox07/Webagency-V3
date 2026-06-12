@@ -141,18 +141,15 @@ function lumiDom() {
 const click = (w, elm) => elm.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, view: w }));
 // Treibt den geführten Flow bis zum Kontakt-Screen, füllt das Formular und sendet ab.
 // Liefert das via fetch (Supabase-POST) erfasste Payload-Objekt zurück (oder null).
+const onContact = (w) => !!w.document.querySelector('.lb-form') && !!w.document.querySelector('.lb-reccard-slim');
 async function driveToSubmit(w, fetchCalls) {
   const qq = (s) => w.document.querySelector(s);
-  const qaa = (s) => [...w.document.querySelectorAll(s)];
   let guard = 0;
-  while (!/wohin darf Sartu dein Angebot/i.test(qq('#lumiStage').textContent) && guard++ < 30) {
-    const cta = qq('#lumiPriceBar:not([hidden]) .lb-pricebar-cta');
+  // Geführter Flow endet direkt im Kontakt-Screen (Karte + Formular) — kein Konfigurator/Preisleiste.
+  while (!onContact(w) && guard++ < 20) {
     const next = qq('.lb-next'), skip = qq('.lb-skip');
     if (next) { click(w, next); continue; }
-    if (cta) { click(w, cta); continue; }
     if (skip) { click(w, skip); continue; }
-    const opt = qaa('#lumiStage button').find(b => !/lb-(back|skip|next|pricebar|addon-toggle|pkg)/.test(b.className));
-    if (opt) { click(w, opt); continue; }
     break;
   }
   const form = qq('.lb-form');
@@ -199,6 +196,37 @@ async function checkF() {
     rec('f', 'Redesign: keine window-errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   } catch (e) {
     rec('f', 'Redesign: Durchlauf', false, e.message);
+  }
+  // --- Weg 3: Kontakt-Übersichts-Default (kompakt, keine Frage-Widgets) ---
+  try {
+    const { w } = lumiDom();
+    click(w, q(w, '.lb-start'));
+    click(w, qa(w, '.lb-path-card')[0]);
+    let guard = 0;
+    while (!onContact(w) && guard++ < 20) { const n = q(w, '.lb-next') || q(w, '.lb-skip'); if (!n) break; click(w, n); }
+    rec('f', 'Kontakt: schlanke Empfehlungs-Karte', !!q(w, '.lb-reccard-slim'), 'fehlt');
+    rec('f', 'Kontakt: Übersichts-Liste mit „ändern“', qa(w, '.lb-overview-row .lb-edit').length >= 5, `${qa(w, '.lb-overview-row .lb-edit').length} Links`);
+    const stray = qa(w, '#lumiStage .lb-acc, #lumiStage details, #lumiStage .lb-fixblock, #lumiStage .lb-card, #lumiStage .lb-func, #lumiStage .lb-pkg').length;
+    rec('f', 'Kontakt: keine Frage-Widgets/Accordions', stray === 0, `${stray} Fremd-Widgets`);
+  } catch (e) {
+    rec('f', 'Kontakt-Default: Durchlauf', false, e.message);
+  }
+  // --- Weg 4: Deep-Link von /preise -> Kontakt mit vorgewähltem Paket ---
+  try {
+    const html = read('briefing.html');
+    const vc = new VirtualConsole(); vc.on('jsdomError', () => {});
+    const dom = new JSDOM(html, { url: 'https://example.test/briefing?paket=wachstum', runScripts: 'outside-only', virtualConsole: vc, pretendToBeVisual: true });
+    const w = dom.window;
+    w.matchMedia = () => ({ matches: true, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+    w.Element.prototype.scrollIntoView = function () {}; w.scrollTo = function () {};
+    ['name', 'email', 'telefon', 'dsgvo'].forEach((fld) => { Object.defineProperty(w.HTMLFormElement.prototype, fld, { configurable: true, get() { return this.querySelector('[name="' + fld + '"]') || (fld === 'name' ? (this.getAttribute('name') || '') : undefined); } }); });
+    w.fetch = () => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({}), text: () => Promise.resolve('') });
+    const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(m => m[1].split('?')[0]);
+    for (const s of srcs) { try { w.eval(read(s)); } catch (e) { /* ignore */ } }
+    w.document.dispatchEvent(new w.Event('DOMContentLoaded', { bubbles: true }));
+    rec('f', 'Deep-Link: direkt im Kontakt mit Paket-Empfehlung', onContact(w) && /Wachstum/.test(q(w, '.lb-q') ? q(w, '.lb-q').textContent : ''), 'kein Kontakt/Paket');
+  } catch (e) {
+    rec('f', 'Deep-Link: Durchlauf', false, e.message);
   }
 }
 
