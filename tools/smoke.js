@@ -89,18 +89,12 @@ function checkD() {
   }
 }
 
-/* ---------- e) Schutzliste: pricing-calc.js byte-identisch; pricing.js nur erlaubte hidden-Flags ---------- */
+/* ---------- e) Schutzliste: pricing.js + pricing-calc.js byte-identisch zu main ---------- */
 function checkE() {
-  // pricing-calc.js: strikt byte-identisch
-  let r = cp.spawnSync('git', ['diff', 'main', '--', 'pricing-calc.js'], { cwd: ROOT, encoding: 'utf8' });
-  rec('e', 'pricing-calc.js identisch zu main', r.stdout.trim() === '', 'Diff vorhanden');
-  // pricing.js: einzig erlaubte Änderung = `hidden: true` an design-onepager/design-mehrseiten
-  r = cp.spawnSync('git', ['diff', 'main', '--', 'pricing.js'], { cwd: ROOT, encoding: 'utf8' });
-  const changed = r.stdout.split('\n').filter(l => /^[+-]/.test(l) && !/^[+-]{3}/.test(l));
-  const onlyAllowed = changed.every(l => /design-onepager|design-mehrseiten/.test(l));
-  const addsHidden = changed.filter(l => l.startsWith('+')).every(l => /hidden: true/.test(l));
-  rec('e', 'pricing.js: nur erlaubte hidden-Flags (design-Produkte)', changed.length > 0 && onlyAllowed && addsHidden,
-    `geänderte Zeilen: ${changed.length}, nur-design: ${onlyAllowed}, alle +hidden: ${addsHidden}`);
+  for (const f of ['pricing.js', 'pricing-calc.js']) {
+    const r = cp.spawnSync('git', ['diff', 'main', '--', f], { cwd: ROOT, encoding: 'utf8' });
+    rec('e', `${f} identisch zu main`, r.stdout.trim() === '', 'Diff vorhanden');
+  }
 }
 
 /* ---------- f) Lumi-Durchlauf in jsdom ---------- */
