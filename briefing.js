@@ -767,13 +767,13 @@
       var pkgSec = el('div', 'lb-cfg-section');
       var dynSec = el('div');
       var paySec = el('div', 'lb-cfg-section lb-cfg-pay');
-      var wartSec, pageSec, addSec, designSec, wishSec, seoSec; // in renderDynamic() befüllt
+      var wartSec, pageSec, brandSec, addSec, designSec, wishSec, seoSec; // in renderDynamic() befüllt
       stage.appendChild(pkgSec); stage.appendChild(dynSec); stage.appendChild(paySec);
 
       // WICHTIG: EXTRAS_VISIBLE/EXTRAS_MORE VOR dem ersten renderDynamic() zuweisen.
       // Vorher lief die var-Zuweisung erst weiter unten → beim Erstrender war
       // EXTRAS_VISIBLE undefined → forEach-Crash riss Extras, Preisleiste und Weiter-Logik ab.
-      var EXTRAS_VISIBLE = ['logo-lite', 'branding-pro', 'corporate', 'terminbuchung', 'mehrsprachig', 'express'];
+      var EXTRAS_VISIBLE = ['terminbuchung', 'mehrsprachig', 'express'];
       var EXTRAS_MORE = ['newsletter'];
 
       renderPkg(); renderDynamic(); renderPayTerms();
@@ -796,11 +796,12 @@
         if (isEnterprise()) { renderEnterprise(dynSec); return; }
         wartSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wartSec);
         pageSec = el('div', 'lb-cfg-section'); dynSec.appendChild(pageSec);
+        brandSec = el('div', 'lb-cfg-section'); dynSec.appendChild(brandSec);
         addSec = el('div', 'lb-cfg-section'); dynSec.appendChild(addSec);
         designSec = el('div', 'lb-cfg-section'); dynSec.appendChild(designSec);
         wishSec = el('div', 'lb-cfg-section'); dynSec.appendChild(wishSec);
         seoSec = el('div', 'lb-cfg-section'); dynSec.appendChild(seoSec);
-        renderWartung(); renderPages(); renderAddons(); renderDesignDir(); renderWuensche(); renderSeo();
+        renderWartung(); renderPages(); renderBranding(); renderAddons(); renderDesignDir(); renderWuensche(); renderSeo();
       }
 
       /* -- Topf 3: Wünsche ohne Festpreis-Liste (anwählbare Chips, kein Preis) -- */
@@ -828,6 +829,41 @@
       }
 
       /* -- Paketauswahl -- */
+      function brandingProducts() { return (PRICING.addons || []).filter(function (a) { return a.group === 'branding'; }); }
+      function clearBranding() { brandingProducts().forEach(function (o) { if (A.addons[o.id]) A.addons[o.id].selected = false; }); }
+      function renderBranding() {
+        brandSec.innerHTML = '<h3 class="lb-cfg-h">Logo &amp; Branding <span class="lb-cfg-opt">(optional)</span></h3>';
+        var grid = el('div', 'lb-pkgs');
+        brandingProducts().forEach(function (a) {
+          var st = A.addons[a.id];
+          var c = el('button', 'lb-pkg'); c.type = 'button';
+          var rec = (A.addonEmpfohlen || []).indexOf(a.id) > -1;
+          c.innerHTML =
+            (rec ? '<span class="lb-pkg-badge lb-pkg-badge-rec">Empfohlen</span>' : '') +
+            '<span class="lb-pkg-name">' + a.name + '</span>' +
+            '<span class="lb-pkg-price">' + a.price.toLocaleString('de-DE') + ' € einmalig</span>' +
+            '<ul class="lb-perks"><li>' + (a.desc || '') + '</li></ul>';
+          if (st && st.selected) c.classList.add('is-on');
+          c.addEventListener('click', function () {
+            var was = st && st.selected;
+            clearBranding();                 // exklusiv: nur EINE Stufe
+            if (st) st.selected = !was;
+            renderBranding(); renderPriceBar();
+          });
+          grid.appendChild(c);
+        });
+        var none = el('button', 'lb-pkg'); none.type = 'button';
+        none.innerHTML =
+          '<span class="lb-pkg-name">Brauche ich nicht</span>' +
+          '<span class="lb-pkg-price">0 €</span>' +
+          '<span class="lb-pkg-scope">Du hast schon ein Logo — oder es kommt später.</span>';
+        var anyOn = brandingProducts().some(function (o) { return A.addons[o.id] && A.addons[o.id].selected; });
+        if (!anyOn) none.classList.add('is-on');
+        none.addEventListener('click', function () { clearBranding(); renderBranding(); renderPriceBar(); });
+        grid.appendChild(none);
+        brandSec.appendChild(grid);
+      }
+
       function renderDesignDir() {
         designSec.innerHTML = '<h3 class="lb-cfg-h">Design-Richtung <span class="lb-cfg-opt">(optional)</span></h3>';
         buildDesignDirection(designSec, false);
