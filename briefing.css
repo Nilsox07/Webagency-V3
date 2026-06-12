@@ -7,8 +7,22 @@
 /* ---- Bühne (dynamischer Bereich in der Lumi-Karte) ---- */
 .lb-stage {
   padding: clamp(18px, 3vw, 30px);
-  min-height: 320px;
+  /* Stabile Höhe: das Auswahl-Feld bleibt über alle Fragen gleich hoch
+     (fester Anteil der Viewport-Höhe) statt pro Frage zu springen.
+     Lange Screens (Design-Richtung/Konfigurator) wachsen darüber hinaus. */
+  min-height: clamp(340px, 50vh, 480px);
 }
+
+/* "Was ist Lumi?"-Infokasten: dunkel statt weiß, passend zum Lumi-Bereich.
+   (briefing.css lädt nur hier — die Rechtsseiten mit .legal-content bleiben weiß.) */
+.lumi-section .legal-content {
+  background: #0e1626;
+  border-color: var(--border-dark);
+}
+.lumi-section .legal-content h2,
+.lumi-section .legal-content strong { color: var(--white); }
+.lumi-section .legal-content p { color: var(--text-light); }
+.lumi-section .legal-content a { color: var(--green); }
 
 /* ---- Lumi-Sprechblase + Frage ---- */
 .lb-say { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 22px; }
