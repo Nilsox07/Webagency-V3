@@ -5,6 +5,7 @@ const db = require('./db');
 const auth = require('./auth');
 const prices = require('./prices');
 const { migrate } = require('./migrate');
+const promptgen = require('./promptgen');
 
 async function ensureAdmin() {
   const email = (process.env.ADMIN_EMAIL || 'admin@sartu.de').toLowerCase();
@@ -44,6 +45,7 @@ async function ensureKunde({ email, name, firma, paket, status, redesign, seiten
 async function seed() {
   await migrate();
   await ensureAdmin();
+  await promptgen.ensureBausteine(db);
   await ensureKunde({ email: 'anna@cafe-sonne.de', name: 'Anna Sonne', firma: 'Café Sonne', paket: 'pro', status: 'inhalte', redesign: false, seiten: ['Startseite', 'Speisekarte', 'Über uns', 'Kontakt'] });
   await ensureKunde({ email: 'ben@bau-berg.de', name: 'Ben Berg', firma: 'Bau Berg GmbH', paket: 'platin', status: 'design', redesign: true, seiten: ['Startseite', 'Leistungen', 'Referenzen', 'Karriere', 'Kontakt'] });
 }

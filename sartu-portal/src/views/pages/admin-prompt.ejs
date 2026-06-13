@@ -1,0 +1,13 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a> · <a href="/admin/bausteine">Bausteine bearbeiten</a></p>
+<h1>Bau-Prompt für Claude Code</h1>
+<% if (!result.vollstaendig) { %>
+  <div class="card blocker"><strong>Achtung — unvollständig.</strong> Der Prompt enthält Lücken-Marker
+  <code>[FEHLT: …]</code>. Fehlende Felder: <%= result.fehlend.join(', ') || 'Stichpunkte' %>.</div>
+<% } else { %>
+  <p class="ok">Alle Pflichtdaten vorhanden — Prompt ist vollständig.</p>
+<% } %>
+<p><button class="btn" type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('promptbox').value)">Prompt kopieren</button>
+   <span class="muted small">Bausteine: <%= result.bausteinKeys.join(', ') %></span></p>
+<textarea id="promptbox" class="promptbox" rows="26" readonly><%= result.text %></textarea>
+<%- include('../partials/foot') %>

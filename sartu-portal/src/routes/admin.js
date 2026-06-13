@@ -1,6 +1,7 @@
 'use strict';
 const db = require('../db');
 const care = require('../care');
+const promptgen = require('../promptgen');
 
 module.exports = async function (app) {
   const acsrf = { preHandler: [app.requireAdmin, app.csrfProtection] };
@@ -82,8 +83,8 @@ module.exports = async function (app) {
     if (!kunde) kunde = await db.one(`INSERT INTO kunden (email,name,firma) VALUES ($1,$2,$3) RETURNING id`,
       [email, a.kontakt_name || kontakt.name || '', '']);
     const paket = kon.paket || 'pro';
-    const proj = await db.one(`INSERT INTO projekte (kunde_id,name,paket,status,is_redesign) VALUES ($1,$2,$3,'angebot',$4) RETURNING id`,
-      [kunde.id, (kon.paket_name || 'Webprojekt'), paket, p.produkt_typ === 'redesign']);
+    const proj = await db.one(`INSERT INTO projekte (kunde_id,name,paket,status,is_redesign,briefing) VALUES ($1,$2,$3,'angebot',$4,$5) RETURNING id`,
+      [kunde.id, (kon.paket_name || 'Webprojekt'), paket, p.produkt_typ === 'redesign', JSON.stringify(p)]);
     await db.query(`UPDATE anfragen SET status = 'angelegt', angelegt_kunde = $2 WHERE id = $1`, [a.id, kunde.id]);
     await db.audit('admin', 'anfrage_angelegt', proj.id, req.ip, { anfrage: a.id }, kunde.id);
     return reply.redirect('/admin/kunde/' + kunde.id);
@@ -104,6 +105,30 @@ module.exports = async function (app) {
     await db.audit('admin', 'kunde_geloescht', null, req.ip, { kunde: kunde.id }, null);
     await db.query(`DELETE FROM kunden WHERE id = $1`, [kunde.id]); // CASCADE räumt Projekte/Inhalte/Uploads etc.
     return reply.redirect('/admin');
+  });
+
+  // Bau-Prompt-Generator je Projekt.
+  app.get('/admin/projekt/:id/prompt', { preHandler: app.requireAdmin }, async (req, reply) => {
+    const projekt = await db.one(`SELECT * FROM projekte WHERE id = $1`, [req.params.id]);
+    if (!projekt) return reply.callNotFound();
+    const kunde = await db.one(`SELECT firma, email FROM kunden WHERE id = $1`, [projekt.kunde_id]);
+    const inhalte = await db.many(`SELECT * FROM inhalte_seiten WHERE projekt_id = $1 ORDER BY sort`, [projekt.id]);
+    await promptgen.ensureBausteine(db);
+    const bausteine = await db.many(`SELECT * FROM prompt_bausteine ORDER BY sortierung`);
+    const result = promptgen.generate(projekt, inhalte, bausteine, (kunde && kunde.firma) || (kunde && kunde.email) || '');
+    return reply.view('pages/admin-prompt', { title: 'Bau-Prompt', theme: 'admin', user: req.user, csrf: reply.csrf(), projekt, result });
+  });
+
+  // Bausteine editieren.
+  app.get('/admin/bausteine', { preHandler: app.requireAdmin }, async (req, reply) => {
+    await promptgen.ensureBausteine(db);
+    const bausteine = await db.many(`SELECT * FROM prompt_bausteine ORDER BY sortierung`);
+    return reply.view('pages/admin-bausteine', { title: 'Prompt-Bausteine', theme: 'admin', user: req.user, csrf: reply.csrf(), bausteine });
+  });
+  app.post('/admin/bausteine/:schluessel', acsrf, async (req, reply) => {
+    await db.query(`UPDATE prompt_bausteine SET titel = $1, text = $2 WHERE schluessel = $3`,
+      [String(req.body.titel || ''), String(req.body.text || ''), req.params.schluessel]);
+    return reply.redirect('/admin/bausteine');
   });
 
   app.get('/admin/tickets', { preHandler: app.requireAdmin }, async (req, reply) => {

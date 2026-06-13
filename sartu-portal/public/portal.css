@@ -83,3 +83,7 @@ textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border-radius
 .bar span{display:block;height:100%;background:var(--lime)}
 .estimate{padding:10px 0;border-bottom:1px solid var(--line)}
 .estimate .row{display:flex;gap:10px;align-items:center;margin-top:6px}
+
+/* Etappe 7: Prompt-Box */
+.promptbox{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.5;border:1.5px solid var(--line-light);border-radius:12px;padding:14px;background:#0e1626;color:#e7edf4}
+.theme-admin .promptbox{background:#0B1220;color:#e7edf4}
