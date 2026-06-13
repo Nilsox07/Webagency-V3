@@ -19,7 +19,7 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 | 3 — Vorschau+Pins+Runden+Abnahme | ✅ | _git log `Etappe 3:`_ | 26 grün (gesamt) | Vorschau-Hosting (nur Besitzer) mit injiziertem Pin-Overlay; Pin-Sammelkorb je Runde; „Runde einreichen" (verbraucht++, Status korrektur_N, read-only danach, audit_log); Admin-Pin-Liste + „erledigt"; Abnahme-Screen (annehmen → live; Geld-zurück-Garantie nur 1. Entwurf → Ticket, keine Zahlung). **Screenshot: Playwright nicht installiert → DOM-Snippet-Fallback (GO-LIVE-TODO).** |
 | 4 — Care/Störung/Kostenschätzung | ✅ | _git log `Etappe 4:`_ | 33 grün (gesamt) | Care-Tab (Minuten-Balken je Sprachversion, Verfallshinweis, Historie, Betriebs-Status), Störung/Änderung getrennt → Tickets, Kostenschätzung (€ = 150/Std auto) mit Pflicht-Freigabe vor Buchung, Admin-Buchungsmaske (5er-Takt-Validierung), Ticket-Liste mit Typ-Filter. |
 | 5 — SEO/Upsell/Übergabe | ✅ | _git log `Etappe 5:`_ | 40 grün (gesamt) | SEO-Tab (Stufe/Preis, Monats-Kontingent x/y + Verfallsdatum, Dokumente, Stufenwechsel/Kündigung als Anfrage-Ticket), Extras-Katalog aus prices.js → Anfrage-Ticket (keine Zahlung), Datei-Übergabe-Tab, Postfach-Anfrage. prices.js == Website-Preise (Diff-Test). |
-| 6 — Anfragen/Nachfass/DSGVO | ⏳ offen | — | — | /api/anfragen, Cron, Export-ZIP, Löschung |
+| 6 — Anfragen/Nachfass/DSGVO | ✅ | _git log `Etappe 6:`_ | 47 grün (gesamt) | /api/anfragen (Token, echtes Lumi-Payload) + Admin-Inbox Ein-Klick Kunde+Projekt; Nachfass-Cron (7-Tage-Erinnerung max 2 + Admin-Hinweis, 5-Tage-Schätzung); DSGVO Export-ZIP (eigener Store-ZIP via zlib.crc32, keine Lib) + Löschung (Antrag→Ticket→Admin-Lösch-Routine inkl. Dateien, CASCADE); Audit-Log-Ansicht; AVV-Platzhalter. |
 | 7 — Bau-Prompt-Generator | ⏳ offen | — | — | prompt_bausteine, Snapshot-Test |
 
 ## Abnahme-Belege (laufend)
@@ -31,6 +31,10 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 - **#6 Care**: `test/care.test.js` + `test/etappe4.test.js` — 5er-Takt (7→400, 10→ok), Sprachversions-Zeilen, Schätzungs-Freigabe-Pflicht vor Buchung (offen→409, freigegeben→ok), audit_log `schaetzung_freigegeben`. ✅
 - **#7 SEO**: `test/etappe5.test.js` — Kontingent x/y, Verfallsdatum (Monatsende), Dokumente; Kündigung/Wechsel = Anfrage-Ticket. ✅
 - **#8 prices.js == Website**: `test/prices-diff.test.js` — Pakete, Care, Extraseite, Extras + SEO (inkl. KI 990+79) identisch zu Webagency-V3/pricing.js. ✅
+- **#9 /api/anfragen**: `test/etappe6.test.js` — echtes Lumi-Fixture, Token-Pflicht, Ein-Klick Kunde+Projekt. ✅
+- **#10 Nachfass-Cron**: Zeitraffer — 7-Tage-Erinnerung (max 2 → Admin-Hinweis), 5-Tage-Schätzung (einmalig). ✅
+- **#11 Export-ZIP**: gültiges ZIP (PK), export.json + Kundendaten enthalten. ✅
+- **#12 Verbotene Wörter**: `test/verbotene-woerter.test.js` — keine Treffer in src/public. ✅
 - **#13 .env.example**: vollständig; README-Deploy (Coolify) vorhanden. ✅ (Rest mit Folge-Etappen)
 
 ## Offene ⚠ / Blocker

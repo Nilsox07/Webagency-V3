@@ -88,6 +88,8 @@ async function buildApp(opts = {}) {
   await app.register(require('./routes/kunde'));
   await app.register(require('./routes/feedback'));
   await app.register(require('./routes/seo'));
+  await app.register(require('./routes/konto'));
+  await app.register(require('./routes/api'));
   await app.register(require('./routes/admin'));
 
   return app;

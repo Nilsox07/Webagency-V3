@@ -17,6 +17,9 @@
 ## Pin-Feedback
 - [ ] **Playwright-Screenshots**: im Sandbox nicht installiert. Pins speichern derzeit einen DOM-Ausschnitt (HTML) als Fallback. Auf dem Server Playwright installieren und echte Element-Screenshots erzeugen (screenshot_pfad).
 
+## Anfragen-Eingang
+- [ ] **Live-Submit umstellen**: briefing.js (Webagency-V3) zusaetzlich an POST /api/anfragen senden (ANFRAGEN_TOKEN). Format-Vertrag: docs/payload.md.
+
 ## Sicherheit / Recht (Kanzlei)
 - [ ] AVV-Dokument finalisieren (Platzhalter in /docs).
 - [ ] AGB-Version, Geld-zurück-Wortlaut, Runden-Klausel, Care/SEO-Laufzeiten juristisch prüfen.

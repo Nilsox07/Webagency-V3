@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<h1>Mein Konto</h1>
+<div class="card">
+  <h2>Meine Daten exportieren</h2>
+  <p class="muted">Lade alle deine im Portal gespeicherten Daten als ZIP (JSON + Dateien) herunter.</p>
+  <a class="btn" href="/portal/konto/export">Daten-Export (ZIP)</a>
+</div>
+<div class="card">
+  <h2>Konto-Löschung</h2>
+  <% if (offeneLoeschung) { %>
+    <p class="ok">Deine Löschung ist beantragt. Wir bearbeiten sie innerhalb von 30 Tagen. Rechnungen müssen wir gesetzlich länger aufbewahren.</p>
+  <% } else { %>
+    <p class="muted">Du kannst die Löschung deines Kontos beantragen. Sie wird innerhalb von 30 Tagen ausgeführt. Aufbewahrungspflichtige Rechnungen bleiben gesetzlich erhalten.</p>
+    <form method="post" action="/portal/konto/loeschung" onsubmit="return confirm('Löschung wirklich beantragen?')">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="linkbtn">Konto-Löschung beantragen</button>
+    </form>
+  <% } %>
+</div>
+<%- include('../partials/foot') %>

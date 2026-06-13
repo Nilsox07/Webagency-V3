@@ -1,0 +1,14 @@
+<%- include('../partials/head') %>
+<h1>Anfragen (Lumi)</h1>
+<% if (!anfragen.length) { %><p class="muted">Keine neuen Anfragen.</p><% } %>
+<% anfragen.forEach(function(a){ var k=a.payload.konfiguration||{}; %>
+  <div class="card">
+    <div class="cardtitle"><%= a.kontakt_name || 'Ohne Namen' %> · <%= a.kontakt_email || '—' %></div>
+    <p class="muted small">Paket <%= k.paket || '—' %><% if(k.paket_preis){ %> · <%= k.paket_preis %> €<% } %> · Typ <%= a.payload.produkt_typ || '—' %> · SEO <%= a.payload.seo_stufe || '—' %></p>
+    <form method="post" action="/admin/anfragen/<%= a.id %>/anlegen" class="inline">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn">Kunde + Projekt anlegen</button>
+    </form>
+  </div>
+<% }) %>
+<%- include('../partials/foot') %>

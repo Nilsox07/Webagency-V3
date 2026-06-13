@@ -5,6 +5,7 @@ process.env.NODE_ENV = 'test';
 process.env.ENC_KEY = process.env.ENC_KEY || '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
 process.env.COOKIE_SECRET = process.env.COOKIE_SECRET || 'test-cookie-secret-0123456789-0123456789';
 process.env.BASE_URL = 'http://localhost';
+process.env.ANFRAGEN_TOKEN = process.env.ANFRAGEN_TOKEN || 'test-anfrage-token';
 
 const crypto = require('crypto');
 const { newDb, DataType } = require('pg-mem');

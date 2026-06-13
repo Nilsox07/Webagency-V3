@@ -63,6 +63,49 @@ module.exports = async function (app) {
     return reply.redirect('/admin/projekt/' + projekt.id);
   });
 
+  // Lumi-Anfragen-Inbox.
+  app.get('/admin/anfragen', { preHandler: app.requireAdmin }, async (req, reply) => {
+    const anfragen = await db.many(`SELECT * FROM anfragen WHERE status = 'neu' ORDER BY created_at DESC`);
+    return reply.view('pages/admin-anfragen', { title: 'Anfragen', theme: 'admin', user: req.user, csrf: reply.csrf(), anfragen });
+  });
+
+  // Ein-Klick: Kunde + Projekt aus einer Anfrage anlegen (Lumi-Payload).
+  app.post('/admin/anfragen/:id/anlegen', acsrf, async (req, reply) => {
+    const a = await db.one(`SELECT * FROM anfragen WHERE id = $1`, [req.params.id]);
+    if (!a || a.status !== 'neu') return reply.callNotFound();
+    const p = a.payload || {};
+    const kon = p.konfiguration || {};
+    const kontakt = p.kontakt || {};
+    const email = (a.kontakt_email || kontakt.email || '').toLowerCase();
+    if (!email) return reply.code(400).send({ ok: false, grund: 'Keine E-Mail in der Anfrage.' });
+    let kunde = await db.one(`SELECT id FROM kunden WHERE lower(email) = $1`, [email]);
+    if (!kunde) kunde = await db.one(`INSERT INTO kunden (email,name,firma) VALUES ($1,$2,$3) RETURNING id`,
+      [email, a.kontakt_name || kontakt.name || '', '']);
+    const paket = kon.paket || 'pro';
+    const proj = await db.one(`INSERT INTO projekte (kunde_id,name,paket,status,is_redesign) VALUES ($1,$2,$3,'angebot',$4) RETURNING id`,
+      [kunde.id, (kon.paket_name || 'Webprojekt'), paket, p.produkt_typ === 'redesign']);
+    await db.query(`UPDATE anfragen SET status = 'angelegt', angelegt_kunde = $2 WHERE id = $1`, [a.id, kunde.id]);
+    await db.audit('admin', 'anfrage_angelegt', proj.id, req.ip, { anfrage: a.id }, kunde.id);
+    return reply.redirect('/admin/kunde/' + kunde.id);
+  });
+
+  app.get('/admin/audit', { preHandler: app.requireAdmin }, async (req, reply) => {
+    const eintraege = await db.many(`SELECT * FROM audit_log ORDER BY created_at DESC LIMIT 500`);
+    return reply.view('pages/admin-audit', { title: 'Audit-Log', theme: 'admin', user: req.user, csrf: reply.csrf(), eintraege });
+  });
+
+  // DSGVO-Löschung (Lösch-Routine inkl. Dateien). FK-Cascades entfernen abhängige Daten.
+  app.post('/admin/kunde/:id/loeschen', acsrf, async (req, reply) => {
+    const kunde = await db.one(`SELECT id FROM kunden WHERE id = $1`, [req.params.id]);
+    if (!kunde) return reply.callNotFound();
+    const uploads = await db.many(`SELECT pfad FROM uploads WHERE kunde_id = $1`, [kunde.id]);
+    const fs = require('fs');
+    for (const u of uploads) { try { if (u.pfad && fs.existsSync(u.pfad)) fs.unlinkSync(u.pfad); } catch (e) { /* weiter */ } }
+    await db.audit('admin', 'kunde_geloescht', null, req.ip, { kunde: kunde.id }, null);
+    await db.query(`DELETE FROM kunden WHERE id = $1`, [kunde.id]); // CASCADE räumt Projekte/Inhalte/Uploads etc.
+    return reply.redirect('/admin');
+  });
+
   app.get('/admin/tickets', { preHandler: app.requireAdmin }, async (req, reply) => {
     const typ = req.query.typ || '';
     const tickets = typ
