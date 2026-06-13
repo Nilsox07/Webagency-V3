@@ -1,9 +1,0 @@
-<%- include('../partials/head') %>
-<p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
-<h1>Datei-Übergabe</h1>
-<p class="muted">Hier liegen deine finalen Dateien (Logo-Formate, Styleguide, Inhalte-Export).</p>
-<div class="card">
-  <% if (!dateien.length) { %><p class="muted">Sobald dein Projekt live ist, stellen wir hier die finalen Pakete bereit.</p><% } %>
-  <ul><% dateien.forEach(function(d){ %><li><%= d.typ %>: <a href="/portal/upload/<%= d.id %>"><%= d.dateiname %></a></li><% }) %></ul>
-</div>
-<%- include('../partials/foot') %>

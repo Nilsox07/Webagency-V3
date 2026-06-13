@@ -1,6 +1,0 @@
-<%- include('../partials/head') %>
-<h1>Audit-Log</h1>
-<table class="tbl"><thead><tr><th>Wann</th><th>Wer</th><th>Aktion</th><th>Ziel</th><th>IP</th></tr></thead><tbody>
-<% eintraege.forEach(function(e){ %><tr><td><%= e.created_at %></td><td><%= e.actor %></td><td><%= e.aktion %></td><td><%= e.ziel || '' %></td><td><%= e.ip || '' %></td></tr><% }) %>
-</tbody></table>
-<%- include('../partials/foot') %>
