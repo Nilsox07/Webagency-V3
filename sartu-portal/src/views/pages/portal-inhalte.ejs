@@ -1,10 +1,36 @@
 <%- include('../partials/head') %>
 <p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
 <h1>Inhalte: <%= projekt.name %></h1>
-<p class="muted">Wir schreiben die Texte — du lieferst nur Stichpunkte. (Formulare in Etappe&nbsp;2.)</p>
-<div class="grid">
-<% inhalte.forEach(function(s){ %>
-  <div class="card"><div class="cardtitle"><%= s.seitenname %></div><div class="status status-<%= s.status %>"><%= s.status %></div></div>
-<% }) %>
-</div>
+<p class="muted">Wir schreiben die Texte — du lieferst nur Stichpunkte (mind. <%= minLines %> je Seite).</p>
+<% if (fehler === 'unvollstaendig') { %><p class="err">Es fehlen noch Pflicht-Angaben. Bitte fülle alle Seiten (bzw. Alt-URL + Zugänge) aus.</p><% } %>
+
+<% if (projekt.is_redesign) { %>
+  <div class="card"><p class="muted">Redesign: Wir übernehmen deine Inhalte von der alten Seite. Du brauchst nur die Adresse deiner bestehenden Website und die Zugänge.</p></div>
+<% } else { %>
+  <% seiten.forEach(function(s){ %>
+    <form class="card" method="post" action="/portal/projekt/<%= projekt.id %>/inhalte/<%= s.id %>">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="cardtitle"><%= s.seitenname %> <span class="status status-<%= s.status %>"><%= s.status %></span></div>
+      <label>Stichpunkte (eine Zeile pro Punkt)
+        <textarea name="stichpunkte" rows="6" placeholder="z. B.&#10;Wir bieten ...&#10;Seit 2010 ...&#10;Unser Team ...&#10;Öffnungszeiten ...&#10;So erreichst du uns ..."><%= s.stichpunkte %></textarea>
+      </label>
+      <button class="btn">Speichern</button>
+    </form>
+  <% }) %>
+<% } %>
+
+<form class="card" method="post" action="/portal/projekt/<%= projekt.id %>/zugaenge">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <h2>Zugänge <span class="muted small">(verschlüsselt gespeichert)</span></h2>
+  <label>Domain-AuthCode <% if (zugMaskiert.domain){ %><span class="muted small">gespeichert: <%= zugMaskiert.domain %></span><% } %><input name="domain_authcode" autocomplete="off" placeholder="leer lassen = unverändert"></label>
+  <label>Login der alten Website <% if (zugMaskiert.alt){ %><span class="muted small">gespeichert: <%= zugMaskiert.alt %></span><% } %><input name="alt_website" autocomplete="off"></label>
+  <label>Google-Unternehmensprofil <% if (zugMaskiert.google){ %><span class="muted small">gespeichert: <%= zugMaskiert.google %></span><% } %><input name="google_profil" autocomplete="off"></label>
+  <button class="btn ghost">Zugänge speichern</button>
+</form>
+
+<form method="post" action="/portal/projekt/<%= projekt.id %>/fertig">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <button class="btn" <%= ready ? '' : 'disabled' %>>Alles vollständig — an Sartu übergeben</button>
+  <% if (!ready) { %><p class="muted small">Der Schalter wird aktiv, sobald alle Pflichtteile da sind.</p><% } %>
+</form>
 <%- include('../partials/foot') %>

@@ -49,6 +49,20 @@ test('Ohne Login: kunden-Routen leiten zur Anmeldung (kein Datenleck)', async ()
   }
 });
 
+test('Kunde A darf KEINE POST-Route von Kunde B auslösen (403/404)', async () => {
+  const cookieA = await H.loginKunde(app, A.id);
+  const posts = [
+    '/portal/projekt/' + projB.id + '/fertig',
+    '/portal/projekt/' + projB.id + '/angebot/annehmen',
+    '/portal/projekt/' + projB.id + '/zugaenge',
+    '/portal/projekt/' + projB.id + '/inhalte/' + inhB.id,
+  ];
+  for (const url of posts) {
+    const res = await app.inject({ method: 'POST', url, headers: { cookie: cookieA, 'content-type': 'application/x-www-form-urlencoded' }, payload: 'x=1' });
+    assert.ok([403, 404].includes(res.statusCode), `${url} → ${res.statusCode} (erwartet 403/404)`);
+  }
+});
+
 test('kunde_id wird NIE aus Request-Parametern übernommen (Projekt-Query bleibt gefiltert)', async () => {
   // Selbst wenn A eingeloggt ist und B's Projekt-ID rät: db-Helfer filtert auf A.id → null → 404.
   const cookieA = await H.loginKunde(app, A.id);

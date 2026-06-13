@@ -1,0 +1,35 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
+<h1>Dokumente</h1>
+<% if (fehler === 'agb') { %><p class="err">Bitte bestätige die AGB, um das Angebot anzunehmen.</p><% } %>
+
+<div class="card">
+  <h2>Angebot</h2>
+  <% if (angebot) { %>
+    <p>Einmalig <strong><%= angebot.betrag_einmalig.toLocaleString('de-DE') %> €</strong> · Monatlich <strong><%= angebot.betrag_monatlich.toLocaleString('de-DE') %> €</strong> (Rundum-Schutz <%= careName %>).</p>
+    <% if (angebot.angenommen_am) { %>
+      <p class="ok">Angenommen am <%= angebot.angenommen_am %>. Danke!</p>
+    <% } else { %>
+      <form method="post" action="/portal/projekt/<%= projekt.id %>/angebot/annehmen">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <label class="check"><input type="checkbox" name="agb"> Ich habe die AGB (<%= angebot.agb_version %>) und die Leistungsbeschreibung gelesen und bin einverstanden.</label>
+        <button class="btn">Angebot annehmen</button>
+      </form>
+      <p class="muted small">Unverbindlich bis hier — mit dem Klick wird dein Auftrag verbindlich (mit Zeitstempel dokumentiert).</p>
+    <% } %>
+  <% } else { %><p class="muted">Noch kein Angebot hinterlegt.</p><% } %>
+</div>
+
+<div class="card">
+  <h2>Vertragsdaten (laufende Produkte)</h2>
+  <p>Rundum-Schutz <strong><%= careName %></strong> — Mindestlaufzeit 12 Monate, danach monatlich kündbar.</p>
+</div>
+
+<div class="card">
+  <h2>Rechnungen & Unterlagen</h2>
+  <% if (rechnungen.length) { %>
+    <ul><% rechnungen.forEach(function(r){ %><li><a href="/portal/upload/<%= r.id %>"><%= r.dateiname %></a></li><% }) %></ul>
+  <% } else { %><p class="muted">Noch keine Rechnungen hinterlegt.</p><% } %>
+  <p class="muted small">Leistungsbeschreibung und AVV stellen wir dir hier ebenfalls bereit.</p>
+</div>
+<%- include('../partials/foot') %>

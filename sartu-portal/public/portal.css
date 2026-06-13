@@ -54,3 +54,21 @@ input{display:block;width:100%;margin-top:6px;padding:10px 12px;border-radius:10
 .foot{margin-top:40px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 .theme-admin .foot{border-color:var(--line-light);color:var(--ink-muted)}
 .foot .bar{padding-top:16px;padding-bottom:24px}
+
+/* Etappe 2: Timeline, Blocker, Zusatz-Buttons */
+.btn.ghost{background:transparent;border:1.5px solid var(--lime);color:var(--lime)}
+.theme-admin .btn.ghost{color:#3a7a00;border-color:#3a7a00}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.blocker{border-color:#5a4a17;background:#1c1708}
+.theme-admin .blocker{border-color:#e6c200;background:#fffbe8}
+.blocker ul{margin:.4em 0 0;padding-left:1.1em}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px}
+.phase{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.phase .dot{width:11px;height:11px;border-radius:50%;background:#2a3a4d;display:inline-block}
+.phase-done{color:var(--text)}.phase-done .dot{background:var(--lime-strong)}
+.phase-current{color:var(--lime);font-weight:800}.phase-current .dot{background:var(--lime);box-shadow:0 0 0 3px rgba(174,240,0,.2)}
+.theme-admin .phase-done{color:var(--ink)}.theme-admin .phase-current{color:#3a7a00}
+textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--navy-3);color:var(--text);font:inherit}
+.theme-admin textarea{background:#fff;border-color:var(--line-light);color:var(--ink)}
+.check{font-weight:500;display:flex;gap:8px;align-items:flex-start}
+.check input{width:auto;margin-top:3px}
