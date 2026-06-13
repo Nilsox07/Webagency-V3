@@ -18,7 +18,7 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 | 2 — Projekt-Kern | ✅ | _git log `Etappe 2:`_ | 21 grün (gesamt) | Status-Timeline, Blocker-Box, Liefertermin-Countdown (Start erst bei Vollständigkeit), Inhalte-Strecke (Stichpunkte 5er-Minimum, Zugänge AES-verschlüsselt+maskiert, „Alles vollständig"-Gate), Redesign-Kurzstrecke, Dokumente-Tab mit Angebot-Annahme, Meilensteine read-only. |
 | 3 — Vorschau+Pins+Runden+Abnahme | ✅ | _git log `Etappe 3:`_ | 26 grün (gesamt) | Vorschau-Hosting (nur Besitzer) mit injiziertem Pin-Overlay; Pin-Sammelkorb je Runde; „Runde einreichen" (verbraucht++, Status korrektur_N, read-only danach, audit_log); Admin-Pin-Liste + „erledigt"; Abnahme-Screen (annehmen → live; Geld-zurück-Garantie nur 1. Entwurf → Ticket, keine Zahlung). **Screenshot: Playwright nicht installiert → DOM-Snippet-Fallback (GO-LIVE-TODO).** |
 | 4 — Care/Störung/Kostenschätzung | ✅ | _git log `Etappe 4:`_ | 33 grün (gesamt) | Care-Tab (Minuten-Balken je Sprachversion, Verfallshinweis, Historie, Betriebs-Status), Störung/Änderung getrennt → Tickets, Kostenschätzung (€ = 150/Std auto) mit Pflicht-Freigabe vor Buchung, Admin-Buchungsmaske (5er-Takt-Validierung), Ticket-Liste mit Typ-Filter. |
-| 5 — SEO/Upsell/Übergabe | ⏳ offen | — | — | Kontingente, prices.js-Diff, Datei-Übergabe |
+| 5 — SEO/Upsell/Übergabe | ✅ | _git log `Etappe 5:`_ | 40 grün (gesamt) | SEO-Tab (Stufe/Preis, Monats-Kontingent x/y + Verfallsdatum, Dokumente, Stufenwechsel/Kündigung als Anfrage-Ticket), Extras-Katalog aus prices.js → Anfrage-Ticket (keine Zahlung), Datei-Übergabe-Tab, Postfach-Anfrage. prices.js == Website-Preise (Diff-Test). |
 | 6 — Anfragen/Nachfass/DSGVO | ⏳ offen | — | — | /api/anfragen, Cron, Export-ZIP, Löschung |
 | 7 — Bau-Prompt-Generator | ⏳ offen | — | — | prompt_bausteine, Snapshot-Test |
 
@@ -29,6 +29,8 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 - **#4 audit_log**: `angebot_angenommen` + `inhalte_vollstaendig` (+Logins) schreiben audit_log. Abnahme/Runden-Einreichung folgen in Etappe 3. (3/4 Belege)
 - **#5 Pin-Lebenszyklus**: `test/etappe3.test.js` — Pin anlegen → einreichen → Runde zaehlt hoch → Pins read-only (409); Admin-Pin-Liste / Vorschau-Link. audit_log `runde_eingereicht`, `abnahme_angenommen`, `abnahme_garantie` → #4 komplett (4/4). ✅
 - **#6 Care**: `test/care.test.js` + `test/etappe4.test.js` — 5er-Takt (7→400, 10→ok), Sprachversions-Zeilen, Schätzungs-Freigabe-Pflicht vor Buchung (offen→409, freigegeben→ok), audit_log `schaetzung_freigegeben`. ✅
+- **#7 SEO**: `test/etappe5.test.js` — Kontingent x/y, Verfallsdatum (Monatsende), Dokumente; Kündigung/Wechsel = Anfrage-Ticket. ✅
+- **#8 prices.js == Website**: `test/prices-diff.test.js` — Pakete, Care, Extraseite, Extras + SEO (inkl. KI 990+79) identisch zu Webagency-V3/pricing.js. ✅
 - **#13 .env.example**: vollständig; README-Deploy (Coolify) vorhanden. ✅ (Rest mit Folge-Etappen)
 
 ## Offene ⚠ / Blocker
