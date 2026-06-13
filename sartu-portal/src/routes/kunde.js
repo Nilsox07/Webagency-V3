@@ -4,6 +4,7 @@ const L = require('../projektlogik');
 const enc = require('../crypto');
 const mailer = require('../mailer');
 const prices = require('../prices');
+const care = require('../care');
 
 // Lädt den Kontext eines Projekts (mandanten-sicher, projektId stammt bereits aus projektForKunde).
 async function projektContext(projektId) {
@@ -135,6 +136,44 @@ module.exports = async function (app) {
       await notifyAdmin('Angebot angenommen: ' + (projekt.name || projekt.id), 'Kunde ' + req.user.kunde.email + ' hat das Angebot angenommen.');
     }
     return reply.redirect('/portal/projekt/' + projekt.id + '/dokumente');
+  });
+
+  // Care-Tab: Monatsminuten je Sprachversion, Historie, Betriebs-Status, offene Schätzungen.
+  app.get('/portal/projekt/:id/care', guard, async (req, reply) => {
+    const projekt = await db.projektForKunde(req.user.id, req.params.id);
+    if (!projekt) return reply.callNotFound();
+    const buchungen = await db.many(`SELECT * FROM care_buchungen WHERE projekt_id = $1 ORDER BY datum DESC, created_at DESC`, [projekt.id]);
+    const schaetzungen = await db.many(`SELECT * FROM kostenschaetzungen WHERE projekt_id = $1 ORDER BY created_at DESC`, [projekt.id]);
+    return reply.view('pages/portal-care', {
+      title: 'Care', theme: 'kunde', user: req.user, csrf: reply.csrf(),
+      projekt, careName: (prices.care[projekt.care_stufe] || {}).name, rows: care.careRows(projekt, buchungen),
+      buchungen, schaetzungen, monat: care.monthKey(),
+    });
+  });
+
+  // Störung melden / Änderung wünschen → Ticket.
+  app.post('/portal/projekt/:id/ticket', csrf, async (req, reply) => {
+    const projekt = await db.projektForKunde(req.user.id, req.params.id);
+    if (!projekt) return reply.callNotFound();
+    const typ = req.body.typ === 'stoerung' ? 'stoerung' : 'aenderung';
+    await db.query(`INSERT INTO tickets (projekt_id, kunde_id, typ, text) VALUES ($1,$2,$3,$4)`,
+      [projekt.id, req.user.id, typ, String(req.body.text || '')]);
+    await notifyAdmin((typ === 'stoerung' ? 'Störung' : 'Änderungswunsch') + ': ' + (projekt.name || projekt.id),
+      'Kunde ' + req.user.kunde.email + ' (' + typ + '): ' + String(req.body.text || ''));
+    return reply.redirect('/portal/projekt/' + projekt.id + '/care');
+  });
+
+  // Kostenschätzung freigeben / ablehnen (Pflicht-Freigabe vor der Buchung), audit_log.
+  app.post('/portal/projekt/:id/schaetzung/:sid/:aktion', csrf, async (req, reply) => {
+    const projekt = await db.projektForKunde(req.user.id, req.params.id);
+    if (!projekt) return reply.callNotFound();
+    const s = await db.one(`SELECT * FROM kostenschaetzungen WHERE id = $1 AND projekt_id = $2`, [req.params.sid, projekt.id]);
+    if (!s || s.status !== 'offen') return reply.callNotFound();
+    const neu = req.params.aktion === 'freigeben' ? 'freigegeben' : 'abgelehnt';
+    await db.query(`UPDATE kostenschaetzungen SET status = $1, freigegeben_am = $2 WHERE id = $3`,
+      [neu, neu === 'freigegeben' ? new Date().toISOString() : null, s.id]);
+    await db.audit('kunde', 'schaetzung_' + neu, projekt.id, req.ip, { schaetzung: s.id, betrag: s.betrag }, req.user.id);
+    return reply.redirect('/portal/projekt/' + projekt.id + '/care');
   });
 
   app.get('/portal/upload/:id', guard, async (req, reply) => {

@@ -72,3 +72,14 @@ textarea{display:block;width:100%;margin-top:6px;padding:10px 12px;border-radius
 .theme-admin textarea{background:#fff;border-color:var(--line-light);color:var(--ink)}
 .check{font-weight:500;display:flex;gap:8px;align-items:flex-start}
 .check input{width:auto;margin-top:3px}
+
+/* Etappe 4: Care-Balken, Grid2, Schätzung */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+.bar-row{margin:10px 0}
+.bar-label{font-size:13px;margin-bottom:4px;color:var(--muted)}
+.bar{height:10px;border-radius:999px;background:#22344a;overflow:hidden}
+.theme-admin .bar{background:#e7eef6}
+.bar span{display:block;height:100%;background:var(--lime)}
+.estimate{padding:10px 0;border-bottom:1px solid var(--line)}
+.estimate .row{display:flex;gap:10px;align-items:center;margin-top:6px}

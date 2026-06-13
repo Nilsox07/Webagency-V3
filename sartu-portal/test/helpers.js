@@ -60,4 +60,10 @@ async function postCsrf(app, formUrl, postUrl, fields, cookie) {
   });
 }
 
-module.exports = { makeApp, createKunde, createProjekt, createUpload, createInhalt, loginKunde, postCsrf, getCookie, db, auth };
+async function loginAdmin(app, email = 'admin@sartu.de', pw = 'admin-pw-123') {
+  await db.query(`INSERT INTO admin_user (email,pass_hash) VALUES ($1,$2)`, [email, await auth.hashPassword(pw)]);
+  const res = await postCsrf(app, '/admin/login', '/admin/login', { email, passwort: pw });
+  return 'sid=' + getCookie(res, 'sid');
+}
+
+module.exports = { makeApp, createKunde, createProjekt, createUpload, createInhalt, loginKunde, loginAdmin, postCsrf, getCookie, db, auth };
