@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/portal">‹ Übersicht</a></p>
+<h1><%= projekt.name || 'Dein Webprojekt' %></h1>
+<div class="status status-<%= projekt.status %>">Status: <%= projekt.status %></div>
+<div class="card">
+  <h2>Phasen</h2>
+  <p class="muted">Die Status-Timeline mit Blocker-Box und Liefertermin kommt in Etappe&nbsp;2.</p>
+  <p><a href="/portal/projekt/<%= projekt.id %>/inhalte">Inhalte bearbeiten ›</a></p>
+</div>
+<%- include('../partials/foot') %>

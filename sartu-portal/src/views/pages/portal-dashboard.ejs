@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<h1>Hallo<%= user.kunde && user.kunde.name ? ', ' + user.kunde.name.split(' ')[0] : '' %> 👋</h1>
+<p class="muted">Hier siehst du den Stand deiner Projekte.</p>
+<% if (!projekte.length) { %>
+  <div class="card"><p class="muted">Noch kein Projekt hinterlegt. Sobald dein Angebot angelegt ist, erscheint es hier.</p></div>
+<% } %>
+<div class="grid">
+<% projekte.forEach(function(p){ %>
+  <a class="card link-card" href="/portal/projekt/<%= p.id %>">
+    <div class="kicker"><%= p.paket %></div>
+    <div class="cardtitle"><%= p.name || 'Dein Webprojekt' %></div>
+    <div class="status status-<%= p.status %>"><%= p.status %></div>
+  </a>
+<% }) %>
+</div>
+<%- include('../partials/foot') %>

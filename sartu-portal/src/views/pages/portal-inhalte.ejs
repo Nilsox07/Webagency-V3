@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
+<h1>Inhalte: <%= projekt.name %></h1>
+<p class="muted">Wir schreiben die Texte — du lieferst nur Stichpunkte. (Formulare in Etappe&nbsp;2.)</p>
+<div class="grid">
+<% inhalte.forEach(function(s){ %>
+  <div class="card"><div class="cardtitle"><%= s.seitenname %></div><div class="status status-<%= s.status %>"><%= s.status %></div></div>
+<% }) %>
+</div>
+<%- include('../partials/foot') %>
