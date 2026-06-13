@@ -1,0 +1,21 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin">‹ Kunden</a></p>
+<h1><%= projekt.name || 'Projekt' %></h1>
+<p class="muted">Paket <%= projekt.paket %> · Status <%= projekt.status %> · Runden <%= projekt.runden_verbraucht %>/<%= projekt.runden_max %> · Vorschau-Token <code><%= projekt.vorschau_token %></code></p>
+<% runden.forEach(function(r){ %>
+  <div class="card">
+    <h2>Runde <%= r.runde %> <span class="status status-<%= r.status %>"><%= r.status %></span></h2>
+    <% if (!r.pins.length) { %><p class="muted">Keine Anmerkungen.</p><% } %>
+    <table class="tbl"><tbody>
+    <% r.pins.forEach(function(p){ %>
+      <tr>
+        <td><span class="status status-<%= p.status %>"><%= p.status %></span></td>
+        <td><strong><%= p.text %></strong><br><span class="muted small"><%= p.css_selektor %> · <%= p.viewport_breite %>px · <%= p.seite_pfad %></span></td>
+        <td><a href="/vorschau/<%= projekt.vorschau_token %><%= p.seite_pfad %>#<%= p.css_selektor %>" target="_blank">öffnen</a></td>
+        <td><% if (p.status !== 'erledigt') { %><form method="post" action="/admin/pin/<%= p.id %>/erledigt" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn">erledigt</button></form><% } %></td>
+      </tr>
+    <% }) %>
+    </tbody></table>
+  </div>
+<% }) %>
+<%- include('../partials/foot') %>

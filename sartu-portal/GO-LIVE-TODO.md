@@ -14,6 +14,9 @@
 - [ ] **Argon2**: aktiv (native build erfolgreich). Auf Produktions-Image verifizieren.
 - [ ] **Docker im Sandbox nicht verfügbar** → Tests laufen über pg-mem. CI gegen echtes Postgres aufsetzen.
 
+## Pin-Feedback
+- [ ] **Playwright-Screenshots**: im Sandbox nicht installiert. Pins speichern derzeit einen DOM-Ausschnitt (HTML) als Fallback. Auf dem Server Playwright installieren und echte Element-Screenshots erzeugen (screenshot_pfad).
+
 ## Sicherheit / Recht (Kanzlei)
 - [ ] AVV-Dokument finalisieren (Platzhalter in /docs).
 - [ ] AGB-Version, Geld-zurück-Wortlaut, Runden-Klausel, Care/SEO-Laufzeiten juristisch prüfen.

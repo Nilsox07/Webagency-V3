@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
+<h1>Vorschau & Anmerkungen</h1>
+<p class="muted">Runden übrig: <strong><%= rundenUebrig %></strong> von <%= projekt.runden_max %>.</p>
+<div class="card">
+  <% if (projekt.vorschau_ordner) { %>
+    <p><a class="btn" href="/vorschau/<%= projekt.vorschau_token %>/" target="_blank">Vorschau öffnen</a></p>
+    <p class="muted small">Im Anmerkungs-Modus klickst du aufs Element und schreibst, was sich ändern soll.</p>
+  <% } else { %>
+    <p class="muted">Sobald Sartu deinen Entwurf hochgeladen hat, erscheint hier die klickbare Vorschau.</p>
+  <% } %>
+</div>
+<div class="card">
+  <h2>Sammelkorb dieser Runde (<%= pins.length %>)</h2>
+  <% if (!pins.length) { %><p class="muted">Noch keine Anmerkungen.</p><% } %>
+  <ul>
+  <% pins.forEach(function(p){ %><li><strong><%= p.text %></strong> <span class="muted small">— <%= p.css_selektor %> @ <%= p.viewport_breite %>px</span></li><% }) %>
+  </ul>
+  <% if (kannEinreichen) { %>
+    <form method="post" action="/portal/projekt/<%= projekt.id %>/runde/einreichen" onsubmit="return confirm('Runde einreichen? Damit ist eine deiner <%= projekt.runden_max %> Korrekturrunden verbraucht und die Anmerkungen sind festgeschrieben.')">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn">Korrekturrunde einreichen</button>
+    </form>
+  <% } else if (projekt.status !== 'design') { %>
+    <p class="muted small">Diese Runde ist eingereicht — wir arbeiten sie ein. Danach kannst du erneut Anmerkungen machen.</p>
+  <% } %>
+</div>
+<%- include('../partials/foot') %>

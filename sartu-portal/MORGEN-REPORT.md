@@ -16,7 +16,7 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 |---|---|---|---|---|
 | 1 — Fundament | ✅ | _siehe git log `Etappe 1:`_ | 11 grün | Komplettes Datenmodell (24 Tabellen), Magic-Link+Argon2-Auth, Sessions, CSRF, Rate-Limit, Sartu-Optik (Kunde dunkel / Admin hell), Seed (1 Admin + 2 Kunden). Mandanten-Trennungs-Test grün. |
 | 2 — Projekt-Kern | ✅ | _git log `Etappe 2:`_ | 21 grün (gesamt) | Status-Timeline, Blocker-Box, Liefertermin-Countdown (Start erst bei Vollständigkeit), Inhalte-Strecke (Stichpunkte 5er-Minimum, Zugänge AES-verschlüsselt+maskiert, „Alles vollständig"-Gate), Redesign-Kurzstrecke, Dokumente-Tab mit Angebot-Annahme, Meilensteine read-only. |
-| 3 — Vorschau+Pins+Runden+Abnahme | ⏳ offen | — | — | Pin-Overlay, Runden-Einreichung, Screenshot (Playwright/Fallback) |
+| 3 — Vorschau+Pins+Runden+Abnahme | ✅ | _git log `Etappe 3:`_ | 26 grün (gesamt) | Vorschau-Hosting (nur Besitzer) mit injiziertem Pin-Overlay; Pin-Sammelkorb je Runde; „Runde einreichen" (verbraucht++, Status korrektur_N, read-only danach, audit_log); Admin-Pin-Liste + „erledigt"; Abnahme-Screen (annehmen → live; Geld-zurück-Garantie nur 1. Entwurf → Ticket, keine Zahlung). **Screenshot: Playwright nicht installiert → DOM-Snippet-Fallback (GO-LIVE-TODO).** |
 | 4 — Care/Störung/Kostenschätzung | ⏳ offen | — | — | 5er-Takt, Sprachversions-Zeilen, Freigabe-Pflicht |
 | 5 — SEO/Upsell/Übergabe | ⏳ offen | — | — | Kontingente, prices.js-Diff, Datei-Übergabe |
 | 6 — Anfragen/Nachfass/DSGVO | ⏳ offen | — | — | /api/anfragen, Cron, Export-ZIP, Löschung |
@@ -25,7 +25,9 @@ Stack: Node 22 + Fastify 5, EJS (SSR), PostgreSQL (Produktion) / pg-mem (Tests),
 ## Abnahme-Belege (laufend)
 - **#1 Mandanten-Trennung**: `test/tenant-isolation.test.js` — Kunde A → 404 auf alle Routen von B; eigene Ressourcen 200; ohne Login 302→/login. ✅
 - **#2 Magic-Link-Lebenszyklus**: `test/auth.test.js` — gültig→302, abgelaufen→400, benutzt→400, nur Hash gespeichert. ✅
-- **#4 (teilw.) audit_log**: Login schreibt `audit_log` (login_magic / login_admin). Weitere Belege ab Etappe 2/3.
+- **#3 Timeline+Blocker+Countdown**: `test/projektlogik.test.js` + `test/etappe2.test.js` — Countdown startet erst bei Vollständigkeit. ✅
+- **#4 audit_log**: `angebot_angenommen` + `inhalte_vollstaendig` (+Logins) schreiben audit_log. Abnahme/Runden-Einreichung folgen in Etappe 3. (3/4 Belege)
+- **#5 Pin-Lebenszyklus**: `test/etappe3.test.js` — Pin anlegen → einreichen → Runde zaehlt hoch → Pins read-only (409); Admin-Pin-Liste / Vorschau-Link. audit_log `runde_eingereicht`, `abnahme_angenommen`, `abnahme_garantie` → #4 komplett (4/4). ✅
 - **#13 .env.example**: vollständig; README-Deploy (Coolify) vorhanden. ✅ (Rest mit Folge-Etappen)
 
 ## Offene ⚠ / Blocker

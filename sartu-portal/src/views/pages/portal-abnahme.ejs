@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/portal/projekt/<%= projekt.id %>">‹ Zurück zum Projekt</a></p>
+<h1>Abnahme</h1>
+<p class="muted">Wenn alles passt, gib den Entwurf frei — dann bringen wir deine Website live.</p>
+<div class="card">
+  <form method="post" action="/portal/projekt/<%= projekt.id %>/abnahme/annehmen">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <button class="btn">Entwurf annehmen — live gehen</button>
+  </form>
+</div>
+<% if (ersterEntwurf) { %>
+  <div class="card">
+    <h2>Oder: Geld-zurück-Garantie</h2>
+    <p class="muted">Überzeugt dich der erste Entwurf nicht, kannst du die Garantie ziehen. Das ist nur beim ersten Entwurf möglich — wir melden uns persönlich, es entsteht keine automatische Zahlung.</p>
+    <form method="post" action="/portal/projekt/<%= projekt.id %>/abnahme/garantie">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Was hat nicht gepasst? (optional)<textarea name="grund" rows="2"></textarea></label>
+      <button class="btn ghost">Geld-zurück-Garantie ziehen</button>
+    </form>
+  </div>
+<% } %>
+<%- include('../partials/foot') %>
