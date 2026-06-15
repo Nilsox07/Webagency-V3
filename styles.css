@@ -320,6 +320,7 @@ a { text-decoration: none; color: inherit; }
 
 /* ---------- Hero visual / devices ---------- */
 .hero-visual { position: relative; }
+.hero-mockup-img { display: block; width: 100%; height: auto; }
 
 .badge-bubble {
   position: absolute;
